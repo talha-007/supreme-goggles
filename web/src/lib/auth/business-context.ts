@@ -47,3 +47,8 @@ export function canManageCustomers(role: MemberRole): boolean {
 export function canManageInvoices(role: MemberRole): boolean {
   return role !== "viewer";
 }
+
+/** Tax defaults, shop profile fields — owners and managers only. */
+export function canManageBusinessSettings(role: MemberRole): boolean {
+  return role === "owner" || role === "manager";
+}

@@ -3,8 +3,11 @@ import Link from "next/link";
 export const appNav = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/dashboard/products", label: "Products" },
+  { href: "/dashboard/products?stock=low", label: "Low stock" },
   { href: "/dashboard/customers", label: "Customers" },
   { href: "/dashboard/invoices", label: "Invoices" },
+  { href: "/dashboard/purchase-orders", label: "Purchase orders" },
+  { href: "/dashboard/suppliers", label: "Suppliers" },
   { href: "/dashboard/settings", label: "Settings" },
 ] as const;
 

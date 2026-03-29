@@ -48,7 +48,7 @@ export async function GET(
 
   const { data: business } = await supabase
     .from("businesses")
-    .select("id, name, phone, address, logo_url, currency")
+    .select("id, name, phone, address, logo_url, currency, tax_label")
     .eq("id", member.business_id)
     .single();
 

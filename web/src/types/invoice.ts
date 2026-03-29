@@ -45,6 +45,15 @@ export type BusinessInvoiceRow = {
   address: string | null;
   logo_url: string | null;
   currency: string;
+  /** Shown on PDF instead of the word "Tax", e.g. GST, VAT. */
+  tax_label?: string | null;
+};
+
+/** Applied when creating a new invoice (from Settings). */
+export type InvoiceEditorDefaults = {
+  defaultTaxRate: number;
+  defaultInvoiceDiscountAmount: number;
+  defaultLineDiscountPct: number;
 };
 
 export type CustomerInvoiceRow = {

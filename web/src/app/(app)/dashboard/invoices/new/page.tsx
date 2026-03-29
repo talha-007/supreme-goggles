@@ -2,6 +2,8 @@ import { InvoiceEditor } from "@/components/invoices/invoice-editor";
 import { requireBusinessContext, canManageInvoices } from "@/lib/auth/business-context";
 import { createClient } from "@/lib/supabase/server";
 import type { LineDraft } from "@/lib/invoices/actions";
+import { getBusinessInvoiceDefaults } from "@/lib/settings/actions";
+import type { InvoiceEditorDefaults } from "@/types/invoice";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -26,6 +28,15 @@ export default async function NewInvoicePage() {
     .eq("business_id", ctx.businessId)
     .eq("is_active", true)
     .order("name");
+
+  const businessDefaults = await getBusinessInvoiceDefaults();
+  const invoiceDefaults: InvoiceEditorDefaults | null = businessDefaults
+    ? {
+        defaultTaxRate: businessDefaults.default_tax_rate,
+        defaultInvoiceDiscountAmount: businessDefaults.default_invoice_discount_amount,
+        defaultLineDiscountPct: businessDefaults.default_line_discount_pct,
+      }
+    : null;
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -52,6 +63,7 @@ export default async function NewInvoicePage() {
           initialLines={[] as LineDraft[]}
           customers={customers ?? []}
           products={products ?? []}
+          invoiceDefaults={invoiceDefaults}
         />
       </div>
     </div>

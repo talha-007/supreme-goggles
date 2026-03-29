@@ -18,13 +18,14 @@ const pkr = new Intl.NumberFormat("en-PK", {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; stock?: string }>;
 }) {
   const ctx = await requireBusinessContext();
   const canEdit = canManageProducts(ctx.role);
   const params = await searchParams;
   const rawQ = params.q ?? "";
   const q = sanitizeSearch(rawQ);
+  const lowStockOnly = params.stock === "low";
 
   const supabase = await createClient();
   let query = supabase
@@ -51,7 +52,12 @@ export default async function ProductsPage({
     );
   }
 
-  const products = (rows ?? []) as ProductRow[];
+  let products = (rows ?? []) as ProductRow[];
+  if (lowStockOnly) {
+    products = products.filter(
+      (p) => p.reorder_level > 0 && p.current_stock <= p.reorder_level,
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -61,7 +67,7 @@ export default async function ProductsPage({
             Products
           </h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Manage inventory for your business.
+            Manage inventory for your business. Set reorder levels to flag low stock before you run out.
           </p>
         </div>
         {canEdit ? (
@@ -74,25 +80,51 @@ export default async function ProductsPage({
         ) : null}
       </div>
 
-      <form
-        className="mt-6 flex max-w-md flex-col gap-2 sm:flex-row sm:items-center"
-        action="/dashboard/products"
-        method="get"
-      >
-        <input
-          name="q"
-          type="search"
-          defaultValue={rawQ}
-          placeholder="Search name, SKU, barcode…"
-          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        />
-        <button
-          type="submit"
-          className="shrink-0 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <form
+          className="flex max-w-md flex-1 flex-col gap-2 sm:flex-row sm:items-center"
+          action="/dashboard/products"
+          method="get"
         >
-          Search
-        </button>
-      </form>
+          {lowStockOnly ? <input type="hidden" name="stock" value="low" /> : null}
+          <input
+            name="q"
+            type="search"
+            defaultValue={rawQ}
+            placeholder="Search name, SKU, barcode…"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          />
+          <button
+            type="submit"
+            className="shrink-0 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          >
+            Search
+          </button>
+        </form>
+        <div className="flex flex-wrap items-center gap-2">
+          {lowStockOnly ? (
+            <Link
+              href={rawQ ? `/dashboard/products?q=${encodeURIComponent(rawQ)}` : "/dashboard/products"}
+              className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"
+            >
+              Clear low-stock filter
+            </Link>
+          ) : (
+            <Link
+              href={rawQ ? `/dashboard/products?stock=low&q=${encodeURIComponent(rawQ)}` : "/dashboard/products?stock=low"}
+              className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-950 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-100 dark:hover:bg-amber-950"
+            >
+              Low stock only
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {lowStockOnly ? (
+        <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
+          Showing products where stock is at or below reorder level (reorder level must be greater than zero).
+        </p>
+      ) : null}
 
       <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
         <table className="w-full min-w-[640px] text-left text-sm">
@@ -115,7 +147,13 @@ export default async function ProductsPage({
                   colSpan={canEdit ? 8 : 7}
                   className="px-4 py-10 text-center text-zinc-500 dark:text-zinc-400"
                 >
-                  {q ? "No products match your search." : "No products yet. Add your first product."}
+                  {lowStockOnly
+                    ? q
+                      ? "No low-stock items match your search."
+                      : "No products are low right now. Set a reorder level on products you want to track."
+                    : q
+                      ? "No products match your search."
+                      : "No products yet. Add your first product."}
                 </td>
               </tr>
             ) : (

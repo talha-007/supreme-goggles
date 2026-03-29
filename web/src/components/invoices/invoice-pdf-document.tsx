@@ -274,7 +274,9 @@ export function InvoicePdfDocument({ invoice, business, customer, items }: Props
             <Text>− {formatMoney(Number(invoice.discount_amount), business.currency)}</Text>
           </View>
           <View style={styles.totalRow}>
-            <Text>Tax ({Number(invoice.tax_rate).toFixed(2)}%)</Text>
+            <Text>
+              {(business.tax_label?.trim() || "Tax") + " "}({Number(invoice.tax_rate).toFixed(2)}%)
+            </Text>
             <Text>{formatMoney(Number(invoice.tax_amount), business.currency)}</Text>
           </View>
           <View style={styles.grandRow}>

@@ -1,7 +1,16 @@
+import { LowStockPanel } from "@/components/dashboard/low-stock-panel";
+import { OpenPosPanel } from "@/components/dashboard/open-pos-panel";
+import { RetailShortcuts } from "@/components/dashboard/retail-shortcuts";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { requireBusinessContext, canManageInvoices } from "@/lib/auth/business-context";
+import {
+  requireBusinessContext,
+  canManageInvoices,
+  canManageProducts,
+} from "@/lib/auth/business-context";
 import { createClient } from "@/lib/supabase/server";
 import type { InvoiceRow, InvoiceStatus } from "@/types/invoice";
+import type { ProductRow } from "@/types/product";
+import type { PurchaseOrderStatus } from "@/types/purchase-order";
 import Link from "next/link";
 
 const pkr = new Intl.NumberFormat("en-PK", {
@@ -44,6 +53,7 @@ function outstandingPk(rows: { total_amount: unknown; paid_amount: unknown }[]) 
 export default async function DashboardPage() {
   const ctx = await requireBusinessContext();
   const canEdit = canManageInvoices(ctx.role);
+  const canProducts = canManageProducts(ctx.role);
   const supabase = await createClient();
   const bid = ctx.businessId;
 
@@ -59,6 +69,9 @@ export default async function DashboardPage() {
     monthRows,
     todayRows,
     recentRows,
+    reorderCandidatesRes,
+    openPoCountRes,
+    openPoRowsRes,
   ] = await Promise.all([
     supabase
       .from("products")
@@ -105,11 +118,51 @@ export default async function DashboardPage() {
       .eq("business_id", bid)
       .order("created_at", { ascending: false })
       .limit(6),
+    supabase
+      .from("products")
+      .select("id, name, current_stock, reorder_level, unit, sku, sale_price")
+      .eq("business_id", bid)
+      .eq("is_active", true)
+      .gt("reorder_level", 0)
+      .order("current_stock", { ascending: true })
+      .limit(200),
+    supabase
+      .from("purchase_orders")
+      .select("id", { count: "exact", head: true })
+      .eq("business_id", bid)
+      .in("status", ["draft", "ordered", "partial"]),
+    supabase
+      .from("purchase_orders")
+      .select("id, po_number, status, total_amount, created_at")
+      .eq("business_id", bid)
+      .in("status", ["draft", "ordered", "partial"])
+      .order("created_at", { ascending: false })
+      .limit(6),
   ]);
 
   const productsCount = productsCountRes.count ?? 0;
   const customersCount = customersCountRes.count ?? 0;
   const draftsCount = draftsCountRes.count ?? 0;
+
+  const reorderCandidates = (reorderCandidatesRes.data ?? []) as Pick<
+    ProductRow,
+    "id" | "name" | "current_stock" | "reorder_level" | "unit" | "sku" | "sale_price"
+  >[];
+  const lowStockLines = reorderCandidates.filter(
+    (p) => p.current_stock <= p.reorder_level,
+  );
+  const lowStockCount = lowStockLines.length;
+  const lowStockPreview = lowStockLines.slice(0, 8);
+
+  const openPoCount = openPoCountRes.count ?? 0;
+  type OpenPoRow = {
+    id: string;
+    po_number: string;
+    status: PurchaseOrderStatus;
+    total_amount: number;
+    created_at: string;
+  };
+  const openPosList = (openPoRowsRes.data ?? []) as OpenPoRow[];
 
   const receivableData = receivableRows.data ?? [];
   const monthData = (monthRows.data ?? []) as InvoiceRow[];
@@ -143,7 +196,7 @@ export default async function DashboardPage() {
             Dashboard
           </h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Snapshot of your shop — sales, receivables, and shortcuts.
+            Sales, stock, and purchasing in one place — built for shops and retail counters.
           </p>
         </div>
         {canEdit ? (
@@ -164,6 +217,10 @@ export default async function DashboardPage() {
         ) : null}
       </div>
 
+      <div className="mt-6">
+        <RetailShortcuts canManageInvoices={canEdit} canManageProducts={canProducts} />
+      </div>
+
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Today (sales)"
@@ -179,9 +236,30 @@ export default async function DashboardPage() {
         <StatCard label="Draft invoices" value={String(draftsCount)} hint="Not finalized yet" href="/dashboard/invoices" />
       </div>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Products" value={String(productsCount)} hint="Active catalog items" href="/dashboard/products" />
         <StatCard label="Customers" value={String(customersCount)} hint="Active customers" href="/dashboard/customers" />
+        <StatCard
+          label="Low stock"
+          value={String(lowStockCount)}
+          hint="At or below reorder level"
+          href="/dashboard/products?stock=low"
+        />
+        <StatCard
+          label="Open POs"
+          value={String(openPoCount)}
+          hint="Draft, ordered, or partial"
+          href="/dashboard/purchase-orders"
+        />
+      </div>
+
+      <div className="mt-10 grid gap-6 lg:grid-cols-2">
+        <LowStockPanel
+          items={lowStockPreview}
+          totalCount={lowStockCount}
+          canEdit={canProducts}
+        />
+        <OpenPosPanel items={openPosList} />
       </div>
 
       <div className="mt-10">

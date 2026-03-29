@@ -8,7 +8,7 @@ import {
   type SaveDraftInput,
 } from "@/lib/invoices/actions";
 import { invoiceTotals, lineTotal } from "@/lib/invoices/calc";
-import type { InvoiceRow } from "@/types/invoice";
+import type { InvoiceEditorDefaults, InvoiceRow } from "@/types/invoice";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -28,16 +28,18 @@ type Props = {
   initialLines: LineDraft[];
   customers: CustomerOption[];
   products: ProductOption[];
+  /** Pre-fill tax / discounts on brand-new invoices only. */
+  invoiceDefaults?: InvoiceEditorDefaults | null;
 };
 
-function emptyLine(): LineDraft {
+function makeEmptyLine(lineDiscountPct: number): LineDraft {
   return {
     product_id: null,
     product_name: "",
     unit: "pcs",
     quantity: 1,
     unit_price: 0,
-    discount_pct: 0,
+    discount_pct: lineDiscountPct,
   };
 }
 
@@ -56,26 +58,32 @@ export function InvoiceEditor({
   initialLines,
   customers,
   products,
+  invoiceDefaults = null,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [invoiceId, setInvoiceId] = useState<string | null>(initialInvoiceId);
+  const defaultLineDisc = invoiceDefaults?.defaultLineDiscountPct ?? 0;
   const [customerId, setCustomerId] = useState<string>(
     initialInvoice?.customer_id ?? "",
   );
   const [discountAmount, setDiscountAmount] = useState(
-    String(initialInvoice?.discount_amount ?? 0),
+    String(
+      initialInvoice?.discount_amount ?? invoiceDefaults?.defaultInvoiceDiscountAmount ?? 0,
+    ),
   );
-  const [taxRate, setTaxRate] = useState(String(initialInvoice?.tax_rate ?? 0));
+  const [taxRate, setTaxRate] = useState(
+    String(initialInvoice?.tax_rate ?? invoiceDefaults?.defaultTaxRate ?? 0),
+  );
   const [notes, setNotes] = useState(initialInvoice?.notes ?? "");
   const [dueDate, setDueDate] = useState(
     initialInvoice?.due_date
       ? initialInvoice.due_date.slice(0, 10)
       : todayLocalIsoDate(),
   );
-  const [lines, setLines] = useState<LineDraft[]>(
-    initialLines.length > 0 ? initialLines : [emptyLine()],
+  const [lines, setLines] = useState<LineDraft[]>(() =>
+    initialLines.length > 0 ? initialLines : [makeEmptyLine(defaultLineDisc)],
   );
   const [cashReceived, setCashReceived] = useState("");
 
@@ -109,7 +117,7 @@ export function InvoiceEditor({
   }
 
   function addRow() {
-    setLines((prev) => [...prev, emptyLine()]);
+    setLines((prev) => [...prev, makeEmptyLine(defaultLineDisc)]);
   }
 
   function removeRow(i: number) {
