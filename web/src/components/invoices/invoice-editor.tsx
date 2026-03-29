@@ -11,7 +11,7 @@ import { invoiceTotals, lineTotal } from "@/lib/invoices/calc";
 import type { InvoiceRow } from "@/types/invoice";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 export type ProductOption = {
   id: string;
@@ -41,6 +41,15 @@ function emptyLine(): LineDraft {
   };
 }
 
+/** `YYYY-MM-DD` in the browser's local calendar (matches `<input type="date">`). */
+function todayLocalIsoDate() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 export function InvoiceEditor({
   invoiceId: initialInvoiceId,
   initialInvoice,
@@ -63,11 +72,12 @@ export function InvoiceEditor({
   const [dueDate, setDueDate] = useState(
     initialInvoice?.due_date
       ? initialInvoice.due_date.slice(0, 10)
-      : "",
+      : todayLocalIsoDate(),
   );
   const [lines, setLines] = useState<LineDraft[]>(
     initialLines.length > 0 ? initialLines : [emptyLine()],
   );
+  const [cashReceived, setCashReceived] = useState("");
 
   const productById = useMemo(() => {
     const m = new Map<string, ProductOption>();
@@ -106,9 +116,35 @@ export function InvoiceEditor({
     setLines((prev) => (prev.length <= 1 ? prev : prev.filter((_, j) => j !== i)));
   }
 
+  const previewTotals = useMemo(() => {
+    const lineTotals = lines.map((l) =>
+      lineTotal(l.quantity, l.unit_price, l.discount_pct),
+    );
+    const disc = Number(String(discountAmount).replace(/,/g, "")) || 0;
+    const taxPct = Number(String(taxRate).replace(/,/g, "")) || 0;
+    const { subtotal, tax_amount, total_amount } = invoiceTotals(
+      lineTotals,
+      disc,
+      taxPct,
+    );
+    return { subtotal, tax: tax_amount, total: total_amount };
+  }, [lines, discountAmount, taxRate]);
+
+  useEffect(() => {
+    setCashReceived(previewTotals.total.toFixed(2));
+  }, [previewTotals.total]);
+
+  const cashChange = useMemo(() => {
+    const total = previewTotals.total;
+    const r = Number(String(cashReceived).replace(/,/g, ""));
+    if (!Number.isFinite(r) || r + 0.001 < total) return null;
+    return Math.round((r - total) * 100) / 100;
+  }, [cashReceived, previewTotals.total]);
+
   function buildInput(): SaveDraftInput {
     const disc = Number(discountAmount.replace(/,/g, "")) || 0;
     const tax = Number(taxRate.replace(/,/g, "")) || 0;
+    const received = Number(String(cashReceived).replace(/,/g, ""));
     return {
       invoiceId,
       customerId: customerId || null,
@@ -117,6 +153,7 @@ export function InvoiceEditor({
       notes: notes.trim() || null,
       due_date: dueDate || null,
       lines,
+      cashAmountReceived: Number.isFinite(received) ? received : null,
     };
   }
 
@@ -142,6 +179,16 @@ export function InvoiceEditor({
 
   function chargeCash() {
     setError(null);
+    const total = previewTotals.total;
+    const received = Number(String(cashReceived).replace(/,/g, ""));
+    if (!Number.isFinite(received) || received <= 0) {
+      setError("Enter the amount received from the customer.");
+      return;
+    }
+    if (received + 0.005 < total) {
+      setError("Amount received is less than the invoice total.");
+      return;
+    }
     startTransition(async () => {
       const res = await saveDraftAndFinalizeCash(buildInput());
       if (res.error) {
@@ -167,20 +214,6 @@ export function InvoiceEditor({
       }
     });
   }
-
-  const previewTotals = useMemo(() => {
-    const lineTotals = lines.map((l) =>
-      lineTotal(l.quantity, l.unit_price, l.discount_pct),
-    );
-    const disc = Number(String(discountAmount).replace(/,/g, "")) || 0;
-    const taxPct = Number(String(taxRate).replace(/,/g, "")) || 0;
-    const { subtotal, tax_amount, total_amount } = invoiceTotals(
-      lineTotals,
-      disc,
-      taxPct,
-    );
-    return { subtotal, tax: tax_amount, total: total_amount };
-  }, [lines, discountAmount, taxRate]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -379,7 +412,30 @@ export function InvoiceEditor({
             Total: {previewTotals.total.toFixed(2)} PKR
           </span>
         </div>
-        <div className="flex flex-col gap-3 sm:items-end">
+        <div className="flex w-full flex-col gap-3 sm:max-w-md sm:items-end sm:ml-auto">
+          <div className="w-full rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2 dark:border-emerald-900/50 dark:bg-emerald-950/30">
+            <label className="text-xs font-medium text-emerald-900 dark:text-emerald-200">
+              Amount received (PKR)
+            </label>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              value={cashReceived}
+              onChange={(e) => setCashReceived(e.target.value)}
+              className="mt-1 w-full rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm tabular-nums text-zinc-900 dark:border-emerald-800 dark:bg-zinc-900 dark:text-zinc-50"
+            />
+            {cashChange != null && cashChange > 0.005 ? (
+              <p className="mt-2 text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                Change to return: {cashChange.toLocaleString("en-PK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
+                PKR
+              </p>
+            ) : (
+              <p className="mt-1 text-xs text-emerald-800/80 dark:text-emerald-300/80">
+                Enter cash tendered; only the invoice total is recorded as payment.
+              </p>
+            )}
+          </div>
           <div className="flex flex-wrap justify-end gap-2">
             <button
               type="button"

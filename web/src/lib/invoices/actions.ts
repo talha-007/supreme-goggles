@@ -29,6 +29,8 @@ export type SaveDraftInput = {
   notes: string | null;
   due_date: string | null;
   lines: LineDraft[];
+  /** Cash tendered at counter; must be ≥ invoice total when using cash finalize. */
+  cashAmountReceived?: number | null;
 };
 
 function validateLines(lines: LineDraft[]): string | null {
@@ -226,7 +228,14 @@ export async function finalizeInvoice(invoiceId: string): Promise<InvoiceActionS
   redirect(`/dashboard/invoices/${invoiceId}`);
 }
 
-export async function finalizeInvoiceCash(invoiceId: string): Promise<InvoiceActionState> {
+function roundMoney(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+export async function finalizeInvoiceCash(
+  invoiceId: string,
+  amountReceived?: number | null,
+): Promise<InvoiceActionState> {
   const ctx = await requireBusinessContext();
   if (!canManageInvoices(ctx.role)) {
     return { error: "Permission denied." };
@@ -255,7 +264,16 @@ export async function finalizeInvoiceCash(invoiceId: string): Promise<InvoiceAct
     return { error: "Add line items before finalizing." };
   }
 
-  const total = Number(inv.total_amount);
+  const total = roundMoney(Number(inv.total_amount));
+
+  if (amountReceived != null && amountReceived !== undefined) {
+    if (!Number.isFinite(amountReceived) || amountReceived <= 0) {
+      return { error: "Enter a valid amount received." };
+    }
+    if (roundMoney(amountReceived) + 0.005 < total) {
+      return { error: "Amount received is less than the invoice total." };
+    }
+  }
 
   const { error: uerr } = await supabase
     .from("invoices")
@@ -299,7 +317,7 @@ export async function saveDraftAndFinalizeCash(
   const saved = await saveInvoiceDraft(input);
   if (saved.error) return saved;
   if (!saved.invoiceId) return { error: "Could not save invoice." };
-  return finalizeInvoiceCash(saved.invoiceId);
+  return finalizeInvoiceCash(saved.invoiceId, input.cashAmountReceived ?? null);
 }
 
 export async function recordPayment(
@@ -311,10 +329,6 @@ export async function recordPayment(
   const ctx = await requireBusinessContext();
   if (!canManageInvoices(ctx.role)) {
     return { error: "Permission denied." };
-  }
-
-  if (!Number.isFinite(amount) || amount <= 0) {
-    return { error: "Enter a valid amount." };
   }
 
   const supabase = await createClient();
@@ -331,15 +345,24 @@ export async function recordPayment(
     return { error: "This invoice does not accept payments." };
   }
 
-  const remaining = inv.total_amount - inv.paid_amount;
-  if (amount > remaining + 0.01) {
-    return { error: "Amount exceeds balance due." };
+  const balance = roundMoney(Number(inv.total_amount) - Number(inv.paid_amount));
+  if (balance <= 0.001) {
+    return { error: "This invoice has no balance due." };
+  }
+
+  const received = roundMoney(amount);
+  const paymentAmount = roundMoney(Math.min(received, balance));
+  if (!Number.isFinite(received) || received <= 0) {
+    return { error: "Enter a valid amount." };
+  }
+  if (paymentAmount <= 0.001) {
+    return { error: "Amount received is too low." };
   }
 
   const { error } = await supabase.from("payments").insert({
     business_id: ctx.businessId,
     invoice_id: invoiceId,
-    amount,
+    amount: paymentAmount,
     method,
     reference_no: referenceNo?.trim() || null,
     received_by: ctx.userId,
