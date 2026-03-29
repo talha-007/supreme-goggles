@@ -43,3 +43,7 @@ export function canManageProducts(role: MemberRole): boolean {
 export function canManageCustomers(role: MemberRole): boolean {
   return role !== "viewer";
 }
+
+export function canManageInvoices(role: MemberRole): boolean {
+  return role !== "viewer";
+}
