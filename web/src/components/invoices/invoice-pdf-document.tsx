@@ -6,6 +6,9 @@ import {
   Text,
   View,
 } from "@react-pdf/renderer";
+import type { InvoicePdfLabels } from "@/lib/i18n/pdf-invoice-labels";
+import { intlLocaleTag, isRtlLocale } from "@/lib/i18n/intl-locale";
+import type { AppLocale } from "@/i18n/routing";
 import type {
   BusinessInvoiceRow,
   CustomerInvoiceRow,
@@ -147,15 +150,15 @@ const styles = StyleSheet.create({
   logo: { width: 36, height: 36, objectFit: "contain", alignSelf: "center" },
 });
 
-function formatMoney(n: number, currency: string) {
+function formatMoney(n: number, currency: string, intlTag: string) {
   const sym = currency === "PKR" ? "Rs." : `${currency}`;
-  return `${sym} ${n.toLocaleString("en-PK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `${sym} ${n.toLocaleString(intlTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function formatDate(iso: string | null) {
-  if (!iso) return "—";
+function formatDate(iso: string | null, intlTag: string, dash: string) {
+  if (!iso) return dash;
   try {
-    return new Date(iso).toLocaleDateString("en-PK", {
+    return new Date(iso).toLocaleDateString(intlTag, {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -170,17 +173,29 @@ type Props = {
   business: BusinessInvoiceRow;
   customer: CustomerInvoiceRow | null;
   items: InvoiceItemRow[];
+  labels: InvoicePdfLabels;
+  locale: AppLocale;
 };
 
-export function InvoicePdfDocument({ invoice, business, customer, items }: Props) {
+export function InvoicePdfDocument({
+  invoice,
+  business,
+  customer,
+  items,
+  labels,
+  locale,
+}: Props) {
+  const intlTag = intlLocaleTag(locale);
+  const dash = "—";
   const statusLabel =
     invoice.status === "paid"
-      ? "PAID"
+      ? labels.statusPaid
       : invoice.status === "draft"
-        ? "DRAFT"
+        ? labels.statusDraft
         : invoice.status === "cancelled"
-          ? "CANCELLED"
-          : "DUE";
+          ? labels.statusCancelled
+          : labels.statusDue;
+  const rtl = isRtlLocale(locale);
 
   const estimatedMm = estimateReceiptHeightMm(
     items,
@@ -196,7 +211,11 @@ export function InvoicePdfDocument({ invoice, business, customer, items }: Props
 
   return (
     <Document>
-      <Page size={[RECEIPT_WIDTH_PT, pageHeightPt]} style={styles.page} wrap>
+      <Page
+        size={[RECEIPT_WIDTH_PT, pageHeightPt]}
+        style={[styles.page, rtl ? { direction: "rtl" } : {}]}
+        wrap
+      >
         {business.logo_url ? (
           <Image src={business.logo_url} style={styles.logo} />
         ) : null}
@@ -205,33 +224,37 @@ export function InvoicePdfDocument({ invoice, business, customer, items }: Props
           <Text style={[styles.storeMeta, styles.center]}>{business.address}</Text>
         ) : null}
         {business.phone ? (
-          <Text style={[styles.storeMeta, styles.center]}>Ph: {business.phone}</Text>
+          <Text style={[styles.storeMeta, styles.center]}>
+            {labels.ph} {business.phone}
+          </Text>
         ) : null}
 
         <Text style={[styles.center, { fontSize: 7, fontFamily: "Helvetica-Bold", marginTop: 6 }]}>
-          TAX INVOICE
+          {labels.taxInvoiceTitle}
         </Text>
 
         <View style={styles.divider} />
 
         <View style={styles.titleRow}>
           <View>
-            <Text style={styles.labelSm}>Invoice #</Text>
+            <Text style={styles.labelSm}>{labels.invoiceHash}</Text>
             <Text style={styles.invNum}>{invoice.invoice_number}</Text>
           </View>
-          <View style={{ alignItems: "flex-end" }}>
-            <Text style={styles.labelSm}>Status</Text>
+          <View style={{ alignItems: rtl ? "flex-start" : "flex-end" }}>
+            <Text style={styles.labelSm}>{labels.status}</Text>
             <Text style={{ fontSize: 7, fontFamily: "Helvetica-Bold" }}>{statusLabel}</Text>
           </View>
         </View>
         <Text style={styles.body}>
-          Date: {formatDate(invoice.created_at)}
-          {invoice.due_date ? `  |  Due: ${formatDate(invoice.due_date)}` : ""}
+          {labels.datePrefix} {formatDate(invoice.created_at, intlTag, dash)}
+          {invoice.due_date
+            ? `  |  ${labels.duePrefix} ${formatDate(invoice.due_date, intlTag, dash)}`
+            : ""}
         </Text>
 
         <View style={styles.thinDivider} />
 
-        <Text style={styles.sectionTitle}>Bill to</Text>
+        <Text style={styles.sectionTitle}>{labels.billTo}</Text>
         {customer ? (
           <>
             <Text style={[styles.body, styles.bold]}>{customer.name}</Text>
@@ -241,22 +264,23 @@ export function InvoicePdfDocument({ invoice, business, customer, items }: Props
             ) : null}
           </>
         ) : (
-          <Text style={styles.body}>Walk-in</Text>
+          <Text style={styles.body}>{labels.walkIn}</Text>
         )}
 
         <View style={styles.divider} />
 
-        <Text style={[styles.sectionTitle, { marginBottom: 4 }]}>Items</Text>
+        <Text style={[styles.sectionTitle, { marginBottom: 4 }]}>{labels.items}</Text>
         {items.map((it, i) => (
           <View key={it.id || i} style={styles.itemBlock} wrap={false}>
             <Text style={styles.itemName}>{it.product_name}</Text>
             <View style={styles.itemLine}>
               <Text style={styles.itemLeft}>
-                {String(it.quantity)} {it.unit} × {formatMoney(Number(it.unit_price), business.currency)}
+                {String(it.quantity)} {it.unit} ×{" "}
+                {formatMoney(Number(it.unit_price), business.currency, intlTag)}
                 {Number(it.discount_pct) > 0 ? ` (−${it.discount_pct}%)` : ""}
               </Text>
               <Text style={styles.itemRight}>
-                {formatMoney(Number(it.line_total), business.currency)}
+                {formatMoney(Number(it.line_total), business.currency, intlTag)}
               </Text>
             </View>
           </View>
@@ -266,37 +290,39 @@ export function InvoicePdfDocument({ invoice, business, customer, items }: Props
 
         <View style={styles.totalsSection}>
           <View style={styles.totalRow}>
-            <Text>Subtotal</Text>
-            <Text>{formatMoney(Number(invoice.subtotal), business.currency)}</Text>
+            <Text>{labels.subtotal}</Text>
+            <Text>{formatMoney(Number(invoice.subtotal), business.currency, intlTag)}</Text>
           </View>
           <View style={styles.totalRow}>
-            <Text>Discount</Text>
-            <Text>− {formatMoney(Number(invoice.discount_amount), business.currency)}</Text>
+            <Text>{labels.discount}</Text>
+            <Text>− {formatMoney(Number(invoice.discount_amount), business.currency, intlTag)}</Text>
           </View>
           <View style={styles.totalRow}>
             <Text>
-              {(business.tax_label?.trim() || "Tax") + " "}({Number(invoice.tax_rate).toFixed(2)}%)
+              {(business.tax_label?.trim() || labels.tax) + " "}(
+              {Number(invoice.tax_rate).toFixed(2)}%)
             </Text>
-            <Text>{formatMoney(Number(invoice.tax_amount), business.currency)}</Text>
+            <Text>{formatMoney(Number(invoice.tax_amount), business.currency, intlTag)}</Text>
           </View>
           <View style={styles.grandRow}>
-            <Text>TOTAL</Text>
-            <Text>{formatMoney(Number(invoice.total_amount), business.currency)}</Text>
+            <Text>{labels.total}</Text>
+            <Text>{formatMoney(Number(invoice.total_amount), business.currency, intlTag)}</Text>
           </View>
           {Number(invoice.paid_amount) > 0 ? (
             <View style={styles.totalRow}>
-              <Text>Paid</Text>
-              <Text>{formatMoney(Number(invoice.paid_amount), business.currency)}</Text>
+              <Text>{labels.paid}</Text>
+              <Text>{formatMoney(Number(invoice.paid_amount), business.currency, intlTag)}</Text>
             </View>
           ) : null}
           {Number(invoice.total_amount) - Number(invoice.paid_amount) > 0.001 &&
           invoice.status !== "draft" ? (
             <View style={[styles.totalRow, { marginTop: 4 }]}>
-              <Text style={styles.bold}>Balance due</Text>
+              <Text style={styles.bold}>{labels.balanceDue}</Text>
               <Text style={styles.bold}>
                 {formatMoney(
                   Number(invoice.total_amount) - Number(invoice.paid_amount),
                   business.currency,
+                  intlTag,
                 )}
               </Text>
             </View>
@@ -305,12 +331,12 @@ export function InvoicePdfDocument({ invoice, business, customer, items }: Props
 
         {invoice.notes ? (
           <View style={styles.notesBox}>
-            <Text style={[styles.labelSm, { marginBottom: 2 }]}>Notes</Text>
+            <Text style={[styles.labelSm, { marginBottom: 2 }]}>{labels.notes}</Text>
             <Text>{invoice.notes}</Text>
           </View>
         ) : null}
 
-        <Text style={styles.footer}>Thank you — computer-generated receipt</Text>
+        <Text style={styles.footer}>{labels.footer}</Text>
       </Page>
     </Document>
   );

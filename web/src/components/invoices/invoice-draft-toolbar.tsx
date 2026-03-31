@@ -1,16 +1,18 @@
 "use client";
 
 import { deleteDraftInvoice } from "@/lib/invoices/actions";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 export function InvoiceDraftToolbar({ invoiceId }: { invoiceId: string }) {
   const router = useRouter();
+  const td = useTranslations("invoiceDraftToolbar");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   function onDelete() {
-    if (!confirm("Delete this draft invoice?")) return;
+    if (!confirm(td("deleteConfirm"))) return;
     setError(null);
     startTransition(async () => {
       const res = await deleteDraftInvoice(invoiceId);
@@ -18,6 +20,8 @@ export function InvoiceDraftToolbar({ invoiceId }: { invoiceId: string }) {
         setError(res.error);
         return;
       }
+      router.push("/dashboard/invoices");
+      router.refresh();
     });
   }
 
@@ -29,7 +33,7 @@ export function InvoiceDraftToolbar({ invoiceId }: { invoiceId: string }) {
         disabled={pending}
         className="text-sm font-medium text-red-600 hover:underline disabled:opacity-50 dark:text-red-400"
       >
-        {pending ? "Deleting…" : "Delete draft"}
+        {pending ? td("deleting") : td("delete")}
       </button>
       {error ? (
         <span className="text-sm text-red-600 dark:text-red-400">{error}</span>

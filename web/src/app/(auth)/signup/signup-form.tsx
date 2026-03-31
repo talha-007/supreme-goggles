@@ -1,10 +1,12 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
 export function SignupForm() {
+  const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -30,14 +32,14 @@ export function SignupForm() {
       setError(err.message);
       return;
     }
-    setMessage("Check your email to confirm your account, then sign in.");
+    setMessage(t("checkEmail"));
   }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <label htmlFor="email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Email
+          {t("email")}
         </label>
         <input
           id="email"
@@ -52,7 +54,7 @@ export function SignupForm() {
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="password" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Password
+          {t("password")}
         </label>
         <input
           id="password"
@@ -81,12 +83,12 @@ export function SignupForm() {
         disabled={loading}
         className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
       >
-        {loading ? "Creating account…" : "Create account"}
+        {loading ? t("creatingAccount") : t("createAccount")}
       </button>
       <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
-        Already have an account?{" "}
+        {t("hasAccount")}{" "}
         <Link href="/login" className="font-medium text-zinc-900 underline dark:text-zinc-100">
-          Sign in
+          {t("signIn")}
         </Link>
       </p>
     </form>

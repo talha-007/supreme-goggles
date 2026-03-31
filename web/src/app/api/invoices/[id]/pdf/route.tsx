@@ -1,4 +1,6 @@
 import { InvoicePdfDocument } from "@/components/invoices/invoice-pdf-document";
+import { defaultLocale, isAppLocale, type AppLocale } from "@/i18n/routing";
+import type { InvoicePdfLabels } from "@/lib/i18n/pdf-invoice-labels";
 import { createClient } from "@/lib/supabase/server";
 import type {
   BusinessInvoiceRow,
@@ -7,7 +9,10 @@ import type {
   InvoiceRow,
 } from "@/types/invoice";
 import { renderToBuffer } from "@react-pdf/renderer";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import en from "../../../../../../messages/en.json";
+import ur from "../../../../../../messages/ur.json";
 
 export const runtime = "nodejs";
 
@@ -72,12 +77,20 @@ export async function GET(
     .eq("invoice_id", id)
     .order("id", { ascending: true });
 
+  const cookieLocale = (await cookies()).get("NEXT_LOCALE")?.value;
+  const locale: AppLocale = isAppLocale(cookieLocale ?? "")
+    ? (cookieLocale as AppLocale)
+    : defaultLocale;
+  const pdfLabels = (locale === "ur" ? ur : en).pdf as InvoicePdfLabels;
+
   const buffer = await renderToBuffer(
     <InvoicePdfDocument
       invoice={invoice as InvoiceRow}
       business={business as BusinessInvoiceRow}
       customer={customer}
       items={(items ?? []) as InvoiceItemRow[]}
+      labels={pdfLabels}
+      locale={locale}
     />,
   );
 

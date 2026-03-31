@@ -4,6 +4,8 @@ import {
   finalizeInvoice,
   finalizeInvoiceCash,
 } from "@/lib/invoices/actions";
+import { intlLocaleTag } from "@/lib/i18n/intl-locale";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
@@ -15,6 +17,12 @@ export function InvoiceFinalizeButtons({
   totalAmount: number;
 }) {
   const router = useRouter();
+  const locale = useLocale();
+  const tp = useTranslations("invoiceFinalize");
+  const te = useTranslations("invoiceEditor");
+  const tc = useTranslations("common");
+  const tpm = useTranslations("invoicePayment");
+  const intlTag = intlLocaleTag(locale);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [cashReceived, setCashReceived] = useState(totalAmount.toFixed(2));
@@ -45,11 +53,11 @@ export function InvoiceFinalizeButtons({
   function onCashFinalize() {
     const r = Number(String(cashReceived).replace(/,/g, ""));
     if (!Number.isFinite(r) || r <= 0) {
-      setError("Enter the amount received from the customer.");
+      setError(te("errorCashAmount"));
       return;
     }
     if (r + 0.005 < total) {
-      setError("Amount received is less than the invoice total.");
+      setError(te("errorCashLow"));
       return;
     }
     run(() => finalizeInvoiceCash(invoiceId, r));
@@ -59,7 +67,7 @@ export function InvoiceFinalizeButtons({
     <div className="flex flex-col gap-3">
       <div className="rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2 dark:border-emerald-900/50 dark:bg-emerald-950/30">
         <label className="text-xs font-medium text-emerald-900 dark:text-emerald-200">
-          Amount received (PKR) — cash
+          {tp("amountCashLabel")}
         </label>
         <input
           type="number"
@@ -71,12 +79,13 @@ export function InvoiceFinalizeButtons({
         />
         {cashChange != null && cashChange > 0.005 ? (
           <p className="mt-2 text-sm font-semibold text-emerald-800 dark:text-emerald-200">
-            Change to return:{" "}
-            {cashChange.toLocaleString("en-PK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} PKR
+            {tp("changeDue")}{" "}
+            {cashChange.toLocaleString(intlTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
+            {tpm("currencySuffix")}
           </p>
         ) : (
           <p className="mt-1 text-xs text-emerald-800/80 dark:text-emerald-300/80">
-            Only the invoice total is recorded as payment; change is for the cashier.
+            {tp("hintCash")}
           </p>
         )}
       </div>
@@ -87,7 +96,7 @@ export function InvoiceFinalizeButtons({
           onClick={() => run(() => finalizeInvoice(invoiceId))}
           className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
         >
-          {pending ? "Working…" : "Finalize (credit / due)"}
+          {pending ? tc("working") : tp("finalizeCredit")}
         </button>
         <button
           type="button"
@@ -95,13 +104,10 @@ export function InvoiceFinalizeButtons({
           onClick={onCashFinalize}
           className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
         >
-          {pending ? "Working…" : "Finalize & paid (cash)"}
+          {pending ? tc("working") : tp("finalizeCash")}
         </button>
       </div>
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">
-        Finalizing records the sale and reduces stock. Use credit when payment comes later; use cash
-        for immediate payment at the counter.
-      </p>
+      <p className="text-xs text-zinc-500 dark:text-zinc-400">{tp("footnote")}</p>
       {error ? (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">
           {error}

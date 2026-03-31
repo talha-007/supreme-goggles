@@ -1,11 +1,13 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function LoginForm() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,7 +36,7 @@ export function LoginForm() {
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <label htmlFor="email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Email
+          {t("email")}
         </label>
         <input
           id="email"
@@ -49,7 +51,7 @@ export function LoginForm() {
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="password" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Password
+          {t("password")}
         </label>
         <input
           id="password"
@@ -72,12 +74,12 @@ export function LoginForm() {
         disabled={loading}
         className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
       >
-        {loading ? "Signing in…" : "Sign in"}
+        {loading ? t("signingIn") : t("signIn")}
       </button>
       <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
-        No account?{" "}
+        {t("noAccount")}{" "}
         <Link href="/signup" className="font-medium text-zinc-900 underline dark:text-zinc-100">
-          Sign up
+          {t("signUp")}
         </Link>
       </p>
     </form>

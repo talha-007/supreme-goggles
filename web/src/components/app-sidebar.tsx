@@ -1,32 +1,36 @@
 import Link from "next/link";
 
+/** Translation keys under `nav` in messages. */
 export const appNav = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/dashboard/products", label: "Products" },
-  { href: "/dashboard/products?stock=low", label: "Low stock" },
-  { href: "/dashboard/customers", label: "Customers" },
-  { href: "/dashboard/invoices", label: "Invoices" },
-  { href: "/dashboard/purchase-orders", label: "Purchase orders" },
-  { href: "/dashboard/suppliers", label: "Suppliers" },
-  { href: "/dashboard/settings", label: "Settings" },
+  { href: "/dashboard", key: "dashboard" },
+  { href: "/dashboard/products", key: "products" },
+  { href: "/dashboard/products?stock=low", key: "lowStock" },
+  { href: "/dashboard/customers", key: "customers" },
+  { href: "/dashboard/invoices", key: "invoices" },
+  { href: "/dashboard/purchase-orders", key: "purchaseOrders" },
+  { href: "/dashboard/suppliers", key: "suppliers" },
+  { href: "/dashboard/settings", key: "settings" },
 ] as const;
 
-export function SidebarBrand() {
+export type NavLinkItem = { href: string; label: string };
+
+export function SidebarBrand({ title }: { title: string }) {
   return (
     <div className="border-b border-zinc-200 px-4 py-4 dark:border-zinc-800">
-      <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Retail SaaS</span>
+      <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{title}</span>
     </div>
   );
 }
 
 type SidebarNavProps = {
+  links: readonly NavLinkItem[];
   onLinkClick?: () => void;
 };
 
-export function SidebarNav({ onLinkClick }: SidebarNavProps) {
+export function SidebarNav({ links, onLinkClick }: SidebarNavProps) {
   return (
     <nav className="flex flex-1 flex-col gap-0.5 p-2">
-      {appNav.map((item) => (
+      {links.map((item) => (
         <Link
           key={item.href}
           href={item.href}
@@ -41,11 +45,11 @@ export function SidebarNav({ onLinkClick }: SidebarNavProps) {
 }
 
 /** Visible from `lg` and up; hidden on small screens (use mobile drawer in `AppShell`). */
-export function AppSidebarDesktop() {
+export function AppSidebarDesktop({ links, brandTitle }: { links: readonly NavLinkItem[]; brandTitle: string }) {
   return (
     <aside className="hidden w-56 shrink-0 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 lg:flex">
-      <SidebarBrand />
-      <SidebarNav />
+      <SidebarBrand title={brandTitle} />
+      <SidebarNav links={links} />
     </aside>
   );
 }

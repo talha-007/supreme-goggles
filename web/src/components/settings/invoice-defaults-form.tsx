@@ -4,6 +4,7 @@ import {
   updateBusinessInvoiceDefaults,
   type BusinessInvoiceDefaults,
 } from "@/lib/settings/actions";
+import { useTranslations } from "next-intl";
 import { useActionState } from "react";
 
 type Props = {
@@ -13,13 +14,15 @@ type Props = {
 
 export function InvoiceDefaultsForm({ initial, canEdit }: Props) {
   const [state, action, pending] = useActionState(updateBusinessInvoiceDefaults, {});
+  const t = useTranslations("invoiceDefaults");
+  const tc = useTranslations("common");
 
   return (
     <form action={action} className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <label htmlFor="default_tax_rate" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Default tax rate (%)
+            {t("defaultTaxRate")}
           </label>
           <input
             id="default_tax_rate"
@@ -32,19 +35,17 @@ export function InvoiceDefaultsForm({ initial, canEdit }: Props) {
             disabled={!canEdit}
             className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
           />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Pre-filled on new invoices (you can still change per invoice).
-          </p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">{t("defaultTaxRateHint")}</p>
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="tax_label" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Tax label (receipt / PDF)
+            {t("taxLabel")}
           </label>
           <input
             id="tax_label"
             name="tax_label"
             type="text"
-            placeholder="e.g. GST, VAT, Sales tax"
+            placeholder={t("taxLabelPlaceholder")}
             defaultValue={initial.tax_label ?? ""}
             disabled={!canEdit}
             className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
@@ -55,7 +56,7 @@ export function InvoiceDefaultsForm({ initial, canEdit }: Props) {
             htmlFor="default_invoice_discount_amount"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
-            Default invoice discount (PKR)
+            {t("defaultDiscount")}
           </label>
           <input
             id="default_invoice_discount_amount"
@@ -67,16 +68,14 @@ export function InvoiceDefaultsForm({ initial, canEdit }: Props) {
             disabled={!canEdit}
             className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
           />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Fixed amount off the subtotal on new invoices (same as invoice discount field).
-          </p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">{t("defaultDiscountHint")}</p>
         </div>
         <div className="flex flex-col gap-1">
           <label
             htmlFor="default_line_discount_pct"
             className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
           >
-            Default line discount (%)
+            {t("defaultLineDisc")}
           </label>
           <input
             id="default_line_discount_pct"
@@ -89,9 +88,7 @@ export function InvoiceDefaultsForm({ initial, canEdit }: Props) {
             disabled={!canEdit}
             className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
           />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Applied to each new line you add (e.g. store-wide promo).
-          </p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">{t("defaultLineDiscHint")}</p>
         </div>
       </div>
       {canEdit ? (
@@ -100,12 +97,10 @@ export function InvoiceDefaultsForm({ initial, canEdit }: Props) {
           disabled={pending}
           className="w-fit rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
         >
-          {pending ? "Saving…" : "Save invoice defaults"}
+          {pending ? tc("saving") : t("saveButton")}
         </button>
       ) : (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Only owners and managers can change these defaults.
-        </p>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">{tc("onlyOwnersManagersDefaults")}</p>
       )}
       {state.error ? (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">

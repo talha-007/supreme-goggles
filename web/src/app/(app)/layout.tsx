@@ -1,5 +1,7 @@
+import { appNav } from "@/components/app-sidebar";
 import { AppShell } from "@/components/app-shell";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 export default async function AppLayout({
@@ -35,5 +37,16 @@ export default async function AppLayout({
 
   const businessName = businessRow?.name ?? "Business";
 
-  return <AppShell businessName={businessName}>{children}</AppShell>;
+  const tNav = await getTranslations("nav");
+  const tCommon = await getTranslations("common");
+  const navLinks = appNav.map((item) => ({
+    href: item.href,
+    label: tNav(item.key),
+  }));
+
+  return (
+    <AppShell businessName={businessName} brandTitle={tCommon("brand")} navLinks={navLinks}>
+      {children}
+    </AppShell>
+  );
 }

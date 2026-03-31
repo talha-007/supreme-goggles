@@ -1,24 +1,20 @@
 import { LowStockPanel } from "@/components/dashboard/low-stock-panel";
 import { OpenPosPanel } from "@/components/dashboard/open-pos-panel";
-import { RetailShortcuts } from "@/components/dashboard/retail-shortcuts";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { PosSaleClient } from "@/components/dashboard/pos-sale-client";
+import { getNewInvoiceEditorData, getPosCatalogProducts } from "@/lib/invoices/new-invoice-data";
 import {
   requireBusinessContext,
   canManageInvoices,
   canManageProducts,
 } from "@/lib/auth/business-context";
+import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { createClient } from "@/lib/supabase/server";
 import type { InvoiceRow, InvoiceStatus } from "@/types/invoice";
 import type { ProductRow } from "@/types/product";
 import type { PurchaseOrderStatus } from "@/types/purchase-order";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
-
-const pkr = new Intl.NumberFormat("en-PK", {
-  style: "currency",
-  currency: "PKR",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2,
-});
 
 const statusStyle: Record<string, string> = {
   draft: "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200",
@@ -56,6 +52,17 @@ export default async function DashboardPage() {
   const canProducts = canManageProducts(ctx.role);
   const supabase = await createClient();
   const bid = ctx.businessId;
+  const locale = await getLocale();
+  const intlTag = intlLocaleTag(locale);
+  const pkr = new Intl.NumberFormat(intlTag, {
+    style: "currency",
+    currency: "PKR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+  const t = await getTranslations("dashboard");
+  const tCommon = await getTranslations("common");
+  const tInv = await getTranslations("invoiceStatus");
 
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -72,6 +79,8 @@ export default async function DashboardPage() {
     reorderCandidatesRes,
     openPoCountRes,
     openPoRowsRes,
+    invoiceEditorData,
+    posCatalogProducts,
   ] = await Promise.all([
     supabase
       .from("products")
@@ -138,6 +147,8 @@ export default async function DashboardPage() {
       .in("status", ["draft", "ordered", "partial"])
       .order("created_at", { ascending: false })
       .limit(6),
+    canEdit ? getNewInvoiceEditorData() : Promise.resolve(null),
+    canEdit ? getPosCatalogProducts() : Promise.resolve([]),
   ]);
 
   const productsCount = productsCountRes.count ?? 0;
@@ -188,67 +199,92 @@ export default async function DashboardPage() {
     customers: Array.isArray(r.customers) ? r.customers[0] ?? null : r.customers,
   }));
 
+  const catalogRows = (posCatalogProducts ?? []) as ProductRow[];
+
   return (
-    <div className="mx-auto max-w-6xl">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="mx-auto max-w-[1600px]">
+      {/* <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Dashboard
+            {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Sales, stock, and purchasing in one place — built for shops and retail counters.
-          </p>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("subtitle")}</p>
         </div>
         {canEdit ? (
           <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Link
-              href="/dashboard/invoices/new"
+              href="#dashboard-new-invoice"
               className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
             >
-              New invoice
+              {t("newInvoice")}
             </Link>
             <Link
               href="/dashboard/invoices"
               className="inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
             >
-              All invoices
+              {t("allInvoices")}
             </Link>
           </div>
         ) : null}
-      </div>
+      </div> */}
 
-      <div className="mt-6">
-        <RetailShortcuts canManageInvoices={canEdit} canManageProducts={canProducts} />
-      </div>
+      {canEdit && invoiceEditorData ? (
+        <section id="dashboard-new-invoice" className="mt-2 scroll-mt-24">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+                {t("invoiceSection")}
+              </h2>
+              {/* <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("invoiceSectionDesc")}</p> */}
+            </div>
+            <Link
+              href="/dashboard/invoices/new"
+              className="shrink-0 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
+            >
+              {t("fullPageInvoice")}
+            </Link>
+          </div>
+          <div className="mt-4">
+            <PosSaleClient
+              initialCatalogProducts={catalogRows}
+              customers={invoiceEditorData.customers}
+              invoiceDefaults={invoiceEditorData.invoiceDefaults}
+              cancelHref="/dashboard"
+              firstDraftSaveBehavior="refresh-only"
+              fullPageInvoiceHref="/dashboard/invoices/new"
+            />
+          </div>
+        </section>
+      ) : null}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Today (sales)"
+          label={t("statToday")}
           value={pkr.format(todaySales)}
-          hint="Finalized invoices created today"
+          hint={t("statTodayHint")}
         />
         <StatCard
-          label="This month"
+          label={t("statMonth")}
           value={pkr.format(monthSales)}
-          hint="Excludes drafts & cancelled"
+          hint={t("statMonthHint")}
         />
-        <StatCard label="Outstanding" value={pkr.format(outstanding)} hint="Unpaid + partial balance" />
-        <StatCard label="Draft invoices" value={String(draftsCount)} hint="Not finalized yet" href="/dashboard/invoices" />
+        <StatCard label={t("statOutstanding")} value={pkr.format(outstanding)} hint={t("statOutstandingHint")} />
+        <StatCard label={t("statDrafts")} value={String(draftsCount)} hint={t("statDraftsHint")} href="/dashboard/invoices" />
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Products" value={String(productsCount)} hint="Active catalog items" href="/dashboard/products" />
-        <StatCard label="Customers" value={String(customersCount)} hint="Active customers" href="/dashboard/customers" />
+        <StatCard label={t("statProducts")} value={String(productsCount)} hint={t("statProductsHint")} href="/dashboard/products" />
+        <StatCard label={t("statCustomers")} value={String(customersCount)} hint={t("statCustomersHint")} href="/dashboard/customers" />
         <StatCard
-          label="Low stock"
+          label={t("statLowStock")}
           value={String(lowStockCount)}
-          hint="At or below reorder level"
+          hint={t("statLowStockHint")}
           href="/dashboard/products?stock=low"
         />
         <StatCard
-          label="Open POs"
+          label={t("statOpenPos")}
           value={String(openPoCount)}
-          hint="Draft, ordered, or partial"
+          hint={t("statOpenPosHint")}
           href="/dashboard/purchase-orders"
         />
       </div>
@@ -265,25 +301,28 @@ export default async function DashboardPage() {
       <div className="mt-10">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            Recent invoices
+            {t("recentInvoices")}
           </h2>
           <Link
             href="/dashboard/invoices"
             className="text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
           >
-            View all
+            {tCommon("viewAll")}
           </Link>
         </div>
 
         <div className="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
           {recent.length === 0 ? (
             <p className="px-4 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
-              No invoices yet.
+              {t("noInvoices")}
               {canEdit ? (
                 <>
                   {" "}
-                  <Link href="/dashboard/invoices/new" className="font-medium text-zinc-900 underline dark:text-zinc-100">
-                    Create your first invoice
+                  <Link
+                    href="#dashboard-new-invoice"
+                    className="font-medium text-zinc-900 underline dark:text-zinc-100"
+                  >
+                    {t("createFirstInvoice")}
                   </Link>
                 </>
               ) : null}
@@ -292,10 +331,10 @@ export default async function DashboardPage() {
             <table className="w-full min-w-[560px] text-left text-sm">
               <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
                 <tr>
-                  <th className="px-4 py-3">Invoice</th>
-                  <th className="px-4 py-3">Customer</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Total</th>
+                  <th className="px-4 py-3">{t("colInvoice")}</th>
+                  <th className="px-4 py-3">{t("colCustomer")}</th>
+                  <th className="px-4 py-3">{t("colStatus")}</th>
+                  <th className="px-4 py-3 text-right">{t("colTotal")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -309,7 +348,7 @@ export default async function DashboardPage() {
                         {inv.invoice_number}
                       </Link>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                        {new Date(inv.created_at).toLocaleDateString("en-PK", {
+                        {new Date(inv.created_at).toLocaleDateString(intlTag, {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
@@ -317,13 +356,13 @@ export default async function DashboardPage() {
                       </p>
                     </td>
                     <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
-                      {inv.customers?.name ?? "—"}
+                      {inv.customers?.name ?? tCommon("dash")}
                     </td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusStyle[inv.status] ?? statusStyle.draft}`}
                       >
-                        {inv.status}
+                        {tInv(inv.status as "draft" | "unpaid" | "partial" | "paid" | "cancelled")}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums text-zinc-900 dark:text-zinc-50">

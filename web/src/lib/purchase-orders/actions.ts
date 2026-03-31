@@ -13,6 +13,7 @@ import type {
   ReceiveItemsFormValues,
 } from "@/types/purchase-order";
 import type { ProductUnit } from "@/types/product";
+import { notifyPoConfirmed, notifyStockReceived } from "@/lib/whatsapp/business-notify";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -309,6 +310,12 @@ export async function confirmPurchaseOrder(id: string): Promise<POActionState> {
     };
   }
 
+  const { data: poMeta } = await supabase
+    .from("purchase_orders")
+    .select("po_number")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("purchase_orders")
     .update({
@@ -321,6 +328,9 @@ export async function confirmPurchaseOrder(id: string): Promise<POActionState> {
     .eq("status", "draft");
 
   if (error) return { error: error.message };
+  if (poMeta?.po_number) {
+    notifyPoConfirmed(ctx.businessId, String(poMeta.po_number));
+  }
   revalidatePath("/dashboard/purchase-orders");
   revalidatePath(`/dashboard/purchase-orders/${id}`);
   return {};
@@ -474,6 +484,19 @@ export async function receiveStock(poId: string, values: ReceiveItemsFormValues)
     .eq("business_id", ctx.businessId);
 
   if (upErr) return { error: upErr.message };
+
+  const lineParts: string[] = [];
+  for (const [poItemId, qtyAdd] of mergedQty) {
+    if (qtyAdd <= 0) continue;
+    const row = byId.get(poItemId);
+    if (row) lineParts.push(`${row.product_name}: +${qtyAdd}`);
+  }
+  notifyStockReceived(
+    ctx.businessId,
+    po.po_number as string,
+    newStatus,
+    lineParts.join("\n").slice(0, 850),
+  );
 
   revalidatePath(`/dashboard/purchase-orders/${poId}`);
   revalidatePath("/dashboard/purchase-orders");

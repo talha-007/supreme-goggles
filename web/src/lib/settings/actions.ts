@@ -14,6 +14,14 @@ export type BusinessInvoiceDefaults = {
   tax_label: string | null;
 };
 
+export type BusinessWhatsAppSettings = {
+  whatsapp_phone_e164: string | null;
+  whatsapp_notify_daily: boolean;
+  whatsapp_notify_po: boolean;
+  whatsapp_notify_receive: boolean;
+  whatsapp_notify_low_stock: boolean;
+};
+
 export type SettingsActionState = { error?: string };
 
 function parseMoney(raw: FormDataEntryValue | null): number {
@@ -73,5 +81,52 @@ export async function updateBusinessInvoiceDefaults(
 
   revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard/invoices/new");
+  return {};
+}
+
+export async function getBusinessWhatsAppSettings(): Promise<BusinessWhatsAppSettings | null> {
+  const ctx = await requireBusinessContext();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("businesses")
+    .select(
+      "whatsapp_phone_e164, whatsapp_notify_daily, whatsapp_notify_po, whatsapp_notify_receive, whatsapp_notify_low_stock",
+    )
+    .eq("id", ctx.businessId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return {
+    whatsapp_phone_e164: data.whatsapp_phone_e164 as string | null,
+    whatsapp_notify_daily: Boolean(data.whatsapp_notify_daily),
+    whatsapp_notify_po: Boolean(data.whatsapp_notify_po),
+    whatsapp_notify_receive: Boolean(data.whatsapp_notify_receive),
+    whatsapp_notify_low_stock: Boolean(data.whatsapp_notify_low_stock),
+  };
+}
+
+export async function updateBusinessWhatsAppSettings(
+  _prev: SettingsActionState,
+  formData: FormData,
+): Promise<SettingsActionState> {
+  const ctx = await requireBusinessContext();
+  if (!canManageBusinessSettings(ctx.role)) {
+    return { error: "Only owners and managers can change these settings." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("update_business_whatsapp_settings", {
+    p_phone_e164: String(formData.get("whatsapp_phone_e164") ?? "").trim(),
+    p_notify_daily: formData.get("whatsapp_notify_daily") === "on",
+    p_notify_po: formData.get("whatsapp_notify_po") === "on",
+    p_notify_receive: formData.get("whatsapp_notify_receive") === "on",
+    p_notify_low_stock: formData.get("whatsapp_notify_low_stock") === "on",
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/dashboard/settings");
   return {};
 }

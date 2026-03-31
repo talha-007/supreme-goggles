@@ -1,14 +1,9 @@
 import { requireBusinessContext, canManageInvoices } from "@/lib/auth/business-context";
+import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { createClient } from "@/lib/supabase/server";
 import type { InvoiceRow } from "@/types/invoice";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
-
-const pkr = new Intl.NumberFormat("en-PK", {
-  style: "currency",
-  currency: "PKR",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2,
-});
 
 const statusStyle: Record<string, string> = {
   draft: "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200",
@@ -22,6 +17,16 @@ export default async function InvoicesPage() {
   const ctx = await requireBusinessContext();
   const canEdit = canManageInvoices(ctx.role);
   const supabase = await createClient();
+  const t = await getTranslations("invoices");
+  const tc = await getTranslations("common");
+  const tStatus = await getTranslations("invoiceStatus");
+  const locale = await getLocale();
+  const pkr = new Intl.NumberFormat(intlLocaleTag(locale), {
+    style: "currency",
+    currency: "PKR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
 
   const { data: rows, error } = await supabase
     .from("invoices")
@@ -39,7 +44,7 @@ export default async function InvoicesPage() {
   if (error) {
     return (
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Invoices</h1>
+        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{t("title")}</h1>
         <p className="mt-2 text-sm text-red-600">{error.message}</p>
       </div>
     );
@@ -53,18 +58,16 @@ export default async function InvoicesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Invoices
+            {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Create bills, print PDFs, and track payments.
-          </p>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("subtitle")}</p>
         </div>
         {canEdit ? (
           <Link
             href="/dashboard/invoices/new"
             className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
           >
-            New invoice
+            {t("new")}
           </Link>
         ) : null}
       </div>
@@ -73,24 +76,24 @@ export default async function InvoicesPage() {
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
             <tr>
-              <th className="px-4 py-3">Invoice</th>
-              <th className="px-4 py-3">Customer</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Total</th>
-              <th className="px-4 py-3 text-right">Paid</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3">{t("colInvoice")}</th>
+              <th className="px-4 py-3">{t("colCustomer")}</th>
+              <th className="px-4 py-3">{t("colStatus")}</th>
+              <th className="px-4 py-3 text-right">{t("colTotal")}</th>
+              <th className="px-4 py-3 text-right">{t("colPaid")}</th>
+              <th className="px-4 py-3 text-right">{t("colActions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
             {invoices.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-10 text-center text-zinc-500">
-                  No invoices yet.
+                  {t("empty")}
                 </td>
               </tr>
             ) : (
               invoices.map((inv) => {
-                const cust = inv.customers?.name ?? "—";
+                const cust = inv.customers?.name ?? tc("dash");
                 return (
                   <tr key={inv.id} className="text-zinc-800 dark:text-zinc-200">
                     <td className="px-4 py-3 font-mono text-sm">{inv.invoice_number}</td>
@@ -99,7 +102,7 @@ export default async function InvoicesPage() {
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs capitalize ${statusStyle[inv.status] ?? statusStyle.draft}`}
                       >
-                        {inv.status}
+                        {tStatus(inv.status as "draft" | "unpaid" | "partial" | "paid" | "cancelled")}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums">
@@ -113,14 +116,14 @@ export default async function InvoicesPage() {
                         href={`/dashboard/invoices/${inv.id}`}
                         className="font-medium text-zinc-900 underline hover:no-underline dark:text-zinc-100"
                       >
-                        View
+                        {t("view")}
                       </Link>
                       {canEdit && inv.status === "draft" ? (
                         <Link
                           href={`/dashboard/invoices/${inv.id}/edit`}
                           className="ml-3 font-medium text-zinc-900 underline hover:no-underline dark:text-zinc-100"
                         >
-                          Edit
+                          {tc("edit")}
                         </Link>
                       ) : null}
                     </td>

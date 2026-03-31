@@ -153,6 +153,7 @@ export async function saveInvoiceDraft(
     return { error: "Could not save invoice." };
   }
 
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/invoices");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
   return { invoiceId };
@@ -223,6 +224,7 @@ export async function finalizeInvoice(invoiceId: string): Promise<InvoiceActionS
 
   if (error) return { error: error.message };
 
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/invoices");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
   redirect(`/dashboard/invoices/${invoiceId}`);
@@ -295,6 +297,7 @@ export async function finalizeInvoiceCash(
     return { error: perr.message };
   }
 
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/invoices");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
   redirect(`/dashboard/invoices/${invoiceId}`);

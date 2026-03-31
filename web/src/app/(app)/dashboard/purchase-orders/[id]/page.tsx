@@ -4,16 +4,11 @@ import { PoLineQuickAdd } from "@/components/purchase-orders/po-line-quick-add";
 import { ReceivePoForm } from "@/components/purchase-orders/receive-po-form";
 import { getPurchaseOrder } from "@/lib/purchase-orders/actions";
 import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-context";
+import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import type { PurchaseOrderItemRow, PurchaseOrderStatus } from "@/types/purchase-order";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-
-const pkr = new Intl.NumberFormat("en-PK", {
-  style: "currency",
-  currency: "PKR",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2,
-});
 
 const statusStyle: Record<string, string> = {
   draft: "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200",
@@ -44,6 +39,18 @@ export default async function PurchaseOrderDetailPage({
     redirect("/dashboard");
   }
 
+  const locale = await getLocale();
+  const intlTag = intlLocaleTag(locale);
+  const t = await getTranslations("purchaseOrders");
+  const tStatus = await getTranslations("poStatus");
+
+  const pkr = new Intl.NumberFormat(intlTag, {
+    style: "currency",
+    currency: "PKR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+
   const { id } = await params;
   const { po, error } = await getPurchaseOrder(id);
 
@@ -52,7 +59,12 @@ export default async function PurchaseOrderDetailPage({
   }
 
   const status = po.status as PurchaseOrderStatus;
-  const supplier = po.supplier as { name: string; phone: string | null; email: string | null; address: string | null } | null;
+  const supplier = po.supplier as {
+    name: string;
+    phone: string | null;
+    email: string | null;
+    address: string | null;
+  } | null;
   const rawItems = (po.items ?? []) as PoItemRow[];
   const items: PurchaseOrderItemRow[] = rawItems.map((row) => {
     return {
@@ -92,7 +104,7 @@ export default async function PurchaseOrderDetailPage({
             href="/dashboard/purchase-orders"
             className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
           >
-            ← Purchase orders
+            {t("backLink")}
           </Link>
           <h1 className="mt-4 font-mono text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
             {po.po_number as string}
@@ -101,7 +113,7 @@ export default async function PurchaseOrderDetailPage({
             <span
               className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusStyle[status] ?? statusStyle.draft}`}
             >
-              {status}
+              {tStatus(status)}
             </span>
           </p>
         </div>
@@ -111,18 +123,14 @@ export default async function PurchaseOrderDetailPage({
         {hasUnlinkedLines && status !== "cancelled" ? (
           <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/50">
             <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">
-              Link every line to the catalog before you can confirm or receive
+              {t("unlinkedTitle")}
             </p>
-            <p className="mt-1 text-sm text-amber-900/95 dark:text-amber-200/90">
-              Receiving stock only updates inventory when the PO line is tied to a product. Use{" "}
-              <span className="font-medium">Quick add</span> below for new SKUs, or edit the PO and
-              pick an existing product from the dropdown (new PO from the list).
-            </p>
+            <p className="mt-1 text-sm text-amber-900/95 dark:text-amber-200/90">{t("unlinkedBody")}</p>
           </div>
         ) : null}
 
         <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Supplier</h2>
+          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{t("supplierSection")}</h2>
           {supplier ? (
             <div className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
               <p className="font-medium">{supplier.name}</p>
@@ -130,11 +138,12 @@ export default async function PurchaseOrderDetailPage({
               {supplier.address ? <p className="whitespace-pre-wrap">{supplier.address}</p> : null}
             </div>
           ) : (
-            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">No supplier linked</p>
+            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{t("noSupplier")}</p>
           )}
           {po.notes ? (
             <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-              <span className="font-medium text-zinc-800 dark:text-zinc-200">Notes</span>: {String(po.notes)}
+              <span className="font-medium text-zinc-800 dark:text-zinc-200">{t("notesLabel")}</span>:{" "}
+              {String(po.notes)}
             </p>
           ) : null}
         </div>
@@ -143,12 +152,12 @@ export default async function PurchaseOrderDetailPage({
           <table className="w-full text-sm">
             <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
               <tr>
-                <th className="px-4 py-2 text-left">Product</th>
-                <th className="px-4 py-2 text-left">Catalog</th>
-                <th className="px-4 py-2 text-right">Ordered</th>
-                <th className="px-4 py-2 text-right">Received</th>
-                <th className="px-4 py-2 text-right">Unit cost</th>
-                <th className="px-4 py-2 text-right">Line</th>
+                <th className="px-4 py-2 text-left">{t("colProduct")}</th>
+                <th className="px-4 py-2 text-left">{t("colCatalog")}</th>
+                <th className="px-4 py-2 text-right">{t("colOrdered")}</th>
+                <th className="px-4 py-2 text-right">{t("colReceived")}</th>
+                <th className="px-4 py-2 text-right">{t("colUnitCost")}</th>
+                <th className="px-4 py-2 text-right">{t("colLine")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -162,14 +171,16 @@ export default async function PurchaseOrderDetailPage({
                       <span className="font-medium text-zinc-900 dark:text-zinc-50">{row.product_name}</span>
                       {prod ? (
                         <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
-                          (stock: {Number(prod.current_stock).toLocaleString("en-PK")})
+                          {t("stockLabel", {
+                            n: Number(prod.current_stock).toLocaleString(intlTag),
+                          })}
                         </span>
                       ) : null}
                     </td>
                     <td className="px-4 py-2 align-top">
                       {row.product_id ? (
                         <span className="text-xs text-emerald-700 dark:text-emerald-300">
-                          Linked — stock will update on receive
+                          {t("linkedHint")}
                         </span>
                       ) : (
                         <PoLineQuickAdd
@@ -180,10 +191,10 @@ export default async function PurchaseOrderDetailPage({
                       )}
                     </td>
                     <td className="px-4 py-2 text-right tabular-nums align-top">
-                      {Number(row.qty_ordered).toLocaleString("en-PK")}
+                      {Number(row.qty_ordered).toLocaleString(intlTag)}
                     </td>
                     <td className="px-4 py-2 text-right tabular-nums align-top">
-                      {Number(row.qty_received).toLocaleString("en-PK")}
+                      {Number(row.qty_received).toLocaleString(intlTag)}
                     </td>
                     <td className="px-4 py-2 text-right tabular-nums align-top">
                       {pkr.format(Number(row.unit_cost))}
@@ -197,7 +208,7 @@ export default async function PurchaseOrderDetailPage({
             </tbody>
           </table>
           <div className="flex justify-between border-t border-zinc-200 px-4 py-3 text-sm font-semibold dark:border-zinc-800">
-            <span>Total</span>
+            <span>{t("totalRow")}</span>
             <span className="tabular-nums">{pkr.format(Number(po.total_amount))}</span>
           </div>
         </div>
@@ -206,17 +217,12 @@ export default async function PurchaseOrderDetailPage({
 
         {needsInventorySync ? (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/60 dark:bg-amber-950/40">
-            <p className="text-sm font-medium text-amber-950 dark:text-amber-100">
-              Inventory not updated for at least one line
-            </p>
-            <p className="mt-1 text-sm text-amber-900/90 dark:text-amber-200/90">
-              Stock only increases when the line is linked to a catalog product. If the line name
-              matches <strong className="font-medium">exactly one</strong> active product (same
-              spelling), you can apply quantities now. Otherwise, edit the product in{" "}
-              <Link href="/dashboard/products" className="underline">
-                Products
-              </Link>{" "}
-              to match the line name, or use the product dropdown on future POs.
+            <p className="text-sm font-medium text-amber-950 dark:text-amber-100">{t("needsSyncTitle")}</p>
+            <p className="mt-1 text-sm text-amber-900/90 dark:text-amber-200/90">{t("needsSyncBody")}</p>
+            <p className="mt-2 text-sm">
+              <Link href="/dashboard/products" className="font-medium text-amber-950 underline dark:text-amber-100">
+                {t("productsLink")}
+              </Link>
             </p>
             <div className="mt-3">
               <BackfillPoStockButton poId={id} />

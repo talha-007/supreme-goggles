@@ -7,8 +7,10 @@ import {
   type LineDraft,
   type SaveDraftInput,
 } from "@/lib/invoices/actions";
+import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { invoiceTotals, lineTotal } from "@/lib/invoices/calc";
 import type { InvoiceEditorDefaults, InvoiceRow } from "@/types/invoice";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -30,6 +32,10 @@ type Props = {
   products: ProductOption[];
   /** Pre-fill tax / discounts on brand-new invoices only. */
   invoiceDefaults?: InvoiceEditorDefaults | null;
+  /** Cancel link target (default: all invoices list). */
+  cancelHref?: string;
+  /** After first draft save when creating a new invoice: navigate to edit page or stay and refresh. */
+  firstDraftSaveBehavior?: "navigate-to-edit" | "refresh-only";
 };
 
 function makeEmptyLine(lineDiscountPct: number): LineDraft {
@@ -59,7 +65,12 @@ export function InvoiceEditor({
   customers,
   products,
   invoiceDefaults = null,
+  cancelHref = "/dashboard/invoices",
+  firstDraftSaveBehavior = "navigate-to-edit",
 }: Props) {
+  const ti = useTranslations("invoiceEditor");
+  const tc = useTranslations("common");
+  const locale = useLocale();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -176,7 +187,9 @@ export function InvoiceEditor({
       if (res.invoiceId) {
         setInvoiceId(res.invoiceId);
         if (!initialInvoiceId) {
-          router.push(`/dashboard/invoices/${res.invoiceId}/edit`);
+          if (firstDraftSaveBehavior === "navigate-to-edit") {
+            router.push(`/dashboard/invoices/${res.invoiceId}/edit`);
+          }
           router.refresh();
         } else {
           router.refresh();
@@ -190,11 +203,11 @@ export function InvoiceEditor({
     const total = previewTotals.total;
     const received = Number(String(cashReceived).replace(/,/g, ""));
     if (!Number.isFinite(received) || received <= 0) {
-      setError("Enter the amount received from the customer.");
+      setError(ti("errorCashAmount"));
       return;
     }
     if (received + 0.005 < total) {
-      setError("Amount received is less than the invoice total.");
+      setError(ti("errorCashLow"));
       return;
     }
     startTransition(async () => {
@@ -228,14 +241,14 @@ export function InvoiceEditor({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Customer
+            {ti("customer")}
           </label>
           <select
             value={customerId}
             onChange={(e) => setCustomerId(e.target.value)}
             className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
           >
-            <option value="">Walk-in (no customer)</option>
+            <option value="">{ti("walkInOption")}</option>
             {customers.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -245,7 +258,7 @@ export function InvoiceEditor({
         </div>
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Due date
+            {ti("dueDate")}
           </label>
           <input
             type="date"
@@ -256,7 +269,7 @@ export function InvoiceEditor({
         </div>
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Invoice discount (PKR)
+            {ti("invoiceDiscount")}
           </label>
           <input
             type="number"
@@ -269,7 +282,7 @@ export function InvoiceEditor({
         </div>
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Tax rate (%)
+            {ti("taxRate")}
           </label>
           <input
             type="number"
@@ -283,7 +296,7 @@ export function InvoiceEditor({
         </div>
         <div className="sm:col-span-2 flex flex-col gap-1">
           <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Notes
+            {ti("notes")}
           </label>
           <textarea
             rows={2}
@@ -297,27 +310,27 @@ export function InvoiceEditor({
       <div>
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-            Line items
+            {ti("linesTitle")}
           </h2>
           <button
             type="button"
             onClick={addRow}
             className="text-sm font-medium text-zinc-900 underline dark:text-zinc-100"
           >
-            + Add line
+            {ti("addRow")}
           </button>
         </div>
         <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
               <tr>
-                <th className="px-3 py-2">Product</th>
-                <th className="px-3 py-2">Name</th>
-                <th className="w-20 px-3 py-2">Unit</th>
-                <th className="w-24 px-3 py-2">Qty</th>
-                <th className="w-28 px-3 py-2">Price</th>
-                <th className="w-20 px-3 py-2">Disc %</th>
-                <th className="w-24 px-3 py-2 text-right">Line</th>
+                <th className="px-3 py-2">{ti("colProduct")}</th>
+                <th className="px-3 py-2">{ti("colName")}</th>
+                <th className="w-20 px-3 py-2">{ti("colUnit")}</th>
+                <th className="w-24 px-3 py-2">{ti("colQty")}</th>
+                <th className="w-28 px-3 py-2">{ti("colPrice")}</th>
+                <th className="w-20 px-3 py-2">{ti("colDisc")}</th>
+                <th className="w-24 px-3 py-2 text-right">{ti("colLine")}</th>
                 <th className="w-10 px-3 py-2" />
               </tr>
             </thead>
@@ -330,7 +343,7 @@ export function InvoiceEditor({
                       onChange={(e) => onProductPick(i, e.target.value)}
                       className="w-full max-w-[180px] rounded border border-zinc-200 bg-white px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
                     >
-                      <option value="">Custom / manual</option>
+                      <option value="">{ti("customManual")}</option>
                       {products.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
@@ -414,16 +427,20 @@ export function InvoiceEditor({
 
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950">
         <div className="text-sm text-zinc-600 dark:text-zinc-400">
-          <span className="mr-4">Subtotal: {previewTotals.subtotal.toFixed(2)}</span>
-          <span className="mr-4">Tax: {previewTotals.tax.toFixed(2)}</span>
+          <span className="mr-4">
+            {ti("subtotalPreview")} {previewTotals.subtotal.toFixed(2)}
+          </span>
+          <span className="mr-4">
+            {ti("taxPreview")} {previewTotals.tax.toFixed(2)}
+          </span>
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-            Total: {previewTotals.total.toFixed(2)} PKR
+            {ti("totalWithCurrency", { amount: previewTotals.total.toFixed(2) })}
           </span>
         </div>
         <div className="flex w-full flex-col gap-3 sm:max-w-md sm:items-end sm:ml-auto">
           <div className="w-full rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2 dark:border-emerald-900/50 dark:bg-emerald-950/30">
             <label className="text-xs font-medium text-emerald-900 dark:text-emerald-200">
-              Amount received (PKR)
+              {ti("cashReceived")}
             </label>
             <input
               type="number"
@@ -435,12 +452,16 @@ export function InvoiceEditor({
             />
             {cashChange != null && cashChange > 0.005 ? (
               <p className="mt-2 text-sm font-semibold text-emerald-800 dark:text-emerald-200">
-                Change to return: {cashChange.toLocaleString("en-PK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
+                {ti("changeDue")}{" "}
+                {cashChange.toLocaleString(intlLocaleTag(locale), {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}{" "}
                 PKR
               </p>
             ) : (
               <p className="mt-1 text-xs text-emerald-800/80 dark:text-emerald-300/80">
-                Enter cash tendered; only the invoice total is recorded as payment.
+                {ti("cashTenderHint")}
               </p>
             )}
           </div>
@@ -451,7 +472,7 @@ export function InvoiceEditor({
               disabled={pending}
               className="rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
             >
-              {pending ? "Working…" : "Cash — paid now"}
+              {pending ? tc("working") : ti("cashPaid")}
             </button>
             <button
               type="button"
@@ -459,15 +480,15 @@ export function InvoiceEditor({
               disabled={pending}
               className="rounded-lg border border-amber-600 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-950 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100 dark:hover:bg-amber-900/50"
             >
-              {pending ? "Working…" : "Credit — pay later"}
+              {pending ? tc("working") : ti("creditLater")}
             </button>
           </div>
           <div className="flex flex-wrap justify-end gap-2 border-t border-zinc-200 pt-3 dark:border-zinc-700">
             <Link
-              href="/dashboard/invoices"
+              href={cancelHref}
               className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-900"
             >
-              Cancel
+              {ti("cancel")}
             </Link>
             <button
               type="button"
@@ -475,14 +496,11 @@ export function InvoiceEditor({
               disabled={pending}
               className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
             >
-              {pending ? "Saving…" : "Save draft only"}
+              {pending ? tc("saving") : ti("saveDraft")}
             </button>
           </div>
           <p className="max-w-md text-right text-xs text-zinc-500 dark:text-zinc-400">
-            Use <strong className="font-medium text-zinc-700 dark:text-zinc-300">Cash</strong> or{" "}
-            <strong className="font-medium text-zinc-700 dark:text-zinc-300">Credit</strong> to
-            finish in one step. Use <strong className="font-medium">Save draft only</strong> to pause
-            (e.g. customer stepped away).
+            {ti("helpCashCreditLong")}
           </p>
         </div>
       </div>

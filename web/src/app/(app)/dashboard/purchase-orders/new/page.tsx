@@ -2,6 +2,7 @@ import { PoEditor } from "@/components/purchase-orders/po-editor";
 import { listSuppliers } from "@/lib/purchase-orders/actions";
 import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-context";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -10,6 +11,8 @@ export default async function NewPurchaseOrderPage() {
   if (!canManageProducts(ctx.role)) {
     redirect("/dashboard");
   }
+
+  const t = await getTranslations("purchaseOrders");
 
   const supabase = await createClient();
   const { data: products } = await supabase
@@ -28,19 +31,17 @@ export default async function NewPurchaseOrderPage() {
           href="/dashboard/purchase-orders"
           className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
         >
-          ← Purchase orders
+          {t("backLink")}
         </Link>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          New purchase order
+          {t("pageNewTitle")}
         </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Create a draft, confirm when sent to the supplier, then receive stock when goods arrive.
-        </p>
+        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("newSubtitle")}</p>
       </div>
 
       {error ? (
         <p className="mb-4 text-sm text-amber-700 dark:text-amber-300">
-          Could not load suppliers: {error}
+          {t("loadSuppliersError", { error })}
         </p>
       ) : null}
 

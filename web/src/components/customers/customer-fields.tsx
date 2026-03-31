@@ -1,5 +1,7 @@
 import { CUSTOMER_TYPES } from "@/types/customer";
 import type { CustomerRow } from "@/types/customer";
+import { intlLocaleTag } from "@/lib/i18n/intl-locale";
+import { getLocale, getTranslations } from "next-intl/server";
 
 type Props = {
   defaultValues?: Partial<CustomerRow>;
@@ -7,14 +9,24 @@ type Props = {
   showOutstandingReadOnly?: boolean;
 };
 
-export function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props) {
+export async function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props) {
+  const t = await getTranslations("customerFields");
+  const tType = await getTranslations("customerType");
+  const locale = await getLocale();
   const d = defaultValues ?? {};
+
+  const money = new Intl.NumberFormat(intlLocaleTag(locale), {
+    style: "currency",
+    currency: "PKR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="sm:col-span-2 flex flex-col gap-1">
         <label htmlFor="name" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Name <span className="text-red-500">*</span>
+          {t("name")} <span className="text-red-500">*</span>
         </label>
         <input
           id="name"
@@ -27,7 +39,7 @@ export function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="phone" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Phone
+          {t("phone")}
         </label>
         <input
           id="phone"
@@ -39,7 +51,7 @@ export function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Email
+          {t("email")}
         </label>
         <input
           id="email"
@@ -51,7 +63,7 @@ export function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props
       </div>
       <div className="sm:col-span-2 flex flex-col gap-1">
         <label htmlFor="address" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Address
+          {t("address")}
         </label>
         <textarea
           id="address"
@@ -63,7 +75,7 @@ export function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="type" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Customer type
+          {t("customerType")}
         </label>
         <select
           id="type"
@@ -73,14 +85,14 @@ export function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props
         >
           {CUSTOMER_TYPES.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {tType(opt.value as "retail" | "wholesale" | "walkin")}
             </option>
           ))}
         </select>
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="credit_limit" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Credit limit (PKR)
+          {t("creditLimit")}
         </label>
         <input
           id="credit_limit"
@@ -95,24 +107,17 @@ export function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props
       {showOutstandingReadOnly && d.outstanding_balance !== undefined ? (
         <div className="sm:col-span-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            Outstanding balance
+            {t("outstandingBalance")}
           </p>
           <p className="mt-1 text-sm tabular-nums text-zinc-900 dark:text-zinc-100">
-            {new Intl.NumberFormat("en-PK", {
-              style: "currency",
-              currency: "PKR",
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 2,
-            }).format(d.outstanding_balance)}
+            {money.format(d.outstanding_balance)}
           </p>
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            Updated automatically from invoices and payments.
-          </p>
+          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{t("outstandingHint")}</p>
         </div>
       ) : null}
       <div className="sm:col-span-2 flex flex-col gap-1">
         <label htmlFor="notes" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Notes
+          {t("notes")}
         </label>
         <textarea
           id="notes"
@@ -131,7 +136,7 @@ export function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props
           className="size-4 rounded border-zinc-300"
         />
         <label htmlFor="is_active" className="text-sm text-zinc-700 dark:text-zinc-300">
-          Active
+          {t("active")}
         </label>
       </div>
     </div>

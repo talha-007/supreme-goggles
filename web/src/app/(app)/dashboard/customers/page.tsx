@@ -1,24 +1,13 @@
 import { requireBusinessContext, canManageCustomers } from "@/lib/auth/business-context";
+import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { createClient } from "@/lib/supabase/server";
 import type { CustomerRow } from "@/types/customer";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 function sanitizeSearch(q: string): string {
   return q.trim().slice(0, 80).replace(/[%_]/g, "");
 }
-
-const pkr = new Intl.NumberFormat("en-PK", {
-  style: "currency",
-  currency: "PKR",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2,
-});
-
-const typeLabel: Record<string, string> = {
-  retail: "Retail",
-  wholesale: "Wholesale",
-  walkin: "Walk-in",
-};
 
 export default async function CustomersPage({
   searchParams,
@@ -30,6 +19,17 @@ export default async function CustomersPage({
   const params = await searchParams;
   const rawQ = params.q ?? "";
   const q = sanitizeSearch(rawQ);
+
+  const t = await getTranslations("customers");
+  const tc = await getTranslations("common");
+  const tType = await getTranslations("customerType");
+  const locale = await getLocale();
+  const pkr = new Intl.NumberFormat(intlLocaleTag(locale), {
+    style: "currency",
+    currency: "PKR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
 
   const supabase = await createClient();
   let query = supabase
@@ -49,7 +49,7 @@ export default async function CustomersPage({
     return (
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Customers
+          {t("title")}
         </h1>
         <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error.message}</p>
       </div>
@@ -63,18 +63,16 @@ export default async function CustomersPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Customers
+            {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Manage buyers and credit limits.
-          </p>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("subtitle")}</p>
         </div>
         {canEdit ? (
           <Link
             href="/dashboard/customers/new"
             className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
           >
-            Add customer
+            {t("addCustomer")}
           </Link>
         ) : null}
       </div>
@@ -88,14 +86,14 @@ export default async function CustomersPage({
           name="q"
           type="search"
           defaultValue={rawQ}
-          placeholder="Search name, phone, email…"
+          placeholder={t("searchPlaceholder")}
           className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
         />
         <button
           type="submit"
           className="shrink-0 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
         >
-          Search
+          {tc("search")}
         </button>
       </form>
 
@@ -103,12 +101,12 @@ export default async function CustomersPage({
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
             <tr>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Phone</th>
-              <th className="px-4 py-3">Type</th>
-              <th className="px-4 py-3 text-right">Outstanding</th>
-              <th className="px-4 py-3">Status</th>
-              {canEdit ? <th className="px-4 py-3 text-right">Actions</th> : null}
+              <th className="px-4 py-3">{t("colName")}</th>
+              <th className="px-4 py-3">{t("colPhone")}</th>
+              <th className="px-4 py-3">{t("colType")}</th>
+              <th className="px-4 py-3 text-right">{t("colOutstanding")}</th>
+              <th className="px-4 py-3">{t("colStatus")}</th>
+              {canEdit ? <th className="px-4 py-3 text-right">{tc("actions")}</th> : null}
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -118,24 +116,24 @@ export default async function CustomersPage({
                   colSpan={canEdit ? 6 : 5}
                   className="px-4 py-10 text-center text-zinc-500 dark:text-zinc-400"
                 >
-                  {q ? "No customers match your search." : "No customers yet. Add your first customer."}
+                  {q ? t("noSearchResults") : t("emptyPrompt")}
                 </td>
               </tr>
             ) : (
               customers.map((c) => (
                 <tr key={c.id} className="text-zinc-800 dark:text-zinc-200">
                   <td className="px-4 py-3 font-medium">{c.name}</td>
-                  <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{c.phone ?? "—"}</td>
-                  <td className="px-4 py-3">{typeLabel[c.type] ?? c.type}</td>
+                  <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{c.phone ?? tc("dash")}</td>
+                  <td className="px-4 py-3">{tType(c.type as "retail" | "wholesale" | "walkin")}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{pkr.format(c.outstanding_balance)}</td>
                   <td className="px-4 py-3">
                     {c.is_active ? (
                       <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                        Active
+                        {tc("active")}
                       </span>
                     ) : (
                       <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-xs text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
-                        Inactive
+                        {tc("inactive")}
                       </span>
                     )}
                   </td>
@@ -145,7 +143,7 @@ export default async function CustomersPage({
                         href={`/dashboard/customers/${c.id}/edit`}
                         className="text-sm font-medium text-zinc-900 underline hover:no-underline dark:text-zinc-100"
                       >
-                        Edit
+                        {tc("edit")}
                       </Link>
                     </td>
                   ) : null}

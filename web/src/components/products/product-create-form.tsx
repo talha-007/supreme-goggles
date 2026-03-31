@@ -4,12 +4,17 @@ import { createProduct, type ProductActionState } from "@/lib/products/actions";
 import { ProductFields } from "@/components/products/product-fields";
 import { useActionState } from "react";
 
-export function ProductCreateForm() {
+type CreateProps = {
+  barcodeFromUrl?: string;
+  scanMode?: boolean;
+};
+
+export function ProductCreateForm({ barcodeFromUrl, scanMode }: CreateProps) {
   const [state, formAction, pending] = useActionState(createProduct, {} as ProductActionState);
 
   return (
     <form action={formAction} encType="multipart/form-data" className="flex flex-col gap-6">
-      <ProductFields />
+      <ProductFields barcodeFromUrl={barcodeFromUrl} scanMode={scanMode} />
       {state.error ? (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">
           {state.error}

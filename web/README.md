@@ -35,6 +35,16 @@
 
 Open [http://localhost:3000](http://localhost:3000) — you will be prompted to sign in, create a business, then land on the dashboard.
 
+## Shop setup (first day)
+
+1. **Business:** Complete onboarding with your shop name (one business per account to start).
+2. **Products:** Add products under **Products** — set **sale price**, **stock**, and optional **category** and **photo** (helps the dashboard POS grid). Use **barcodes** if you scan at the counter.
+3. **Customers:** Add regular customers if you sell on credit; walk-in sales work without a customer.
+4. **Invoicing defaults:** Under **Settings**, set **tax rate** and invoice defaults so new sales match your shop.
+5. **Daily use:** Open **Dashboard** for the split **menu + cart** flow, or **Invoices** for a traditional list. Finalizing **cash** or **credit** updates stock; drafts do not.
+
+If a page fails, use **Try again** or return to the **Dashboard**. Missing pages show a **404** screen with links home.
+
 ## Scripts
 
 - `npm run dev` — development server

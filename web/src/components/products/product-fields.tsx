@@ -1,20 +1,33 @@
+import { ProductBarcodeField } from "@/components/products/product-barcode-field";
 import { PRODUCT_UNITS } from "@/types/product";
 import type { ProductRow } from "@/types/product";
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 
 type Props = {
   defaultValues?: Partial<ProductRow>;
   /** When editing, show current photo + optional remove. */
   existingImageUrl?: string | null;
+  /** Prefill barcode (e.g. `?barcode=` from catalog search). */
+  barcodeFromUrl?: string;
+  /** Autofocus barcode field for USB scanner setup at the counter. */
+  scanMode?: boolean;
 };
 
-export function ProductFields({ defaultValues, existingImageUrl }: Props) {
+export async function ProductFields({
+  defaultValues,
+  existingImageUrl,
+  barcodeFromUrl,
+  scanMode = false,
+}: Props) {
+  const t = await getTranslations("productFields");
   const d = defaultValues ?? {};
+  const barcodeValue = d.barcode ?? barcodeFromUrl ?? "";
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="sm:col-span-2 flex flex-col gap-2">
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Photo</span>
+        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t("photo")}</span>
         {existingImageUrl ? (
           <div className="flex flex-wrap items-start gap-4">
             <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
@@ -32,7 +45,7 @@ export function ProductFields({ defaultValues, existingImageUrl }: Props) {
                 name="remove_image"
                 className="size-4 rounded border-zinc-300"
               />
-              Remove current photo
+              {t("removePhoto")}
             </label>
           </div>
         ) : null}
@@ -42,14 +55,12 @@ export function ProductFields({ defaultValues, existingImageUrl }: Props) {
           accept="image/jpeg,image/png,image/gif,image/webp"
           className="text-sm text-zinc-700 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-900 hover:file:bg-zinc-200 dark:text-zinc-300 dark:file:bg-zinc-800 dark:file:text-zinc-100 dark:hover:file:bg-zinc-700"
         />
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          JPEG, PNG, GIF, or WebP. Max 2MB. New upload replaces the current photo.
-        </p>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">{t("imageHint")}</p>
       </div>
 
       <div className="sm:col-span-2 flex flex-col gap-1">
         <label htmlFor="name" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Name <span className="text-red-500">*</span>
+          {t("name")} <span className="text-red-500">*</span>
         </label>
         <input
           id="name"
@@ -60,9 +71,18 @@ export function ProductFields({ defaultValues, existingImageUrl }: Props) {
           className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
         />
       </div>
+      <div className="sm:col-span-2 flex flex-col gap-1">
+        <label htmlFor="barcode" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          {t("barcode")}
+        </label>
+        <ProductBarcodeField defaultValue={barcodeValue} autoFocus={scanMode} />
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          {t("barcodeHint", { scanMode: t("scanModeWord") })}
+        </p>
+      </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="sku" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          SKU
+          {t("sku")}
         </label>
         <input
           id="sku"
@@ -73,20 +93,8 @@ export function ProductFields({ defaultValues, existingImageUrl }: Props) {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="barcode" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Barcode
-        </label>
-        <input
-          id="barcode"
-          name="barcode"
-          type="text"
-          defaultValue={d.barcode ?? ""}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        />
-      </div>
-      <div className="flex flex-col gap-1">
         <label htmlFor="category" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Category
+          {t("category")}
         </label>
         <input
           id="category"
@@ -98,7 +106,7 @@ export function ProductFields({ defaultValues, existingImageUrl }: Props) {
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="unit" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Unit
+          {t("unit")}
         </label>
         <select
           id="unit"
@@ -115,7 +123,7 @@ export function ProductFields({ defaultValues, existingImageUrl }: Props) {
       </div>
       <div className="sm:col-span-2 flex flex-col gap-1">
         <label htmlFor="description" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Description
+          {t("description")}
         </label>
         <textarea
           id="description"
@@ -127,7 +135,7 @@ export function ProductFields({ defaultValues, existingImageUrl }: Props) {
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="purchase_price" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Purchase price (PKR)
+          {t("purchasePrice")}
         </label>
         <input
           id="purchase_price"
@@ -141,7 +149,7 @@ export function ProductFields({ defaultValues, existingImageUrl }: Props) {
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="sale_price" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Sale price (PKR)
+          {t("salePrice")}
         </label>
         <input
           id="sale_price"
@@ -155,7 +163,7 @@ export function ProductFields({ defaultValues, existingImageUrl }: Props) {
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="current_stock" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Current stock
+          {t("currentStock")}
         </label>
         <input
           id="current_stock"
@@ -169,7 +177,7 @@ export function ProductFields({ defaultValues, existingImageUrl }: Props) {
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="reorder_level" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Reorder level
+          {t("reorderLevel")}
         </label>
         <input
           id="reorder_level"
@@ -190,7 +198,7 @@ export function ProductFields({ defaultValues, existingImageUrl }: Props) {
           className="size-4 rounded border-zinc-300"
         />
         <label htmlFor="is_active" className="text-sm text-zinc-700 dark:text-zinc-300">
-          Active (shown in sales)
+          {t("activeShown")}
         </label>
       </div>
     </div>

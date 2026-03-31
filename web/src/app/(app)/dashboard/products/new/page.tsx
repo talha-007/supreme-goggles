@@ -3,11 +3,19 @@ import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-c
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-export default async function NewProductPage() {
+export default async function NewProductPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ barcode?: string; scan?: string }>;
+}) {
   const ctx = await requireBusinessContext();
   if (!canManageProducts(ctx.role)) {
     redirect("/dashboard/products");
   }
+
+  const params = await searchParams;
+  const barcodeFromUrl = params.barcode?.trim() ? params.barcode.trim().slice(0, 80) : undefined;
+  const scanMode = params.scan === "1";
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -22,11 +30,16 @@ export default async function NewProductPage() {
           Add product
         </h1>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Stock can also be adjusted later from invoices and purchase orders.
+          Stock can also be adjusted later from invoices and purchase orders. Use a barcode scanner on
+          the barcode field, or open{" "}
+          <Link href="/dashboard/products?scan=1" className="font-medium underline">
+            Products in scan mode
+          </Link>{" "}
+          to find items quickly.
         </p>
       </div>
       <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-        <ProductCreateForm />
+        <ProductCreateForm barcodeFromUrl={barcodeFromUrl} scanMode={scanMode} />
       </div>
     </div>
   );
