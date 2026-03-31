@@ -1,7 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LoginForm } from "./login-form";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return {
+    title: t("signInTitle"),
+    description: t("signInSubtitle"),
+    robots: { index: true, follow: true },
+  };
+}
 
 export default async function LoginPage({
   searchParams,

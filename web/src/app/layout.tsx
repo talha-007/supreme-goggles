@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { buildRootMetadata } from "@/lib/seo/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,10 +14,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Retail SaaS",
-  description: "Stock, billing, customers, and reports for retailers and wholesalers",
-};
+export const metadata = buildRootMetadata();
 
 export default async function RootLayout({
   children,

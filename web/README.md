@@ -45,6 +45,12 @@ Open [http://localhost:3000](http://localhost:3000) — you will be prompted to 
 
 If a page fails, use **Try again** or return to the **Dashboard**. Missing pages show a **404** screen with links home.
 
+## SEO (production)
+
+- Set **`NEXT_PUBLIC_SITE_URL`** to your public origin (e.g. `https://app.example.com`) so `metadataBase`, **Open Graph** / Twitter cards, **`/sitemap.xml`**, and **`/robots.txt`** use the correct URLs.
+- **`/dashboard`** and **`/onboarding`** are **`noindex`** in app metadata; **`robots.txt`** also disallows `/dashboard`, `/onboarding`, and `/api`.
+- Optional: set **`GOOGLE_SITE_VERIFICATION`** for Search Console verification.
+
 ## Scripts
 
 - `npm run dev` — development server
