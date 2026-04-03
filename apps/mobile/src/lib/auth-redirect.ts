@@ -1,6 +1,6 @@
 import Constants from "expo-constants";
 
-/** Same pattern as web: `${NEXT_PUBLIC_SITE_URL}/auth/callback` */
+/** Email confirmation links open `${siteUrl}/auth/callback`. */
 export function getEmailRedirectUrl(): string {
   const extra = Constants.expoConfig?.extra as { siteUrl?: string } | undefined;
   const raw =

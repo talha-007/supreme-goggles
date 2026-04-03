@@ -6,7 +6,7 @@ type Props = {
   onChangeText: (t: string) => void;
   placeholder?: string;
   secureTextEntry?: boolean;
-  keyboardType?: "default" | "email-address";
+  keyboardType?: "default" | "email-address" | "phone-pad" | "decimal-pad" | "numeric";
   autoCapitalize?: "none" | "sentences";
 };
 

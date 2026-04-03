@@ -4,6 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { OnboardingForm } from "./onboarding-form";
 
+export const dynamic = "force-dynamic";
+
 export default async function OnboardingPage() {
   const supabase = await createClient();
   const {
@@ -14,14 +16,14 @@ export default async function OnboardingPage() {
     redirect("/login");
   }
 
-  const { data: existing } = await supabase
+  const { data: membership } = await supabase
     .from("business_members")
-    .select("id")
+    .select("business_id")
     .eq("user_id", user.id)
-    .limit(1)
     .maybeSingle();
 
-  if (existing) {
+  /** Must match `(app)/layout.tsx`: only skip onboarding when we have a real business id. */
+  if (membership?.business_id) {
     redirect("/dashboard");
   }
 

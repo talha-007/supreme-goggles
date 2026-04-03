@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const supabase = await createClient();
   const {
@@ -11,12 +13,13 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const { data: members } = await supabase
+  const { data: membership } = await supabase
     .from("business_members")
     .select("business_id")
-    .limit(1);
+    .eq("user_id", user.id)
+    .maybeSingle();
 
-  if (!members?.length) {
+  if (!membership?.business_id) {
     redirect("/onboarding");
   }
 

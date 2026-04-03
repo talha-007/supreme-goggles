@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-nati
 import { router, useNavigation } from "expo-router";
 
 import { useAuth } from "../../src/contexts/auth-context";
+import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
 import { supabase } from "../../src/lib/supabase";
 
 const pkr = new Intl.NumberFormat("en-PK", {
@@ -12,18 +13,15 @@ const pkr = new Intl.NumberFormat("en-PK", {
   maximumFractionDigits: 2,
 });
 
-const LINKS = [
-  { href: "/products", label: "Products" },
-  { href: "/customers", label: "Customers" },
-  { href: "/invoices", label: "Invoices" },
+const MORE_LINKS = [
   { href: "/purchase-orders", label: "Purchase orders" },
   { href: "/suppliers", label: "Suppliers" },
-  { href: "/settings", label: "Settings" },
 ] as const;
 
 export default function DashboardScreen() {
   const navigation = useNavigation();
-  const { businessId, user, signOut } = useAuth();
+  const bottomPad = useTabScreenBottomPadding();
+  const { businessId, user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<{
     products: number;
@@ -134,14 +132,11 @@ export default function DashboardScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: "Dashboard",
-      headerRight: () => (
-        <Pressable onPress={() => signOut()} hitSlop={12} className="px-2 py-1">
-          <Text className="text-sm font-medium text-emerald-400">Sign out</Text>
-        </Pressable>
-      ),
+      title: "Home",
+      headerBackVisible: false,
+      gestureEnabled: false,
     });
-  }, [navigation, signOut]);
+  }, [navigation]);
 
   useEffect(() => {
     void load();
@@ -158,10 +153,11 @@ export default function DashboardScreen() {
   return (
     <ScrollView
       className="flex-1 bg-neutral-950"
-      contentContainerClassName="px-4 pb-10 pt-4"
+      contentContainerClassName="px-4 pt-4"
+      contentContainerStyle={{ paddingBottom: bottomPad }}
     >
       <Text className="text-base text-neutral-200">
-        Sales, stock, and purchasing in one place — same metrics as the web dashboard.
+        Sales, stock, and purchasing at a glance.
       </Text>
 
       <View className="mt-6 flex-row flex-wrap gap-3">
@@ -174,10 +170,10 @@ export default function DashboardScreen() {
       </View>
 
       <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">
-        Navigate
+        Purchasing
       </Text>
       <View className="mt-3 gap-2">
-        {LINKS.map((item) => (
+        {MORE_LINKS.map((item) => (
           <Pressable
             key={item.href}
             onPress={() => router.push(item.href)}

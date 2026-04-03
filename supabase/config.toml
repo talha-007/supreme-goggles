@@ -1,0 +1,9 @@
+# Local development only (`supabase start`). Merged with Supabase defaults.
+# Hosted projects: change rate limits in Dashboard → Authentication → Rate Limits.
+# See docs/SUPABASE_AUTH_TESTING.md
+
+project_id = "supreme-goggles"
+
+[auth.rate_limit]
+# Emails per hour (signup confirmations, magic links, etc.). Default local value is low; raise for testing.
+email_sent = 1000

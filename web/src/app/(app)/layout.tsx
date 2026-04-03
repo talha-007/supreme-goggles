@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   },
 };
 
+/** Avoid stale membership checks that can ping-pong /dashboard ↔ /onboarding. */
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({
   children,
 }: {
@@ -42,7 +45,7 @@ export default async function AppLayout({
     .from("businesses")
     .select("name")
     .eq("id", membership.business_id)
-    .single();
+    .maybeSingle();
 
   const businessName = businessRow?.name ?? "Business";
 

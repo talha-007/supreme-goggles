@@ -1,16 +1,16 @@
 import { Text, View } from "react-native";
-import { useNavigation } from "expo-router";
-import { useLayoutEffect } from "react";
+
+import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
 
 export default function InvoicesPlaceholder() {
-  const navigation = useNavigation();
-  useLayoutEffect(() => {
-    navigation.setOptions({ title: "Invoices" });
-  }, [navigation]);
+  const bottomPad = useTabScreenBottomPadding();
   return (
-    <View className="flex-1 items-center justify-center bg-neutral-950 px-6">
+    <View
+      className="flex-1 items-center justify-center bg-neutral-950 px-6"
+      style={{ paddingBottom: bottomPad }}
+    >
       <Text className="text-center text-base text-neutral-400">
-        Invoices — mirrors web invoicing and stock rules. Build mobile invoice flows here.
+        Create and track bills and payments. This section is coming soon.
       </Text>
     </View>
   );

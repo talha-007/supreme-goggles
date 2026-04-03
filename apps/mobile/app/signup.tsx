@@ -69,7 +69,7 @@ export default function SignupScreen() {
 
           <Text className="text-3xl font-bold text-neutral-100">Create account</Text>
           <Text className="mt-2 text-base text-neutral-500">
-            Same sign-up as the web app — email and password
+            Create your account with email and password
           </Text>
 
           <View className="mt-8">

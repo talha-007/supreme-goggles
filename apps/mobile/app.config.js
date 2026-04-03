@@ -10,7 +10,7 @@ module.exports = ({ config }) => ({
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
       process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ??
       "",
-    /** Same as web — used for sign-up email confirmation redirect */
+    /** Base URL for sign-up email confirmation links */
     siteUrl:
       process.env.NEXT_PUBLIC_SITE_URL ??
       process.env.EXPO_PUBLIC_SITE_URL ??

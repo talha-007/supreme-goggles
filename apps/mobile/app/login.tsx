@@ -32,12 +32,11 @@ export default function LoginScreen() {
     setError(null);
     setLoading(true);
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
     if (err) {
+      setLoading(false);
       setError(err.message);
       return;
     }
-    router.replace("/");
   };
 
   return (

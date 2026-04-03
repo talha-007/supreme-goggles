@@ -62,7 +62,7 @@ export default function OnboardingScreen() {
         >
           <Text className="text-2xl font-semibold text-neutral-100">Your business</Text>
           <Text className="mt-1 text-sm text-neutral-500">
-            Same onboarding as the web app — create your business and owner membership.
+            Add your store name and type to finish setup.
           </Text>
 
           <View className="mt-8">
@@ -103,7 +103,7 @@ export default function OnboardingScreen() {
             </Text>
           ) : null}
 
-          <PrimaryButton label="Continue to dashboard" onPress={onSubmit} loading={loading} />
+          <PrimaryButton label="Continue" onPress={onSubmit} loading={loading} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

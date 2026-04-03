@@ -27,7 +27,10 @@ export default function AuthCallbackScreen() {
       const { data } = await supabase.auth.getSession();
       if (!alive) return;
       if (data.session) {
-        router.replace("/");
+        /** Let AuthProvider commit session before (app) layout reads useAuth(). */
+        setTimeout(() => {
+          router.replace("/dashboard");
+        }, 0);
       } else {
         router.replace("/login");
       }
