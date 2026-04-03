@@ -183,6 +183,7 @@
     "creatingAccount": "Creating account…",
     "checkEmail": "Check your email to confirm your account, then sign in.",
     "authError": "Could not complete sign-in. Confirm the redirect URL {callback} is listed in Supabase → Authentication → URL configuration.",
+    "pkceError": "This confirmation link is invalid or was opened in a different browser than the one that started an older sign-up. Request a new confirmation email from sign-in, or sign up again — then open the new link in any browser.",
     "callbackPath": "/auth/callback"
   },
   "onboarding": {

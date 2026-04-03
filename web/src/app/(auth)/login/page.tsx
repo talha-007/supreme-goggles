@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; details?: string }>;
+  searchParams: Promise<{ error?: string; details?: string; reason?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -38,7 +38,9 @@ export default async function LoginPage({
       <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("signInSubtitle")}</p>
       {params.error === "auth" ? (
         <p className="mt-4 text-sm text-red-600 dark:text-red-400" role="alert">
-          {t("authError", { callback: t("callbackPath") })}
+          {params.reason === "crossdevice"
+            ? t("pkceError")
+            : t("authError", { callback: t("callbackPath") })}
         </p>
       ) : null}
       {params.error === "oauth" && params.details ? (

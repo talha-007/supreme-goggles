@@ -183,6 +183,7 @@
     "creatingAccount": "اکاؤنٹ بن رہا ہے…",
     "checkEmail": "تصدیق کے لیے ای میل دیکھیں، پھر سائن اِن کریں۔",
     "authError": "سائن اِن مکمل نہیں ہوا۔ چیک کریں کہ {callback} Supabase → Authentication → URL میں ہے۔",
+    "pkceError": "یہ تصدیقی لنک ختم ہو چکا یا پرانے سائن اپ کا ہے۔ نیا تصدیقی ای میل مانگیں یا دوبارہ سائن اپ کریں — نئے لنک کو کسی بھی براؤزر میں کھول سکتے ہیں۔",
     "callbackPath": "/auth/callback"
   },
   "onboarding": {

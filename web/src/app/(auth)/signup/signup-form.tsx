@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
+import { createSignUpClient } from "@/lib/supabase/signup-client";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
@@ -18,7 +18,7 @@ export function SignupForm() {
     setError(null);
     setMessage(null);
     setLoading(true);
-    const supabase = createClient();
+    const supabase = createSignUpClient();
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
     const { error: err } = await supabase.auth.signUp({
       email,

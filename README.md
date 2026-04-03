@@ -1,6 +1,25 @@
-# Web app (Next.js + Supabase)
+# Supreme Goggles
 
-## Setup
+Retail stack: **Next.js** (`web/`) + **Expo** POS (`apps/pos-mobile/`). Shared **Supabase** project.
+
+## Mobile POS (Expo)
+
+```bash
+cd apps/pos-mobile
+cp .env.example .env   # same Supabase URL + anon key as web (EXPO_PUBLIC_*)
+npm install
+npx expo start
+```
+
+See [`apps/pos-mobile/README.md`](apps/pos-mobile/README.md) and [`docs/POS_REACT_NATIVE_GUIDE.md`](docs/POS_REACT_NATIVE_GUIDE.md).
+
+Optional — npm workspaces from repo root: `npm install` then `npm run pos` (see root [`package.json`](package.json)).
+
+---
+
+## Web app (Next.js + Supabase)
+
+### Setup
 
 1. Copy environment variables:
 

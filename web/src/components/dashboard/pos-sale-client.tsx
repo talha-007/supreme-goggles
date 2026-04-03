@@ -97,8 +97,10 @@ export function PosSaleClient({
     [locale],
   );
 
-  const [now, setNow] = useState(() => new Date());
+  /** `null` until mount so server + first client paint match (avoids hydration mismatch on time). */
+  const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
+    setNow(new Date());
     const t = window.setInterval(() => setNow(new Date()), 30000);
     return () => window.clearInterval(t);
   }, []);
@@ -349,16 +351,18 @@ export function PosSaleClient({
     }
   }
 
-  const dateStr = now.toLocaleDateString(intlLocaleTag(locale), {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-  const timeStr = now.toLocaleTimeString(intlLocaleTag(locale), {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const dateStr =
+    now?.toLocaleDateString(intlLocaleTag(locale), {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }) ?? "—";
+  const timeStr =
+    now?.toLocaleTimeString(intlLocaleTag(locale), {
+      hour: "2-digit",
+      minute: "2-digit",
+    }) ?? "—";
 
   const showMobileCartBar = lines.length > 0 && mobileTab === "menu";
 
