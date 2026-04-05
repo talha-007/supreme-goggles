@@ -20,7 +20,7 @@ export function SignupForm() {
     setLoading(true);
     const supabase = createSignUpClient();
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
-    const { error: err } = await supabase.auth.signUp({
+    const { data, error: err } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -29,7 +29,22 @@ export function SignupForm() {
     });
     setLoading(false);
     if (err) {
-      setError(err.message);
+      const m = err.message.toLowerCase();
+      if (
+        m.includes("already") ||
+        m.includes("registered") ||
+        m.includes("exists") ||
+        m.includes("user already")
+      ) {
+        setError(t("emailAlreadyRegistered"));
+      } else {
+        setError(err.message);
+      }
+      return;
+    }
+    // Supabase often returns 200 with no user for existing emails (anti–email-enumeration).
+    if (!data.user) {
+      setError(t("emailAlreadyRegistered"));
       return;
     }
     setMessage(t("checkEmail"));
