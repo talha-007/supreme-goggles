@@ -1,19 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { PurchaseOrderStatus } from "../types/purchase";
+import type { ProductUnit } from "../types/product";
 
-/** Matches DB enum `product_unit` (same as web). */
-export const PRODUCT_UNITS = [
-  "pcs",
-  "kg",
-  "g",
-  "dozen",
-  "ltr",
-  "mtr",
-  "box",
-] as const;
-
-export type ProductUnit = (typeof PRODUCT_UNITS)[number];
+export { PRODUCT_UNITS, type ProductUnit } from "../types/product";
 
 function roundMoney(n: number): number {
   return Math.round(n * 100) / 100;

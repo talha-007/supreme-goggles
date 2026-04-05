@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { router, useNavigation } from "expo-router";
 
@@ -31,13 +32,15 @@ export default function DashboardScreen() {
     monthSales: number;
     outstanding: number;
   } | null>(null);
+  const statsRef = useRef(stats);
+  statsRef.current = stats;
 
   const load = useCallback(async () => {
     if (!businessId || !user) {
       setLoading(false);
       return;
     }
-    setLoading(true);
+    if (statsRef.current === null) setLoading(true);
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -138,9 +141,15 @@ export default function DashboardScreen() {
     });
   }, [navigation]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useLayoutEffect(() => {
+    setStats(null);
+  }, [businessId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+    }, [load]),
+  );
 
   if (loading || !stats) {
     return (
@@ -159,6 +168,23 @@ export default function DashboardScreen() {
       <Text className="text-base text-neutral-200">
         Sales, stock, and purchasing at a glance.
       </Text>
+
+      <Pressable
+        onPress={() => router.push("/quick-sale")}
+        className="mt-6 rounded-2xl border border-emerald-600/40 bg-emerald-950/35 px-4 py-4 active:opacity-90"
+        accessibilityRole="button"
+        accessibilityLabel="Open quick sale"
+      >
+        <View className="flex-row items-center justify-between gap-3">
+          <View className="min-w-0 flex-1">
+            <Text className="text-base font-semibold text-emerald-300">Quick sale</Text>
+            <Text className="mt-1 text-sm leading-5 text-neutral-400">
+              Search products, tap to add, complete cash sale — receipt ready to share or print.
+            </Text>
+          </View>
+          <Text className="text-2xl text-emerald-400">→</Text>
+        </View>
+      </Pressable>
 
       <View className="mt-6 flex-row flex-wrap gap-3">
         <StatCard label="Today (sales)" value={pkr.format(stats.todaySales)} />

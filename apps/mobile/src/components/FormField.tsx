@@ -8,6 +8,7 @@ type Props = {
   secureTextEntry?: boolean;
   keyboardType?: "default" | "email-address" | "phone-pad" | "decimal-pad" | "numeric";
   autoCapitalize?: "none" | "sentences";
+  multiline?: boolean;
 };
 
 export function FormField({
@@ -18,6 +19,7 @@ export function FormField({
   secureTextEntry,
   keyboardType = "default",
   autoCapitalize = "none",
+  multiline = false,
 }: Props) {
   return (
     <View className="mb-4">
@@ -31,7 +33,11 @@ export function FormField({
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         autoCorrect={false}
-        className="rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3.5 text-base text-neutral-100"
+        multiline={multiline}
+        textAlignVertical={multiline ? "top" : "center"}
+        className={`rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3.5 text-base text-neutral-100 ${
+          multiline ? "min-h-[88px]" : ""
+        }`}
       />
     </View>
   );

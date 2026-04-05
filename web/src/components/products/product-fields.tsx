@@ -1,7 +1,9 @@
+"use client";
+
 import { ProductBarcodeField } from "@/components/products/product-barcode-field";
 import { PRODUCT_UNITS } from "@/types/product";
 import type { ProductRow } from "@/types/product";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 type Props = {
@@ -14,13 +16,13 @@ type Props = {
   scanMode?: boolean;
 };
 
-export async function ProductFields({
+export function ProductFields({
   defaultValues,
   existingImageUrl,
   barcodeFromUrl,
   scanMode = false,
 }: Props) {
-  const t = await getTranslations("productFields");
+  const t = useTranslations("productFields");
   const d = defaultValues ?? {};
   const barcodeValue = d.barcode ?? barcodeFromUrl ?? "";
 

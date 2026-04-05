@@ -15,18 +15,23 @@ function supabaseImageHostname(): string | null {
 
 const host = supabaseImageHostname();
 
-/** Hostnames only (no protocol/port). Unblocks dev HMR when opening the app via your LAN IP. */
 const allowedDevOrigins = [
   "localhost",
   "127.0.0.1",
   "192.168.18.37",
-  ...(process.env.NEXT_DEV_LAN_HOST?.split(",")
-    .map((s) => s.trim())
-    .filter(Boolean) ?? []),
+  "tnrgq2zp-3000.inc1.devtunnels.ms",
 ];
 
 const nextConfig: NextConfig = {
   allowedDevOrigins,
+
+  // ✅ THIS IS THE IMPORTANT FIX
+  experimental: {
+    serverActions: {
+      allowedOrigins: ["*"], // 🔥 quick fix
+    },
+  },
+
   ...(host
     ? {
         images: {

@@ -2,6 +2,16 @@ require("dotenv").config({ path: ".env" });
 
 module.exports = ({ config }) => ({
   ...config,
+  plugins: [
+    ...(config.plugins ?? []),
+    [
+      "expo-image-picker",
+      {
+        photosPermission: "Allow POS Mobile to access your photos for product images.",
+        cameraPermission: "Allow POS Mobile to take photos for product images.",
+      },
+    ],
+  ],
   extra: {
     ...config.extra,
     supabaseUrl:
