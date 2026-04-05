@@ -37,6 +37,7 @@ function normalizeProduct(row: Record<string, unknown>): ProductRow {
     sku: row.sku != null ? String(row.sku) : null,
     barcode: row.barcode != null ? String(row.barcode) : null,
     category: row.category != null ? String(row.category) : null,
+    brand: row.brand != null ? String(row.brand) : null,
     description: row.description != null ? String(row.description) : null,
     unit: (String(row.unit ?? "pcs") || "pcs") as ProductUnit,
     purchase_price: Number(row.purchase_price),
@@ -80,6 +81,8 @@ export default function ProductsScreen() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
+  const [category, setCategory] = useState("");
+  const [brand, setBrand] = useState("");
   const [unit, setUnit] = useState<ProductUnit>("pcs");
   const [salePrice, setSalePrice] = useState("");
   const [purchasePrice, setPurchasePrice] = useState("");
@@ -139,6 +142,8 @@ export default function ProductsScreen() {
             setEditingId(null);
             setName("");
             setSku("");
+            setCategory("");
+            setBrand("");
             setUnit("pcs");
             setSalePrice("");
             setPurchasePrice("");
@@ -174,6 +179,8 @@ export default function ProductsScreen() {
     setEditingId(p.id);
     setName(p.name);
     setSku(p.sku ?? "");
+    setCategory(p.category ?? "");
+    setBrand(p.brand ?? "");
     setUnit(p.unit);
     setSalePrice(String(p.sale_price));
     setPurchasePrice(String(p.purchase_price));
@@ -244,7 +251,8 @@ export default function ProductsScreen() {
       name: n,
       sku: sku.trim() || null,
       barcode: null,
-      category: null,
+      category: category.trim() || null,
+      brand: brand.trim() || null,
       description: null,
       unit,
       purchase_price: roundMoney(purchase),
@@ -542,6 +550,20 @@ export default function ProductsScreen() {
                 placeholder="Unique in your store"
                 autoCapitalize="none"
               />
+              <FormField
+                label="Category (optional)"
+                value={category}
+                onChangeText={setCategory}
+                placeholder="e.g. Beverages"
+                autoCapitalize="words"
+              />
+              <FormField
+                label="Brand (optional)"
+                value={brand}
+                onChangeText={setBrand}
+                placeholder="e.g. Nestlé"
+                autoCapitalize="words"
+              />
               <Text className="mb-2 text-sm font-medium text-neutral-300">Unit</Text>
               <ScrollView
                 horizontal
@@ -667,6 +689,7 @@ export default function ProductsScreen() {
                   <DetailRow label="SKU" value={detail.sku ?? "—"} />
                   <DetailRow label="Barcode" value={detail.barcode ?? "—"} />
                   <DetailRow label="Category" value={detail.category ?? "—"} />
+                  <DetailRow label="Brand" value={detail.brand ?? "—"} />
                   <DetailRow label="Sale price" value={formatPkr(detail.sale_price)} />
                   <DetailRow label="Purchase price" value={formatPkr(detail.purchase_price)} />
                 </View>

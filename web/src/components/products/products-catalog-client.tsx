@@ -308,11 +308,13 @@ export function ProductsCatalogClient({
             aria-hidden
           />
         ) : null}
-        <table className="w-full min-w-[640px] text-left text-sm">
+        <table className="w-full min-w-[880px] text-left text-sm">
           <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
             <tr>
               <th className="w-14 px-4 py-3">{tp("colPhoto")}</th>
               <th className="px-4 py-3">{tp("colName")}</th>
+              <th className="px-4 py-3">{tp("colCategory")}</th>
+              <th className="px-4 py-3">{tp("colBrand")}</th>
               <th className="px-4 py-3">{tc("sku")}</th>
               <th className="px-4 py-3">{tc("barcode")}</th>
               <th className="px-4 py-3">{tc("unit")}</th>
@@ -326,7 +328,7 @@ export function ProductsCatalogClient({
             {loading && products.length === 0 ? (
               <tr>
                 <td
-                  colSpan={canEdit ? 9 : 8}
+                  colSpan={canEdit ? 11 : 10}
                   className="px-4 py-10 text-center text-zinc-500 dark:text-zinc-400"
                 >
                   {tp("loadingRows")}
@@ -335,7 +337,7 @@ export function ProductsCatalogClient({
             ) : !loading && products.length === 0 ? (
               <tr>
                 <td
-                  colSpan={canEdit ? 9 : 8}
+                  colSpan={canEdit ? 11 : 10}
                   className="px-4 py-10 text-center text-zinc-500 dark:text-zinc-400"
                 >
                   {lowStockOnly
@@ -368,6 +370,12 @@ export function ProductsCatalogClient({
                       )}
                     </td>
                     <td className="px-4 py-3 font-medium">{p.name}</td>
+                    <td className="max-w-[8rem] truncate px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                      {p.category?.trim() ? p.category : tc("dash")}
+                    </td>
+                    <td className="max-w-[8rem] truncate px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                      {p.brand?.trim() ? p.brand : tc("dash")}
+                    </td>
                     <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{p.sku ?? tc("dash")}</td>
                     <td className="px-4 py-3 font-mono text-xs text-zinc-600 dark:text-zinc-400">
                       {p.barcode ?? tc("dash")}

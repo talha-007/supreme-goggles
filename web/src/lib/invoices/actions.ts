@@ -300,7 +300,7 @@ export async function finalizeInvoiceCash(
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/invoices");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
-  redirect(`/dashboard/invoices/${invoiceId}`);
+  redirect(`/dashboard/invoices/${invoiceId}?print=1`);
 }
 
 /** One step: save lines + finalize as unpaid (stock moves). For rush / credit sales. */

@@ -127,6 +127,7 @@ export function PosSaleClient({
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [categoryKey, setCategoryKey] = useState<string>("all");
+  const [brandKey, setBrandKey] = useState<string>("all");
 
   useEffect(() => {
     const sq = sanitizeProductSearchQuery(q);
@@ -174,13 +175,33 @@ export function PosSaleClient({
     return ["all", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [initialCatalogProducts]);
 
+  const brandCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: initialCatalogProducts.length };
+    for (const p of initialCatalogProducts) {
+      const k = p.brand?.trim() || NONE_KEY;
+      counts[k] = (counts[k] ?? 0) + 1;
+    }
+    return counts;
+  }, [initialCatalogProducts]);
+
+  const brandKeys = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of initialCatalogProducts) {
+      set.add(p.brand?.trim() || NONE_KEY);
+    }
+    return ["all", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+  }, [initialCatalogProducts]);
+
   const filteredGrid = useMemo(() => {
-    if (categoryKey === "all") return displayedProducts;
-    return displayedProducts.filter((p) => {
-      const k = p.category?.trim() || NONE_KEY;
-      return k === categoryKey;
-    });
-  }, [displayedProducts, categoryKey]);
+    let list = displayedProducts;
+    if (categoryKey !== "all") {
+      list = list.filter((p) => (p.category?.trim() || NONE_KEY) === categoryKey);
+    }
+    if (brandKey !== "all") {
+      list = list.filter((p) => (p.brand?.trim() || NONE_KEY) === brandKey);
+    }
+    return list;
+  }, [displayedProducts, categoryKey, brandKey]);
 
   const productById = useMemo(() => {
     const m = new Map<string, ProductRow>();
@@ -209,11 +230,6 @@ export function PosSaleClient({
     if (!Number.isFinite(r) || r + 0.001 < total) return null;
     return Math.round((r - total) * 100) / 100;
   }, [cashReceived, previewTotals.total]);
-
-  const customerName = useMemo(() => {
-    if (!customerId) return tp("walkInCustomer");
-    return customers.find((c) => c.id === customerId)?.name ?? tp("walkInCustomer");
-  }, [customerId, customers, tp]);
 
   const addProduct = useCallback(
     (p: ProductRow) => {
@@ -257,6 +273,16 @@ export function PosSaleClient({
 
   function removeLine(i: number) {
     setLines((prev) => prev.filter((_, j) => j !== i));
+  }
+
+  function updateLineUnitPrice(i: number, raw: string) {
+    setLines((prev) => {
+      const next = [...prev];
+      const v = Number(String(raw).replace(/,/g, ""));
+      if (!Number.isFinite(v) || v < 0) return prev;
+      next[i] = { ...next[i]!, unit_price: Math.round(v * 100) / 100 };
+      return next;
+    });
   }
 
   function buildInput(): SaveDraftInput {
@@ -368,7 +394,7 @@ export function PosSaleClient({
 
   return (
     <div
-      className={`relative flex flex-col gap-4 xl:flex-row xl:items-stretch xl:gap-6 ${showMobileCartBar ? "max-xl:pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))]" : ""}`}
+      className={`relative flex flex-col gap-4 xl:pb-28 xl:pt-0 ${showMobileCartBar ? "max-xl:pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))]" : ""}`}
     >
       <div
         className="sticky top-0 z-20 flex gap-1 rounded-2xl border border-zinc-200/90 bg-white/95 p-1 shadow-sm backdrop-blur-md dark:border-zinc-700 dark:bg-zinc-900/95 xl:hidden"
@@ -412,11 +438,69 @@ export function PosSaleClient({
         </button>
       </div>
 
+      <div className="mb-0 hidden gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-4 xl:grid xl:grid-cols-[minmax(200px,280px)_1fr_auto] xl:items-center">
+        <div className="flex min-w-0 items-center gap-2">
+          <label htmlFor="pos-customer-top" className="sr-only">
+            {ti("customer")}
+          </label>
+          <select
+            id="pos-customer-top"
+            value={customerId}
+            onChange={(e) => setCustomerId(e.target.value)}
+            className="min-h-[44px] min-w-0 flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          >
+            <option value="">{ti("walkInOption")}</option>
+            {customers.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <Link
+            href="/dashboard/customers/new"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-lg font-semibold leading-none text-white shadow-sm hover:bg-blue-700"
+            title={tp("addCustomer")}
+          >
+            +
+          </Link>
+        </div>
+        <div className="relative min-w-0">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </span>
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={onSearchKeyDown}
+            placeholder={tp("searchPlaceholder")}
+            autoComplete="off"
+            enterKeyHint="search"
+            aria-label={tp("posTopSearchHint")}
+            className="min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50/80 py-2.5 pl-11 pr-4 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:bg-white focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:bg-zinc-950"
+          />
+          {loading ? (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">{tp("searching")}</span>
+          ) : null}
+        </div>
+        <p className="hidden text-end text-xs text-zinc-500 dark:text-zinc-400 xl:block">
+          {dateStr} · {timeStr}
+        </p>
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col gap-4 xl:flex-row xl:items-stretch xl:gap-6">
       <div
-        className={`min-h-0 min-w-0 flex-1 xl:max-w-none ${mobileTab === "menu" ? "block" : "hidden xl:block"}`}
+        className={`min-h-0 min-w-0 flex-1 xl:order-2 xl:max-w-none ${mobileTab === "menu" ? "block" : "hidden xl:block"}`}
       >
-        <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
+        <div className="flex h-full min-h-0 flex-col gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-5 xl:min-h-[min(100vh-11rem,780px)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800 xl:hidden">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
                 {tp("catalogTitle")}
@@ -430,7 +514,18 @@ export function PosSaleClient({
             </span>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="hidden items-center justify-between gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800 xl:flex">
+            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{tp("catalogTitle")}</p>
+            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-950/50 dark:text-blue-200">
+              {tp("openSale")}
+            </span>
+          </div>
+
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 xl:mb-2">
+              {tp("categoryFilter")}
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {categoryKeys.map((key) => {
               const active = categoryKey === key;
               const count = categoryCounts[key] ?? 0;
@@ -455,8 +550,40 @@ export function PosSaleClient({
               );
             })}
           </div>
+          </div>
 
-          <div className="relative">
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 xl:mb-2">
+              {tp("brandFilter")}
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {brandKeys.map((key) => {
+                const active = brandKey === key;
+                const count = brandCounts[key] ?? 0;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setBrandKey(key)}
+                    className={`flex min-h-[44px] min-w-[7.5rem] shrink-0 touch-manipulation flex-col rounded-2xl border px-3 py-2.5 text-left transition active:scale-[0.98] ${
+                      active
+                        ? "border-violet-500 bg-violet-50 shadow-sm dark:border-violet-500 dark:bg-violet-950/40"
+                        : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+                    }`}
+                  >
+                    <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-50">
+                      {key === "all" ? tp("allMenu") : categoryLabel(key, tp)}
+                    </span>
+                    <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                      {tp("itemsCount", { count })}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="relative xl:hidden">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                 <path
@@ -500,13 +627,14 @@ export function PosSaleClient({
             </p>
           ) : null}
 
-          <div className="relative min-h-[200px] sm:min-h-[280px]">
+          <div className="relative min-h-[200px] flex-1 sm:min-h-[280px] xl:min-h-0">
             {loading ? (
               <div className="pointer-events-none absolute inset-0 z-10 rounded-xl bg-white/50 dark:bg-zinc-950/50" />
             ) : null}
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
+            <div className="grid max-h-[min(52vh,560px)] grid-cols-2 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-3 sm:gap-3 xl:max-h-[min(calc(100vh-16rem),640px)] lg:grid-cols-4">
               {filteredGrid.map((p) => {
                 const cat = p.category?.trim() || tp("uncategorized");
+                const br = p.brand?.trim() || null;
                 const out = p.current_stock <= 0;
                 return (
                   <button
@@ -539,13 +667,29 @@ export function PosSaleClient({
                       <span className="line-clamp-2 text-sm font-medium leading-snug text-zinc-900 dark:text-zinc-50">
                         {p.name}
                       </span>
-                      <span
-                        className={`inline-flex w-fit rounded-md px-1.5 py-0.5 text-[10px] font-medium ${tagClassForCategory(cat)}`}
-                      >
-                        {cat}
-                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        <span
+                          className={`inline-flex w-fit rounded-md px-1.5 py-0.5 text-[10px] font-medium ${tagClassForCategory(cat)}`}
+                        >
+                          {cat}
+                        </span>
+                        {br ? (
+                          <span className="inline-flex w-fit rounded-md border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-700 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                            {br}
+                          </span>
+                        ) : null}
+                      </div>
                       <span className="mt-auto pt-1 text-right text-sm font-semibold tabular-nums text-blue-700 dark:text-blue-300">
                         {pkr.format(p.sale_price)}
+                      </span>
+                      <span className="text-[10px] leading-tight text-zinc-500 dark:text-zinc-400">
+                        {tp("stockLine", {
+                          qty: p.current_stock.toLocaleString(intlLocaleTag(locale), {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 2,
+                          }),
+                          unit: p.unit,
+                        })}
                       </span>
                     </div>
                   </button>
@@ -560,13 +704,13 @@ export function PosSaleClient({
       </div>
 
       <aside
-        className={`flex w-full shrink-0 flex-col xl:sticky xl:top-4 xl:w-[min(100%,380px)] xl:self-start ${mobileTab === "cart" ? "block" : "hidden xl:block"}`}
+        className={`flex w-full shrink-0 flex-col xl:sticky xl:top-4 xl:order-1 xl:w-[min(100%,460px)] xl:self-start ${mobileTab === "cart" ? "block" : "hidden xl:block"}`}
       >
-        <div className="flex min-h-0 w-full flex-col rounded-2xl border border-zinc-200/80 bg-white shadow-lg shadow-zinc-200/50 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-black/40 xl:min-h-[min(100vh-8rem,720px)]">
-          <div className="border-b border-zinc-100 px-3 py-3 sm:px-4 sm:py-4 dark:border-zinc-800">
+        <div className="flex min-h-0 w-full max-w-full flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-lg shadow-zinc-200/50 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-black/40 max-xl:max-h-[min(92dvh,840px)] xl:min-h-[min(100vh-8rem,720px)]">
+          <div className="shrink-0 border-b border-zinc-100 px-3 py-3 sm:px-4 sm:py-3 dark:border-zinc-800">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{customerName}</p>
+                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{tp("cartTitle")}</p>
                 <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
                   {invoiceId ? tp("orderSaved") : tp("newOrder")}
                 </p>
@@ -586,93 +730,192 @@ export function PosSaleClient({
                 </svg>
               </Link>
             </div>
-            <label className="mt-3 block text-xs font-medium text-zinc-500 dark:text-zinc-400">{ti("customer")}</label>
-            <select
-              value={customerId}
-              onChange={(e) => setCustomerId(e.target.value)}
-              className="mt-1 min-h-[48px] w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-base text-zinc-900 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-            >
-              <option value="">{ti("walkInOption")}</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col border-b border-dashed border-zinc-200 dark:border-zinc-700 max-xl:max-h-[38vh] xl:max-h-none">
+          <div className="flex min-h-0 flex-1 flex-col border-b border-dashed border-zinc-200 dark:border-zinc-700 max-xl:max-h-[min(36vh,280px)] xl:min-h-0 xl:max-h-none">
             <div className="flex items-center justify-between px-3 py-2 sm:px-4">
               <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                {tp("cartTitle")}
+                {ti("linesTitle")}
               </span>
               <span className="text-xs tabular-nums text-zinc-500">{lines.length}</span>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-2 [-webkit-overflow-scrolling:touch]">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-2 [-webkit-overflow-scrolling:touch] xl:px-3">
               {lines.length === 0 ? (
                 <p className="px-2 py-8 text-center text-sm text-zinc-400 dark:text-zinc-500">{tp("noItems")}</p>
               ) : (
-                <ul className="flex flex-col gap-2">
-                  {lines.map((line, i) => {
-                    const img = line.product_id ? productById.get(line.product_id)?.image_url : null;
-                    const lt = lineTotal(line.quantity, line.unit_price, line.discount_pct);
-                    return (
-                      <li
-                        key={`${line.product_id ?? "x"}-${i}`}
-                        className="flex items-center gap-2 rounded-xl border border-zinc-100 bg-zinc-50/80 px-2 py-2 dark:border-zinc-800 dark:bg-zinc-900/50"
-                      >
-                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
-                          {img ? (
-                            <Image src={img} alt="" fill className="object-cover" sizes="48px" />
-                          ) : (
-                            <div className="flex h-full items-center justify-center text-xs font-semibold text-zinc-500">
-                              {line.product_name.slice(0, 1)}
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">{line.product_name}</p>
-                          <p className="text-xs text-zinc-500">
-                            {pkr.format(line.unit_price)} × {line.quantity}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-0.5 sm:gap-1">
-                          <button
-                            type="button"
-                            onClick={() => updateLineQty(i, -1)}
-                            className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100 dark:border-zinc-600 dark:hover:bg-zinc-800"
+                <>
+                  <table className="hidden w-full table-fixed border-collapse text-left text-sm xl:table">
+                    <colgroup>
+                      <col className="min-w-0" />
+                      <col className="w-[7.75rem]" />
+                      <col className="w-[5.75rem]" />
+                      <col className="w-[4.75rem]" />
+                      <col className="w-8" />
+                    </colgroup>
+                    <thead>
+                      <tr className="border-b border-zinc-200 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:border-zinc-700">
+                        <th className="min-w-0 py-2 pe-2">{ti("colProduct")}</th>
+                        <th className="py-2 pe-1">{ti("colQty")}</th>
+                        <th className="py-2 pe-1">{ti("colPrice")}</th>
+                        <th className="py-2 pe-1">{ti("colLine")}</th>
+                        <th className="py-2 text-end" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {lines.map((line, i) => {
+                        const img = line.product_id ? productById.get(line.product_id)?.image_url : null;
+                        const lt = lineTotal(line.quantity, line.unit_price, line.discount_pct);
+                        return (
+                          <tr
+                            key={`${line.product_id ?? "x"}-${i}`}
+                            className="border-b border-zinc-100 dark:border-zinc-800"
                           >
-                            −
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => updateLineQty(i, 1)}
-                            className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100 dark:border-zinc-600 dark:hover:bg-zinc-800"
-                          >
-                            +
-                          </button>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
-                            {lt.toFixed(2)}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => removeLine(i)}
-                            className="text-[11px] text-red-600 hover:underline dark:text-red-400"
-                          >
-                            {tp("removeLine")}
-                          </button>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
+                            <td className="min-w-0 overflow-hidden align-middle py-2 pe-2">
+                              <div className="flex min-w-0 items-center gap-2">
+                                <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-md bg-zinc-200 dark:bg-zinc-800">
+                                  {img ? (
+                                    <Image src={img} alt="" fill className="object-cover" sizes="36px" />
+                                  ) : (
+                                    <div className="flex h-full items-center justify-center text-[10px] font-semibold text-zinc-500">
+                                      {line.product_name.slice(0, 1)}
+                                    </div>
+                                  )}
+                                </div>
+                                <span className="line-clamp-2 text-xs font-medium leading-snug text-zinc-900 dark:text-zinc-50">
+                                  {line.product_name}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="w-[7.75rem] min-w-[7.75rem] max-w-[7.75rem] overflow-hidden align-middle py-2 pe-1">
+                              <div className="flex items-center justify-center gap-0.5">
+                                <button
+                                  type="button"
+                                  onClick={() => updateLineQty(i, -1)}
+                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:hover:bg-zinc-800"
+                                >
+                                  −
+                                </button>
+                                <span className="min-w-[1.25rem] shrink-0 text-center text-xs tabular-nums">{line.quantity}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => updateLineQty(i, 1)}
+                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:hover:bg-zinc-800"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </td>
+                            <td className="w-[5.75rem] min-w-[5.75rem] max-w-[5.75rem] overflow-hidden align-middle py-2 pe-1">
+                              <input
+                                type="number"
+                                inputMode="decimal"
+                                min={0}
+                                step="0.01"
+                                value={line.unit_price}
+                                onChange={(e) => updateLineUnitPrice(i, e.target.value)}
+                                className="box-border h-8 w-full min-w-0 max-w-full rounded-md border border-zinc-300 bg-zinc-50 px-1.5 py-0 text-end text-xs tabular-nums text-zinc-900 shadow-none outline-none ring-0 transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-blue-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield] [-moz-appearance:textfield]"
+                              />
+                            </td>
+                            <td className="w-[4.75rem] min-w-[4.75rem] max-w-[4.75rem] overflow-hidden align-middle py-2 pe-1 text-xs font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
+                              {lt.toFixed(2)}
+                            </td>
+                            <td className="w-8 min-w-8 max-w-8 overflow-hidden align-middle py-2 text-end">
+                              <button
+                                type="button"
+                                onClick={() => removeLine(i)}
+                                className="rounded p-1 text-lg leading-none text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+                                aria-label={tp("removeLine")}
+                              >
+                                ×
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  <ul className="flex flex-col gap-2 xl:hidden">
+                    {lines.map((line, i) => {
+                      const img = line.product_id ? productById.get(line.product_id)?.image_url : null;
+                      const lt = lineTotal(line.quantity, line.unit_price, line.discount_pct);
+                      return (
+                        <li
+                          key={`${line.product_id ?? "x"}-${i}`}
+                          className="flex items-center gap-2 rounded-xl border border-zinc-100 bg-zinc-50/80 px-2 py-2 dark:border-zinc-800 dark:bg-zinc-900/50"
+                        >
+                          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
+                            {img ? (
+                              <Image src={img} alt="" fill className="object-cover" sizes="48px" />
+                            ) : (
+                              <div className="flex h-full items-center justify-center text-xs font-semibold text-zinc-500">
+                                {line.product_name.slice(0, 1)}
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">{line.product_name}</p>
+                            <p className="text-xs text-zinc-500">
+                              {pkr.format(line.unit_price)} × {line.quantity}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-0.5 sm:gap-1">
+                            <button
+                              type="button"
+                              onClick={() => updateLineQty(i, -1)}
+                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100 dark:border-zinc-600 dark:hover:bg-zinc-800"
+                            >
+                              −
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => updateLineQty(i, 1)}
+                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100 dark:border-zinc-600 dark:hover:bg-zinc-800"
+                            >
+                              +
+                            </button>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
+                              {lt.toFixed(2)}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => removeLine(i)}
+                              className="text-[11px] text-red-600 hover:underline dark:text-red-400"
+                            >
+                              {tp("removeLine")}
+                            </button>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </>
               )}
             </div>
           </div>
 
-          <div className="space-y-2 px-3 py-3 sm:px-4">
+          <div className="shrink-0 border-t border-zinc-200 bg-white shadow-[0_-6px_24px_rgba(0,0,0,0.04)] dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-[0_-6px_24px_rgba(0,0,0,0.25)]">
+            <div className="space-y-2 px-3 py-3 sm:px-4 xl:hidden">
+              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400" htmlFor="pos-customer">
+                {ti("customer")}
+              </label>
+              <select
+                id="pos-customer"
+                value={customerId}
+                onChange={(e) => setCustomerId(e.target.value)}
+                className="min-h-[48px] w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-base text-zinc-900 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+              >
+                <option value="">{ti("walkInOption")}</option>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2 px-3 pb-3 sm:px-4">
             <div className="flex justify-between text-sm">
               <span className="text-zinc-500 dark:text-zinc-400">{tp("subtotal")}</span>
               <span className="tabular-nums font-medium text-zinc-900 dark:text-zinc-50">
@@ -701,7 +944,7 @@ export function PosSaleClient({
                 {pkr.format(previewTotals.tax)}
               </span>
             </div>
-            <div className="flex justify-between border-t border-zinc-100 pt-2 text-base dark:border-zinc-800">
+            <div className="flex justify-between border-t border-zinc-100 pt-2 text-base dark:border-zinc-800 xl:hidden">
               <span className="font-semibold text-zinc-900 dark:text-zinc-50">{tp("total")}</span>
               <span className="font-bold tabular-nums text-blue-700 dark:text-blue-300">
                 {pkr.format(previewTotals.total)}
@@ -722,9 +965,33 @@ export function PosSaleClient({
                 className="mt-1 min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-base sm:min-h-0 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900"
               />
             </div>
-          </div>
+            </div>
 
-          <div className="mt-auto space-y-3 border-t border-zinc-100 px-3 py-4 sm:px-4 dark:border-zinc-800">
+            <details className="mx-3 mb-3 rounded-xl border border-zinc-100 bg-zinc-50/50 px-3 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/30 sm:mx-4">
+              <summary className="cursor-pointer font-medium text-zinc-600 dark:text-zinc-400">{tp("moreOptions")}</summary>
+              <div className="mt-2 space-y-2">
+                <div>
+                  <label className="text-zinc-500">{ti("dueDate")}</label>
+                  <input
+                    type="date"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-900"
+                  />
+                </div>
+                <div>
+                  <label className="text-zinc-500">{ti("notes")}</label>
+                  <textarea
+                    rows={2}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-900"
+                  />
+                </div>
+              </div>
+            </details>
+
+          <div className="space-y-3 border-t border-zinc-100 px-3 py-4 sm:px-4 dark:border-zinc-800 xl:hidden">
             <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/90 px-3 py-2 dark:border-emerald-900/40 dark:bg-emerald-950/30">
               <label className="text-xs font-medium text-emerald-900 dark:text-emerald-200">{ti("cashReceived")}</label>
               <input
@@ -784,31 +1051,8 @@ export function PosSaleClient({
               </button>
             </div>
 
-            <details className="rounded-xl border border-zinc-100 bg-zinc-50/50 px-3 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/30">
-              <summary className="cursor-pointer font-medium text-zinc-600 dark:text-zinc-400">{tp("moreOptions")}</summary>
-              <div className="mt-2 space-y-2">
-                <div>
-                  <label className="text-zinc-500">{ti("dueDate")}</label>
-                  <input
-                    type="date"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-900"
-                  />
-                </div>
-                <div>
-                  <label className="text-zinc-500">{ti("notes")}</label>
-                  <textarea
-                    rows={2}
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-900"
-                  />
-                </div>
-              </div>
-            </details>
-
             <p className="text-center text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">{tp("helpHint")}</p>
+          </div>
           </div>
 
           {error ? (
@@ -818,6 +1062,85 @@ export function PosSaleClient({
           ) : null}
         </div>
       </aside>
+      </div>
+
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 hidden gap-3 border-t border-zinc-200 bg-white/95 px-4 py-3 shadow-[0_-8px_32px_rgba(0,0,0,0.1)] backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/95 xl:flex xl:flex-wrap xl:items-center xl:justify-between xl:gap-3 xl:pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:left-56"
+        role="region"
+        aria-label={tp("cartTitle")}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={save}
+            disabled={pending}
+            className="min-h-[40px] rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200"
+          >
+            {pending ? tc("saving") : ti("saveDraft")}
+          </button>
+          <button
+            type="button"
+            onClick={chargeCredit}
+            disabled={pending || lines.length === 0}
+            className="min-h-[40px] rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50 dark:border-sky-900 dark:bg-sky-950/50 dark:text-sky-100"
+          >
+            {pending ? tc("working") : ti("creditLater")}
+          </button>
+          <Link
+            href={cancelHref}
+            className="inline-flex min-h-[40px] items-center rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-100 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"
+          >
+            {ti("cancel")}
+          </Link>
+        </div>
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:justify-center">
+          <label className="sr-only" htmlFor="pos-cash-xl">
+            {ti("cashReceived")}
+          </label>
+          <input
+            id="pos-cash-xl"
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step="0.01"
+            value={cashReceived}
+            onChange={(e) => setCashReceived(e.target.value)}
+            className="h-10 w-[7.5rem] rounded-lg border border-emerald-200 bg-emerald-50/80 px-2 text-sm tabular-nums dark:border-emerald-800 dark:bg-emerald-950/30"
+          />
+          <button
+            type="button"
+            onClick={chargeCash}
+            disabled={pending || lines.length === 0}
+            className="min-h-[44px] min-w-[8rem] rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+          >
+            {pending ? tc("working") : tp("placeOrderCash")}
+          </button>
+        </div>
+        <div className="flex w-full flex-wrap items-end justify-between gap-3 sm:ms-auto sm:w-auto sm:justify-end">
+          <div className="text-end">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              {tp("totalPayable")}
+            </p>
+            <p className="text-2xl font-bold tabular-nums leading-tight text-blue-700 dark:text-blue-300">
+              {pkr.format(previewTotals.total)}
+            </p>
+          </div>
+          <Link
+            href="/dashboard/invoices"
+            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {tp("recentInvoices")}
+          </Link>
+        </div>
+      </div>
 
       {showMobileCartBar ? (
         <div

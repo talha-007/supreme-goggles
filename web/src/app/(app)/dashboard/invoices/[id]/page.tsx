@@ -1,3 +1,4 @@
+import { InvoiceAutoPrint } from "@/components/invoices/invoice-auto-print";
 import { InvoiceFinalizeButtons } from "@/components/invoices/invoice-detail-actions";
 import { InvoicePaymentForm } from "@/components/invoices/invoice-payment-form";
 import { requireBusinessContext, canManageInvoices } from "@/lib/auth/business-context";
@@ -7,6 +8,7 @@ import type { InvoiceItemRow, InvoiceRow } from "@/types/invoice";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 function paymentMethodLabel(
   tPay: Awaited<ReturnType<typeof getTranslations>>,
@@ -87,6 +89,9 @@ export default async function InvoiceDetailPage({
 
   return (
     <div className="mx-auto max-w-4xl">
+      <Suspense fallback={null}>
+        <InvoiceAutoPrint invoiceId={id} />
+      </Suspense>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Link

@@ -83,6 +83,7 @@ export async function createProductFromPoLine(
       sku: null,
       barcode: null,
       category: null,
+      brand: null,
       description: null,
       unit,
       purchase_price: roundMoney(Number(row.unit_cost)),

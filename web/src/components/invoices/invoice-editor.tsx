@@ -10,7 +10,9 @@ import {
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { invoiceTotals, lineTotal } from "@/lib/invoices/calc";
 import type { InvoiceEditorDefaults, InvoiceRow } from "@/types/invoice";
+import type { ProductRow } from "@/types/product";
 import { useLocale, useTranslations } from "next-intl";
+import { InvoiceProductCatalog } from "@/components/invoices/invoice-product-catalog";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -67,8 +69,10 @@ export function InvoiceEditor({
   invoiceDefaults = null,
   cancelHref = "/dashboard/invoices",
   firstDraftSaveBehavior = "navigate-to-edit",
+  catalogProducts = null,
 }: Props) {
   const ti = useTranslations("invoiceEditor");
+  const tpos = useTranslations("posSale");
   const tc = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
@@ -98,11 +102,23 @@ export function InvoiceEditor({
   );
   const [cashReceived, setCashReceived] = useState("");
 
+  const productListForSelect = useMemo((): ProductOption[] => {
+    if (catalogProducts && catalogProducts.length > 0) {
+      return catalogProducts.map((p) => ({
+        id: p.id,
+        name: p.name,
+        unit: p.unit,
+        sale_price: p.sale_price,
+      }));
+    }
+    return products;
+  }, [catalogProducts, products]);
+
   const productById = useMemo(() => {
     const m = new Map<string, ProductOption>();
-    products.forEach((p) => m.set(p.id, p));
+    productListForSelect.forEach((p) => m.set(p.id, p));
     return m;
-  }, [products]);
+  }, [productListForSelect]);
 
   function updateLine(i: number, patch: Partial<LineDraft>) {
     setLines((prev) => {
@@ -124,6 +140,34 @@ export function InvoiceEditor({
       product_name: p.name,
       unit: p.unit,
       unit_price: p.sale_price,
+    });
+  }
+
+  function addProductFromCatalog(p: ProductRow) {
+    if (p.current_stock <= 0) {
+      setError(tpos("outOfStock"));
+      return;
+    }
+    setError(null);
+    setLines((prev) => {
+      const idx = prev.findIndex((l) => l.product_id === p.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = { ...next[idx]!, quantity: next[idx]!.quantity + 1 };
+        return next;
+      }
+      const newLine: LineDraft = {
+        product_id: p.id,
+        product_name: p.name,
+        unit: p.unit,
+        quantity: 1,
+        unit_price: p.sale_price,
+        discount_pct: defaultLineDisc,
+      };
+      if (prev.length === 1 && !prev[0]!.product_id && !prev[0]!.product_name.trim()) {
+        return [newLine];
+      }
+      return [...prev, newLine];
     });
   }
 
@@ -307,6 +351,10 @@ export function InvoiceEditor({
         </div>
       </div>
 
+      {catalogProducts && catalogProducts.length > 0 ? (
+        <InvoiceProductCatalog products={catalogProducts} onPick={addProductFromCatalog} />
+      ) : null}
+
       <div>
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
@@ -344,7 +392,7 @@ export function InvoiceEditor({
                       className="w-full max-w-[180px] rounded border border-zinc-200 bg-white px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
                     >
                       <option value="">{ti("customManual")}</option>
-                      {products.map((p) => (
+                      {productListForSelect.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
                         </option>

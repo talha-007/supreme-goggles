@@ -13,7 +13,7 @@ export function ProductCreateForm({ barcodeFromUrl, scanMode }: CreateProps) {
   const [state, formAction, pending] = useActionState(createProduct, {} as ProductActionState);
 
   return (
-    <form action={formAction} encType="multipart/form-data" className="flex flex-col gap-6">
+    <form action={formAction} className="flex flex-col gap-6">
       <ProductFields barcodeFromUrl={barcodeFromUrl} scanMode={scanMode} />
       {state.error ? (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">

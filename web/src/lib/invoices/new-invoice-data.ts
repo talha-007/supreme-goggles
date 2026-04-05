@@ -53,7 +53,7 @@ export async function getPosCatalogProducts(): Promise<ProductRow[]> {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, business_id, name, sku, barcode, category, description, unit, purchase_price, sale_price, current_stock, reorder_level, is_active, image_url, created_at, updated_at",
+      "id, business_id, name, sku, barcode, category, brand, description, unit, purchase_price, sale_price, current_stock, reorder_level, is_active, image_url, created_at, updated_at",
     )
     .eq("business_id", ctx.businessId)
     .eq("is_active", true)

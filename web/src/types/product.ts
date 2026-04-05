@@ -20,6 +20,8 @@ export type ProductRow = {
   sku: string | null;
   barcode: string | null;
   category: string | null;
+  /** Brand / manufacturer (optional; used with category for filtering). */
+  brand: string | null;
   description: string | null;
   unit: ProductUnit;
   purchase_price: number;
