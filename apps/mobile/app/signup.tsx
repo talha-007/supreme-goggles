@@ -34,14 +34,39 @@ export default function SignupScreen() {
     setError(null);
     setMessage(null);
     setLoading(true);
-    const { error: err } = await supabase.auth.signUp({
+    const { data, error: err } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: getEmailRedirectUrl() },
     });
     setLoading(false);
     if (err) {
-      setError(err.message);
+      const m = err.message.toLowerCase();
+      if (
+        m.includes("already") ||
+        m.includes("registered") ||
+        m.includes("exists") ||
+        m.includes("user already")
+      ) {
+        setError(
+          "This email is already registered. Sign in instead, or use Forgot password if needed.",
+        );
+      } else {
+        setError(err.message);
+      }
+      return;
+    }
+    if (!data.user) {
+      setError(
+        "This email is already registered. Sign in instead, or use Forgot password if needed.",
+      );
+      return;
+    }
+    const identities = data.user.identities ?? [];
+    if (identities.length === 0) {
+      setError(
+        "This email is already registered. Sign in instead, or use Forgot password if needed.",
+      );
       return;
     }
     setMessage("Check your email to confirm your account, then sign in.");

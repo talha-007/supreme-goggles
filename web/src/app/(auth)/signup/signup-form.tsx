@@ -42,8 +42,13 @@ export function SignupForm() {
       }
       return;
     }
-    // Supabase often returns 200 with no user for existing emails (anti–email-enumeration).
+    // Anti–enumeration: duplicate email often returns user with identities: [] (see gotrue-js #513).
     if (!data.user) {
+      setError(t("emailAlreadyRegistered"));
+      return;
+    }
+    const identities = data.user.identities ?? [];
+    if (identities.length === 0) {
       setError(t("emailAlreadyRegistered"));
       return;
     }
