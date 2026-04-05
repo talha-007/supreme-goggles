@@ -38,6 +38,8 @@ type Props = {
   cancelHref?: string;
   /** After first draft save when creating a new invoice: navigate to edit page or stay and refresh. */
   firstDraftSaveBehavior?: "navigate-to-edit" | "refresh-only";
+  /** Full product rows for card grid (new invoice page). Omit on edit / minimal contexts. */
+  catalogProducts?: ProductRow[] | null;
 };
 
 function makeEmptyLine(lineDiscountPct: number): LineDraft {
