@@ -6,7 +6,12 @@ This is our working guide. We will complete items in order, verify each one, and
 
 - App build: PASS (`next build` succeeds)
 - Core stock double-deduction bug: FIXED (legacy trigger removed)
-- Remaining production blockers: database security and hardening items
+- Step 1 (invitations RLS): DONE
+- Step 2 (view hardening): DONE
+- Step 3 (function search_path): DONE
+- Step 4 (leaked password protection): ACCEPTED RISK on free tier
+- Step 5 (FK index performance): DONE
+- Remaining warnings are non-blocking and documented below.
 
 ---
 
@@ -128,18 +133,57 @@ Missing FK indexes can hurt joins/deletes/updates as data grows.
 ## Step 6 — Final Production Readiness Gate
 
 ### Checklist
-- [ ] All steps above complete
-- [ ] `next build` passes on latest commit
-- [ ] Supabase security/performance advisors reviewed and acceptable
-- [ ] Stock flows tested end-to-end:
-  - [ ] finalize cash/credit
-  - [ ] reverse invoice
-  - [ ] no double deduction
-  - [ ] inventory cost card accurate
-- [ ] Backup + rollback plan documented for DB migrations
+- [x] All steps above complete (Step 4 accepted risk)
+- [x] `next build` passes on latest commit
+- [x] Supabase security/performance advisors reviewed and acceptable
+- [x] Stock flows tested end-to-end:
+  - [x] finalize cash/credit
+  - [x] reverse invoice
+  - [x] no double deduction
+  - [x] inventory cost card accurate
+- [x] Backup + rollback plan documented for DB migrations (keep SQL snapshots of pre/post function defs and migration log)
 
 ### Go/No-Go rule
 - GO only when no high-severity security items remain and critical business flows pass.
+
+### Final Gate Result
+- **GO** for Vercel production deployment.
+
+### Accepted residual risks
+- `auth_leaked_password_protection` warning (free-tier limitation).
+- `extension_in_public` warning for `pg_trgm` (hardening improvement, not a launch blocker).
+- `auth_rls_initplan` performance warnings can be optimized post-launch.
+
+---
+
+## Go-Live Runbook (Do This Now)
+
+1. **Push latest code to main**
+   - Includes all migrations and app fixes.
+2. **Confirm DB migration history in production**
+   - Ensure latest migrations exist in Supabase migration history:
+     - `remove_legacy_invoice_stock_trigger`
+     - `invitations_rls_policies`
+     - `views_security_invoker`
+     - `functions_set_search_path_public`
+     - `business_members_invited_by_index`
+     - `fk_covering_indexes_batch`
+3. **Redeploy production on Vercel**
+   - Trigger deploy from latest commit (or click Redeploy from latest).
+4. **Smoke-test production (5–10 min)**
+   - Login, open dashboard
+   - Create invoice (cash and credit)
+   - Verify stock decreases exactly once
+   - Reverse invoice, verify stock returns once
+   - Open products page and confirm quantities
+   - Check inventory cost card updates
+5. **Post-deploy monitoring (first 30 min)**
+   - Review Supabase API/postgres logs for errors
+   - Watch for invoice/stock exceptions
+
+### Rollback quick plan
+- If app issue: rollback Vercel deployment to previous stable release.
+- If DB logic issue: apply targeted corrective migration (do not edit old migration files in-place).
 
 ---
 
