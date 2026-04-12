@@ -90,10 +90,15 @@
     "subtitle": "فروخت، اسٹاک اور خریداری ایک جگہ — دکانوں اور کاؤنٹرز کے لیے۔",
     "newInvoice": "نئی انوائس",
     "allInvoices": "تمام انوائسز",
-    "statToday": "آج (فروخت)",
-    "statTodayHint": "آج بنی حتمی انوائسز",
-    "statMonth": "یہ مہینہ",
-    "statMonthHint": "مسودے اور منسوخ نہیں",
+    "statsPeriodLabel": "فروخت کی مدت",
+    "periodToday": "آج",
+    "periodWeek": "یہ ہفتہ",
+    "periodMonth": "یہ مہینہ",
+    "periodYear": "یہ سال",
+    "statPeriodSales": "فروخت",
+    "statPeriodSalesHint": "{count} انوائسز · مسودے اور منسوخ نہیں",
+    "statInventoryCost": "انوینٹری (لاگت)",
+    "statInventoryCostHint": "موجودہ مقدار × خرید قیمت (فعال مصنوعات)",
     "statOutstanding": "باقی واجب",
     "statOutstandingHint": "غیر ادا + جزوی بیلنس",
     "statDrafts": "مسودہ انوائسز",
@@ -309,7 +314,7 @@
     "currentStock": "موجودہ اسٹاک",
     "active": "فعال",
     "activeShown": "فعال (فروخت میں دکھائیں)",
-    "taxonomyNoMatches": "کوئی مماثل نہیں۔ آپ نیا نام ٹائپ کر سکتے ہیں۔"
+    "taxonomyHint": "موجودہ ناموں سے ملا کرنے کے لیے ٹائپ کریں، یا نیا نام لکھیں۔"
   },
   "customers": {
     "title": "گاہک",

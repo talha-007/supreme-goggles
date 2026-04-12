@@ -90,10 +90,15 @@
     "subtitle": "Sales, stock, and purchasing in one place — built for shops and retail counters.",
     "newInvoice": "New invoice",
     "allInvoices": "All invoices",
-    "statToday": "Today (sales)",
-    "statTodayHint": "Finalized invoices created today",
-    "statMonth": "This month",
-    "statMonthHint": "Excludes drafts & cancelled",
+    "statsPeriodLabel": "Sales period",
+    "periodToday": "Today",
+    "periodWeek": "This week",
+    "periodMonth": "This month",
+    "periodYear": "This year",
+    "statPeriodSales": "Sales",
+    "statPeriodSalesHint": "{count} invoices · excludes drafts & cancelled",
+    "statInventoryCost": "Inventory (cost)",
+    "statInventoryCostHint": "On-hand quantity × purchase price (active products)",
     "statOutstanding": "Outstanding",
     "statOutstandingHint": "Unpaid + partial balance",
     "statDrafts": "Draft invoices",
@@ -309,7 +314,7 @@
     "currentStock": "Current stock",
     "active": "Active",
     "activeShown": "Active (shown in sales)",
-    "taxonomyNoMatches": "No matches. You can still type a new name."
+    "taxonomyHint": "Start typing to match existing names, or enter a new one."
   },
   "customers": {
     "title": "Customers",

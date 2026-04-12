@@ -1,11 +1,11 @@
 "use client";
 
 import { ProductBarcodeField } from "@/components/products/product-barcode-field";
-import { SearchableSuggestionsInput } from "@/components/ui/searchable-suggestions-input";
 import { PRODUCT_UNITS } from "@/types/product";
 import type { ProductRow } from "@/types/product";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useId } from "react";
 
 type Props = {
   defaultValues?: Partial<ProductRow>;
@@ -100,56 +100,49 @@ export function ProductFields({
           className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
         />
       </div>
-      {categorySuggestions.length > 0 ? (
-        <div className="relative z-10">
-          <SearchableSuggestionsInput
-            id="category"
-            name="category"
-            label={t("category")}
-            defaultValue={d.category ?? ""}
-            suggestions={categorySuggestions}
-            noMatchesLabel={t("taxonomyNoMatches")}
-          />
-        </div>
-      ) : (
-        <div className="flex flex-col gap-1">
-          <label htmlFor="category" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            {t("category")}
-          </label>
-          <input
-            id="category"
-            name="category"
-            type="text"
-            defaultValue={d.category ?? ""}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-          />
-        </div>
-      )}
-      {brandSuggestions.length > 0 ? (
-        <div className="relative z-10">
-          <SearchableSuggestionsInput
-            id="brand"
-            name="brand"
-            label={t("brand")}
-            defaultValue={d.brand ?? ""}
-            suggestions={brandSuggestions}
-            noMatchesLabel={t("taxonomyNoMatches")}
-          />
-        </div>
-      ) : (
-        <div className="flex flex-col gap-1">
-          <label htmlFor="brand" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            {t("brand")}
-          </label>
-          <input
-            id="brand"
-            name="brand"
-            type="text"
-            defaultValue={d.brand ?? ""}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-          />
-        </div>
-      )}
+      <div className="flex flex-col gap-1">
+        <label htmlFor="category" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          {t("category")}
+        </label>
+        <input
+          id="category"
+          name="category"
+          type="text"
+          list={categorySuggestions.length > 0 ? categoryListId : undefined}
+          defaultValue={d.category ?? ""}
+          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+        />
+        {categorySuggestions.length > 0 ? (
+          <datalist id={categoryListId}>
+            {categorySuggestions.map((s) => (
+              <option key={s} value={s} />
+            ))}
+          </datalist>
+        ) : null}
+      </div>
+      <div className="flex flex-col gap-1">
+        <label htmlFor="brand" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          {t("brand")}
+        </label>
+        <input
+          id="brand"
+          name="brand"
+          type="text"
+          list={brandSuggestions.length > 0 ? brandListId : undefined}
+          defaultValue={d.brand ?? ""}
+          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+        />
+        {brandSuggestions.length > 0 ? (
+          <datalist id={brandListId}>
+            {brandSuggestions.map((s) => (
+              <option key={s} value={s} />
+            ))}
+          </datalist>
+        ) : null}
+      </div>
+      {categorySuggestions.length > 0 || brandSuggestions.length > 0 ? (
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 sm:col-span-2">{t("taxonomyHint")}</p>
+      ) : null}
       <div className="flex flex-col gap-1">
         <label htmlFor="unit" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
           {t("unit")}

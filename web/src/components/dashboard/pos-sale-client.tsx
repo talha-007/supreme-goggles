@@ -516,58 +516,78 @@ export function PosSaleClient({
         </p>
       </div>
 
-      {/* Desktop: filters in top strip so the menu column is mostly product grid */}
-      <div className="mb-0 hidden flex-wrap items-start gap-x-4 gap-y-3 rounded-2xl border border-zinc-200/80 bg-white px-3 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 xl:flex">
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            {tp("categoryFilter")}
-          </span>
-          <SearchableFilterList
-            items={categoryFilterItems}
-            value={categoryKey}
-            onChange={setCategoryKey}
-            searchPlaceholder={tp("searchCategories")}
-            noMatchesLabel={tp("filterNoMatches")}
-            variant="blue"
-          />
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            {tp("brandFilter")}
-          </span>
-          <SearchableFilterList
-            items={brandFilterItems}
-            value={brandKey}
-            onChange={setBrandKey}
-            searchPlaceholder={tp("searchBrands")}
-            noMatchesLabel={tp("filterNoMatches")}
-            variant="violet"
-          />
-        </div>
-      </div>
-
       <div className="flex min-h-0 flex-1 flex-col gap-4 xl:flex-row xl:items-stretch xl:gap-6">
       <div
         className={`min-h-0 min-w-0 flex-1 xl:order-2 xl:max-w-none ${mobileTab === "menu" ? "block" : "hidden xl:block"}`}
       >
-        <div className="flex h-full min-h-0 flex-col gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-5 xl:min-h-[min(100vh-9rem,780px)]">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800 xl:hidden">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
-                {tp("catalogTitle")}
-              </p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {dateStr} · {timeStr}
-              </p>
+        <div className="flex h-full min-h-0 flex-col gap-3 overflow-visible rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-5 xl:min-h-[min(100vh-9rem,780px)]">
+          <div className="flex flex-col gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800 xl:hidden">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
+                  {tp("catalogTitle")}
+                </p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  {dateStr} · {timeStr}
+                </p>
+              </div>
+              <span className="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-950/50 dark:text-blue-200">
+                {tp("openSale")}
+              </span>
             </div>
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-950/50 dark:text-blue-200">
-              {tp("openSale")}
-            </span>
+            <div className="flex min-w-0 gap-2 overflow-visible">
+              <SearchableFilterList
+                layout="inline"
+                popoverAlign="start"
+                groupLabel={tp("categoryFilter")}
+                items={categoryFilterItems}
+                value={categoryKey}
+                onChange={setCategoryKey}
+                searchPlaceholder={tp("searchCategories")}
+                noMatchesLabel={tp("filterNoMatches")}
+                variant="blue"
+              />
+              <SearchableFilterList
+                layout="inline"
+                popoverAlign="end"
+                groupLabel={tp("brandFilter")}
+                items={brandFilterItems}
+                value={brandKey}
+                onChange={setBrandKey}
+                searchPlaceholder={tp("searchBrands")}
+                noMatchesLabel={tp("filterNoMatches")}
+                variant="violet"
+              />
+            </div>
           </div>
 
-          <div className="hidden items-center justify-between gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800 xl:flex">
-            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{tp("catalogTitle")}</p>
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-950/50 dark:text-blue-200">
+          <div className="hidden items-center gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800 xl:flex">
+            <p className="shrink-0 text-sm font-semibold text-zinc-900 dark:text-zinc-50">{tp("catalogTitle")}</p>
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 overflow-visible">
+              <SearchableFilterList
+                layout="inline"
+                popoverAlign="start"
+                groupLabel={tp("categoryFilter")}
+                items={categoryFilterItems}
+                value={categoryKey}
+                onChange={setCategoryKey}
+                searchPlaceholder={tp("searchCategories")}
+                noMatchesLabel={tp("filterNoMatches")}
+                variant="blue"
+              />
+              <SearchableFilterList
+                layout="inline"
+                popoverAlign="end"
+                groupLabel={tp("brandFilter")}
+                items={brandFilterItems}
+                value={brandKey}
+                onChange={setBrandKey}
+                searchPlaceholder={tp("searchBrands")}
+                noMatchesLabel={tp("filterNoMatches")}
+                variant="violet"
+              />
+            </div>
+            <span className="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-950/50 dark:text-blue-200">
               {tp("openSale")}
             </span>
           </div>
@@ -599,35 +619,6 @@ export function PosSaleClient({
                 {tp("searching")}
               </span>
             ) : null}
-          </div>
-
-          <div className="space-y-3 xl:hidden">
-            <div>
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                {tp("categoryFilter")}
-              </p>
-              <SearchableFilterList
-                items={categoryFilterItems}
-                value={categoryKey}
-                onChange={setCategoryKey}
-                searchPlaceholder={tp("searchCategories")}
-                noMatchesLabel={tp("filterNoMatches")}
-                variant="blue"
-              />
-            </div>
-            <div>
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                {tp("brandFilter")}
-              </p>
-              <SearchableFilterList
-                items={brandFilterItems}
-                value={brandKey}
-                onChange={setBrandKey}
-                searchPlaceholder={tp("searchBrands")}
-                noMatchesLabel={tp("filterNoMatches")}
-                variant="violet"
-              />
-            </div>
           </div>
 
           {loadError ? (

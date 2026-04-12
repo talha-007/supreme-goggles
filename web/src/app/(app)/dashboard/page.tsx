@@ -1,7 +1,10 @@
+import { DashboardStatsPeriodTabs } from "@/components/dashboard/dashboard-stats-period-tabs";
 import { LowStockPanel } from "@/components/dashboard/low-stock-panel";
 import { OpenPosPanel } from "@/components/dashboard/open-pos-panel";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { PosSaleClient } from "@/components/dashboard/pos-sale-client";
+import { resolveInventoryCost } from "@/lib/dashboard/inventory-cost";
+import { getStatsPeriodRange, parseStatsPeriod } from "@/lib/dashboard/stats-period";
 import { getNewInvoiceEditorData, getPosCatalogProducts } from "@/lib/invoices/new-invoice-data";
 import {
   requireBusinessContext,
@@ -46,7 +49,13 @@ function outstandingPk(rows: { total_amount: unknown; paid_amount: unknown }[]) 
   return Math.round(s * 100) / 100;
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ period?: string }>;
+}) {
+  const sp = await searchParams;
+  const statsPeriod = parseStatsPeriod(sp.period);
   const ctx = await requireBusinessContext();
   const canEdit = canManageInvoices(ctx.role);
   const canProducts = canManageProducts(ctx.role);
@@ -65,16 +74,15 @@ export default async function DashboardPage() {
   const tInv = await getTranslations("invoiceStatus");
 
   const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const { start: periodStart, end: periodEnd } = getStatsPeriodRange(statsPeriod, now);
 
   const [
     productsCountRes,
     customersCountRes,
     draftsCountRes,
     receivableRows,
-    monthRows,
-    todayRows,
+    periodRows,
+    inventoryCostRes,
     recentRows,
     reorderCandidatesRes,
     openPoCountRes,
@@ -106,12 +114,9 @@ export default async function DashboardPage() {
       .from("invoices")
       .select("total_amount, status, created_at")
       .eq("business_id", bid)
-      .gte("created_at", startOfMonth.toISOString()),
-    supabase
-      .from("invoices")
-      .select("total_amount, status, created_at")
-      .eq("business_id", bid)
-      .gte("created_at", startOfDay.toISOString()),
+      .gte("created_at", periodStart.toISOString())
+      .lte("created_at", periodEnd.toISOString()),
+    supabase.rpc("business_inventory_cost", { p_business_id: bid }),
     supabase
       .from("invoices")
       .select(
@@ -176,14 +181,16 @@ export default async function DashboardPage() {
   const openPosList = (openPoRowsRes.data ?? []) as OpenPoRow[];
 
   const receivableData = receivableRows.data ?? [];
-  const monthData = (monthRows.data ?? []) as InvoiceRow[];
-  const todayData = (todayRows.data ?? []) as InvoiceRow[];
+  const periodData = (periodRows.data ?? []) as InvoiceRow[];
 
   const outstanding = outstandingPk(receivableData as { total_amount: unknown; paid_amount: unknown }[]);
 
-  const monthSales = sumMoney(monthData as { total_amount: unknown }[], (inv) => inv.status !== "draft" && inv.status !== "cancelled");
+  const periodSales = sumMoney(periodData as { total_amount: unknown }[], (inv) => inv.status !== "draft" && inv.status !== "cancelled");
+  const periodInvoiceCount = periodData.filter(
+    (inv) => inv.status !== "draft" && inv.status !== "cancelled",
+  ).length;
 
-  const todaySales = sumMoney(todayData as { total_amount: unknown }[], (inv) => inv.status !== "draft" && inv.status !== "cancelled");
+  const inventoryCost = await resolveInventoryCost(supabase, bid, inventoryCostRes);
 
   type RecentRow = {
     id: string;
@@ -257,19 +264,23 @@ export default async function DashboardPage() {
         </section>
       ) : null}
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label={t("statToday")}
-          value={pkr.format(todaySales)}
-          hint={t("statTodayHint")}
-        />
-        <StatCard
-          label={t("statMonth")}
-          value={pkr.format(monthSales)}
-          hint={t("statMonthHint")}
-        />
-        <StatCard label={t("statOutstanding")} value={pkr.format(outstanding)} hint={t("statOutstandingHint")} />
-        <StatCard label={t("statDrafts")} value={String(draftsCount)} hint={t("statDraftsHint")} href="/dashboard/invoices" />
+      <div className="mt-8">
+        <DashboardStatsPeriodTabs current={statsPeriod} />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            label={t("statPeriodSales")}
+            value={pkr.format(periodSales)}
+            hint={t("statPeriodSalesHint", { count: periodInvoiceCount })}
+          />
+          <StatCard label={t("statOutstanding")} value={pkr.format(outstanding)} hint={t("statOutstandingHint")} />
+          <StatCard label={t("statDrafts")} value={String(draftsCount)} hint={t("statDraftsHint")} href="/dashboard/invoices" />
+          <StatCard
+            label={t("statInventoryCost")}
+            value={pkr.format(inventoryCost)}
+            hint={t("statInventoryCostHint")}
+            href="/dashboard/products"
+          />
+        </div>
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
