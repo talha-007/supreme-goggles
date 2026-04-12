@@ -22,7 +22,7 @@ export type InvoiceRow = {
   paid_amount: number;
   due_date: string | null;
   notes: string | null;
-  /** Set when stock was deducted at finalize; void restores inventory when present. */
+  /** Set when stock was deducted at finalize; void restores inventory when this or sale stock movements exist. */
   stock_deducted_at?: string | null;
   created_at: string;
   updated_at: string;

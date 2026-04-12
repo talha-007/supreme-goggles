@@ -86,6 +86,8 @@ export function PosSaleClient({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  /** Blocks a second cash/credit finalize before the first server action returns (avoids duplicate stock moves). */
+  const finalizeInFlightRef = useRef(false);
 
   const pkr = useMemo(
     () =>
@@ -346,6 +348,7 @@ export function PosSaleClient({
   }
 
   function chargeCash() {
+    if (finalizeInFlightRef.current || pending) return;
     setError(null);
     const total = previewTotals.total;
     const received = Number(String(cashReceived).replace(/,/g, ""));
@@ -357,25 +360,36 @@ export function PosSaleClient({
       setError(ti("errorCashLow"));
       return;
     }
+    finalizeInFlightRef.current = true;
     startTransition(async () => {
-      const res = await saveDraftAndFinalizeCash(buildInput());
-      if (res.error) {
-        setError(res.error);
-        return;
+      try {
+        const res = await saveDraftAndFinalizeCash(buildInput());
+        if (res.error) {
+          setError(res.error);
+          return;
+        }
+        if (res.invoiceId) setInvoiceId(res.invoiceId);
+      } finally {
+        finalizeInFlightRef.current = false;
       }
-      if (res.invoiceId) setInvoiceId(res.invoiceId);
     });
   }
 
   function chargeCredit() {
+    if (finalizeInFlightRef.current || pending) return;
     setError(null);
+    finalizeInFlightRef.current = true;
     startTransition(async () => {
-      const res = await saveDraftAndFinalizeCredit(buildInput());
-      if (res.error) {
-        setError(res.error);
-        return;
+      try {
+        const res = await saveDraftAndFinalizeCredit(buildInput());
+        if (res.error) {
+          setError(res.error);
+          return;
+        }
+        if (res.invoiceId) setInvoiceId(res.invoiceId);
+      } finally {
+        finalizeInFlightRef.current = false;
       }
-      if (res.invoiceId) setInvoiceId(res.invoiceId);
     });
   }
 

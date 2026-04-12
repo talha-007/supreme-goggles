@@ -45,6 +45,25 @@ function validateLines(lines: LineDraft[]): string | null {
   return null;
 }
 
+/** Same catalog product on multiple rows (e.g. double tap before React merges) → one row + summed qty. */
+function mergeDuplicateCatalogLines(lines: LineDraft[]): LineDraft[] {
+  const out: LineDraft[] = [];
+  for (const l of lines) {
+    if (l.product_id) {
+      const idx = out.findIndex((x) => x.product_id === l.product_id);
+      if (idx >= 0) {
+        const ex = out[idx]!;
+        out[idx] = { ...ex, quantity: ex.quantity + l.quantity };
+      } else {
+        out.push({ ...l });
+      }
+    } else {
+      out.push({ ...l });
+    }
+  }
+  return out;
+}
+
 export async function saveInvoiceDraft(
   input: SaveDraftInput,
 ): Promise<InvoiceActionState> {
@@ -58,7 +77,8 @@ export async function saveInvoiceDraft(
 
   const supabase = await createClient();
 
-  const lineTotals = input.lines.map((l) =>
+  const lines = mergeDuplicateCatalogLines(input.lines);
+  const lineTotals = lines.map((l) =>
     lineTotal(l.quantity, l.unit_price, l.discount_pct),
   );
   const { subtotal, tax_amount, total_amount } = invoiceTotals(
@@ -133,10 +153,7 @@ export async function saveInvoiceDraft(
     invoiceId = created.id;
   }
 
-  await supabase.from("invoice_items").delete().eq("invoice_id", invoiceId);
-
-  const rows = input.lines.map((l, i) => ({
-    invoice_id: invoiceId,
+  const linesPayload = lines.map((l, i) => ({
     product_id: l.product_id,
     product_name: l.product_name.trim(),
     unit: l.unit,
@@ -146,7 +163,10 @@ export async function saveInvoiceDraft(
     line_total: lineTotals[i],
   }));
 
-  const { error: ierr } = await supabase.from("invoice_items").insert(rows);
+  const { error: ierr } = await supabase.rpc("replace_invoice_draft_items", {
+    p_invoice_id: invoiceId,
+    p_lines: linesPayload,
+  });
   if (ierr) {
     return { error: ierr.message };
   }
@@ -367,7 +387,7 @@ export async function recordPayment(
   return {};
 }
 
-/** Void a finalized invoice: removes payments, restores customer balance, restores inventory when stock was deducted at finalize, sets status cancelled. */
+/** Void a finalized invoice: removes payments, restores customer balance, restores inventory when the sale deducted stock (flag or sale stock movements), sets status cancelled. */
 export async function reverseInvoice(invoiceId: string): Promise<InvoiceActionState> {
   const ctx = await requireBusinessContext();
   if (!canManageInvoices(ctx.role)) {
@@ -381,10 +401,9 @@ export async function reverseInvoice(invoiceId: string): Promise<InvoiceActionSt
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard");
-  revalidatePath("/dashboard/invoices");
+  // Invalidate the whole dashboard tree (products, invoices, etc.) — production can cache RSC more than dev.
+  revalidatePath("/dashboard", "layout");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
-  revalidatePath("/dashboard/products");
   return {};
 }
 
