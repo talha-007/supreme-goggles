@@ -1,23 +1,63 @@
 "use client";
 
 import { updateProduct, type ProductActionState } from "@/lib/products/actions";
+import type { ProductTaxonomy } from "@/lib/products/taxonomy";
 import { ProductFields } from "@/components/products/product-fields";
+import { PRODUCT_IMAGE_MAX_BYTES, validateProductImageSelection } from "@/lib/storage/product-images";
 import type { ProductRow } from "@/types/product";
-import { useActionState, useMemo } from "react";
+import { useTranslations } from "next-intl";
+import { useActionState, useMemo, useState } from "react";
 
-export function ProductEditForm({ product }: { product: ProductRow }) {
+const MAX_IMAGE_MB = PRODUCT_IMAGE_MAX_BYTES / (1024 * 1024);
+
+export function ProductEditForm({
+  product,
+  taxonomy,
+}: {
+  product: ProductRow;
+  taxonomy: ProductTaxonomy;
+}) {
+  const t = useTranslations("productFields");
   const updateAction = useMemo(
     () => updateProduct.bind(null, product.id),
     [product.id],
   );
   const [state, formAction, pending] = useActionState(updateAction, {} as ProductActionState);
+  const [clientError, setClientError] = useState<string | null>(null);
+
+  const displayError = clientError ?? state.error;
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
-      <ProductFields defaultValues={product} existingImageUrl={product.image_url} />
-      {state.error ? (
+    <form
+      action={formAction}
+      className="flex flex-col gap-6"
+      onSubmit={(e) => {
+        setClientError(null);
+        const fd = new FormData(e.currentTarget);
+        const img = fd.get("image");
+        if (!(img instanceof File) || img.size === 0) return;
+        const code = validateProductImageSelection(img);
+        if (code === "too_large") {
+          e.preventDefault();
+          setClientError(t("imageTooLarge", { maxMb: MAX_IMAGE_MB }));
+          return;
+        }
+        if (code === "bad_type") {
+          e.preventDefault();
+          setClientError(t("imageBadType"));
+        }
+      }}
+    >
+      <ProductFields
+        key={product.id}
+        defaultValues={product}
+        existingImageUrl={product.image_url}
+        categorySuggestions={taxonomy.categories}
+        brandSuggestions={taxonomy.brands}
+      />
+      {displayError ? (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-          {state.error}
+          {displayError}
         </p>
       ) : null}
       <div className="flex gap-3">

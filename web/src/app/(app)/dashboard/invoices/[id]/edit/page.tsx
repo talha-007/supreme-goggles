@@ -42,6 +42,7 @@ export default async function EditInvoicePage({
     .order("id", { ascending: true });
 
   const lines: LineDraft[] = (items ?? []).map((it) => ({
+    itemId: it.id,
     product_id: it.product_id,
     product_name: it.product_name,
     unit: it.unit,

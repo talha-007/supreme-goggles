@@ -1,5 +1,6 @@
 import { ProductCreateForm } from "@/components/products/product-create-form";
 import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-context";
+import { getProductTaxonomy } from "@/lib/products/taxonomy";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -39,7 +40,7 @@ export default async function NewProductPage({
         </p>
       </div>
       <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-        <ProductCreateForm barcodeFromUrl={barcodeFromUrl} scanMode={scanMode} />
+        <ProductCreateForm barcodeFromUrl={barcodeFromUrl} scanMode={scanMode} taxonomy={taxonomy} />
       </div>
     </div>
   );

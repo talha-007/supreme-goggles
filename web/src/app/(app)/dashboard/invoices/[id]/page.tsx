@@ -1,6 +1,7 @@
 import { InvoiceAutoPrint } from "@/components/invoices/invoice-auto-print";
 import { InvoiceFinalizeButtons } from "@/components/invoices/invoice-detail-actions";
 import { InvoicePaymentForm } from "@/components/invoices/invoice-payment-form";
+import { InvoiceReverseButton } from "@/components/invoices/invoice-reverse-button";
 import { requireBusinessContext, canManageInvoices } from "@/lib/auth/business-context";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { createClient } from "@/lib/supabase/server";
@@ -87,6 +88,11 @@ export default async function InvoiceDetailPage({
     | "cancelled";
   const statusLabel = tStatus(statusKey);
 
+  const showReverse =
+    canEdit &&
+    inv.status !== "draft" &&
+    inv.status !== "cancelled";
+
   return (
     <div className="mx-auto max-w-4xl">
       <Suspense fallback={null}>
@@ -107,15 +113,7 @@ export default async function InvoiceDetailPage({
             {t("statusLabel")}: {statusLabel}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {canEdit && inv.status !== "draft" ? (
-            <Link
-              href="/dashboard/invoices/new"
-              className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-            >
-              {t("newInvoice")}
-            </Link>
-          ) : null}
+        <div className="flex w-full max-w-full flex-wrap gap-2 sm:justify-end">
           <a
             href={`/api/invoices/${id}/pdf`}
             target="_blank"
@@ -124,6 +122,15 @@ export default async function InvoiceDetailPage({
           >
             {t("viewPrintPdf")}
           </a>
+          {showReverse ? <InvoiceReverseButton invoiceId={id} compact /> : null}
+          {canEdit && inv.status !== "draft" ? (
+            <Link
+              href="/dashboard/invoices/new"
+              className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+            >
+              {t("newInvoice")}
+            </Link>
+          ) : null}
           {canEdit && inv.status === "draft" ? (
             <Link
               href={`/dashboard/invoices/${id}/edit`}
@@ -195,7 +202,7 @@ export default async function InvoiceDetailPage({
           ) : null}
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
             <div className="flex justify-between text-sm">
               <span className="text-zinc-600 dark:text-zinc-400">{t("subtotal")}</span>
@@ -257,6 +264,17 @@ export default async function InvoiceDetailPage({
               </ul>
             )}
           </div>
+
+          {showReverse ? (
+            <div className="rounded-xl border border-red-200 bg-red-50/80 p-4 dark:border-red-900/60 dark:bg-red-950/30">
+              <p className="text-xs font-medium uppercase tracking-wide text-red-800 dark:text-red-200">
+                {t("reverseSectionLabel")}
+              </p>
+              <div className="mt-2">
+                <InvoiceReverseButton invoiceId={id} />
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

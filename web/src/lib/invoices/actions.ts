@@ -13,6 +13,8 @@ import { redirect } from "next/navigation";
 export type InvoiceActionState = { error?: string; invoiceId?: string };
 
 export type LineDraft = {
+  /** Set when the line is already saved in `invoice_items` (draft edit). */
+  itemId?: string | null;
   product_id: string | null;
   product_name: string;
   unit: string;
@@ -216,17 +218,16 @@ export async function finalizeInvoice(invoiceId: string): Promise<InvoiceActionS
     return { error: "Add line items before finalizing." };
   }
 
-  const { error } = await supabase
-    .from("invoices")
-    .update({ status: "unpaid" })
-    .eq("id", invoiceId)
-    .eq("business_id", ctx.businessId);
+  const { error } = await supabase.rpc("finalize_draft_invoice", {
+    p_invoice_id: invoiceId,
+  });
 
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/invoices");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
+  revalidatePath("/dashboard/products");
   redirect(`/dashboard/invoices/${invoiceId}`);
 }
 
@@ -277,29 +278,17 @@ export async function finalizeInvoiceCash(
     }
   }
 
-  const { error: uerr } = await supabase
-    .from("invoices")
-    .update({ status: "unpaid" })
-    .eq("id", invoiceId)
-    .eq("business_id", ctx.businessId);
-
-  if (uerr) return { error: uerr.message };
-
-  const { error: perr } = await supabase.from("payments").insert({
-    business_id: ctx.businessId,
-    invoice_id: invoiceId,
-    amount: total,
-    method: "cash",
-    received_by: ctx.userId,
+  const { error: rpcErr } = await supabase.rpc("finalize_draft_invoice_cash", {
+    p_invoice_id: invoiceId,
+    p_amount_received: amountReceived ?? null,
   });
 
-  if (perr) {
-    return { error: perr.message };
-  }
+  if (rpcErr) return { error: rpcErr.message };
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/invoices");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
+  revalidatePath("/dashboard/products");
   redirect(`/dashboard/invoices/${invoiceId}?print=1`);
 }
 
@@ -372,6 +361,110 @@ export async function recordPayment(
   });
 
   if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/invoices");
+  revalidatePath(`/dashboard/invoices/${invoiceId}`);
+  return {};
+}
+
+/** Void a finalized invoice: removes payments, restores customer balance, restores inventory when stock was deducted at finalize, sets status cancelled. */
+export async function reverseInvoice(invoiceId: string): Promise<InvoiceActionState> {
+  const ctx = await requireBusinessContext();
+  if (!canManageInvoices(ctx.role)) {
+    return { error: "Permission denied." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("reverse_invoice", {
+    p_invoice_id: invoiceId,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/invoices");
+  revalidatePath(`/dashboard/invoices/${invoiceId}`);
+  revalidatePath("/dashboard/products");
+  return {};
+}
+
+/** Remove one line from a draft invoice and recalculate totals. */
+export async function deleteDraftInvoiceItem(
+  invoiceId: string,
+  itemId: string,
+): Promise<InvoiceActionState> {
+  const ctx = await requireBusinessContext();
+  if (!canManageInvoices(ctx.role)) {
+    return { error: "Permission denied." };
+  }
+
+  const supabase = await createClient();
+  const { data: inv } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("id", invoiceId)
+    .maybeSingle();
+
+  if (!inv || inv.business_id !== ctx.businessId) {
+    return { error: "Invoice not found." };
+  }
+  if (inv.status !== "draft") {
+    return { error: "Only draft invoices can be edited." };
+  }
+
+  const { count } = await supabase
+    .from("invoice_items")
+    .select("id", { count: "exact", head: true })
+    .eq("invoice_id", invoiceId);
+
+  if (!count || count <= 1) {
+    return { error: "Keep at least one line item, or delete the whole draft." };
+  }
+
+  const { error: derr } = await supabase
+    .from("invoice_items")
+    .delete()
+    .eq("id", itemId)
+    .eq("invoice_id", invoiceId);
+
+  if (derr) return { error: derr.message };
+
+  const { data: items } = await supabase
+    .from("invoice_items")
+    .select("*")
+    .eq("invoice_id", invoiceId)
+    .order("id", { ascending: true });
+
+  const lines: LineDraft[] = (items ?? []).map((it) => ({
+    product_id: it.product_id,
+    product_name: it.product_name,
+    unit: it.unit,
+    quantity: Number(it.quantity),
+    unit_price: Number(it.unit_price),
+    discount_pct: Number(it.discount_pct),
+  }));
+
+  const lineTotals = lines.map((l) =>
+    lineTotal(l.quantity, l.unit_price, l.discount_pct),
+  );
+  const { subtotal, tax_amount, total_amount } = invoiceTotals(
+    lineTotals,
+    Number(inv.discount_amount),
+    Number(inv.tax_rate),
+  );
+
+  const { error: uerr } = await supabase
+    .from("invoices")
+    .update({
+      subtotal,
+      tax_amount,
+      total_amount,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", invoiceId)
+    .eq("business_id", ctx.businessId);
+
+  if (uerr) return { error: uerr.message };
 
   revalidatePath("/dashboard/invoices");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);

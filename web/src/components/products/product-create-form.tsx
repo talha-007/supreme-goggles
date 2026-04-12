@@ -1,23 +1,57 @@
 "use client";
 
 import { createProduct, type ProductActionState } from "@/lib/products/actions";
+import type { ProductTaxonomy } from "@/lib/products/taxonomy";
 import { ProductFields } from "@/components/products/product-fields";
-import { useActionState } from "react";
+import { PRODUCT_IMAGE_MAX_BYTES, validateProductImageSelection } from "@/lib/storage/product-images";
+import { useTranslations } from "next-intl";
+import { useActionState, useState } from "react";
+
+const MAX_IMAGE_MB = PRODUCT_IMAGE_MAX_BYTES / (1024 * 1024);
 
 type CreateProps = {
   barcodeFromUrl?: string;
   scanMode?: boolean;
+  taxonomy: ProductTaxonomy;
 };
 
-export function ProductCreateForm({ barcodeFromUrl, scanMode }: CreateProps) {
+export function ProductCreateForm({ barcodeFromUrl, scanMode, taxonomy }: CreateProps) {
+  const t = useTranslations("productFields");
   const [state, formAction, pending] = useActionState(createProduct, {} as ProductActionState);
+  const [clientError, setClientError] = useState<string | null>(null);
+
+  const displayError = clientError ?? state.error;
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
-      <ProductFields barcodeFromUrl={barcodeFromUrl} scanMode={scanMode} />
-      {state.error ? (
+    <form
+      action={formAction}
+      className="flex flex-col gap-6"
+      onSubmit={(e) => {
+        setClientError(null);
+        const fd = new FormData(e.currentTarget);
+        const img = fd.get("image");
+        if (!(img instanceof File) || img.size === 0) return;
+        const code = validateProductImageSelection(img);
+        if (code === "too_large") {
+          e.preventDefault();
+          setClientError(t("imageTooLarge", { maxMb: MAX_IMAGE_MB }));
+          return;
+        }
+        if (code === "bad_type") {
+          e.preventDefault();
+          setClientError(t("imageBadType"));
+        }
+      }}
+    >
+      <ProductFields
+        barcodeFromUrl={barcodeFromUrl}
+        scanMode={scanMode}
+        categorySuggestions={taxonomy.categories}
+        brandSuggestions={taxonomy.brands}
+      />
+      {displayError ? (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">
-          {state.error}
+          {displayError}
         </p>
       ) : null}
       <div className="flex gap-3">

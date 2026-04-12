@@ -2,13 +2,24 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const PRODUCT_IMAGES_BUCKET = "product-images";
 
-const MAX_BYTES = 2 * 1024 * 1024;
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+export const PRODUCT_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"] as const;
+const ALLOWED_TYPE_SET = new Set<string>(ALLOWED_TYPES);
+
+/** Client-side guard before Server Action submit (show translated messages in the form). */
+export function validateProductImageSelection(
+  file: File,
+): "too_large" | "bad_type" | null {
+  if (file.size === 0) return null;
+  if (file.size > PRODUCT_IMAGE_MAX_BYTES) return "too_large";
+  if (!ALLOWED_TYPE_SET.has(file.type)) return "bad_type";
+  return null;
+}
 
 export function validateImageFile(file: File): string | null {
   if (file.size === 0) return null;
-  if (file.size > MAX_BYTES) return "Image must be 2MB or smaller.";
-  if (!ALLOWED_TYPES.includes(file.type)) return "Use JPEG, PNG, GIF, or WebP.";
+  if (file.size > PRODUCT_IMAGE_MAX_BYTES) return "Image must be 2MB or smaller.";
+  if (!ALLOWED_TYPE_SET.has(file.type)) return "Use JPEG, PNG, GIF, or WebP.";
   return null;
 }
 

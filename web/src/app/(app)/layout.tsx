@@ -34,6 +34,7 @@ export default async function AppLayout({
     .from("business_members")
     .select("business_id")
     .eq("user_id", user.id)
+    .order("id", { ascending: true })
     .limit(1)
     .maybeSingle();
 

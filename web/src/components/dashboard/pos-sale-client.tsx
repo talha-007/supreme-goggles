@@ -12,6 +12,7 @@ import { invoiceTotals, lineTotal } from "@/lib/invoices/calc";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { looksLikeBarcode } from "@/lib/products/barcode-utils";
 import { sanitizeProductSearchQuery } from "@/lib/products/search-query";
+import { SearchableFilterList } from "@/components/ui/searchable-filter-list";
 import type { InvoiceEditorDefaults } from "@/types/invoice";
 import type { ProductRow } from "@/types/product";
 import { useLocale, useTranslations } from "next-intl";
@@ -191,6 +192,26 @@ export function PosSaleClient({
     }
     return ["all", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [initialCatalogProducts]);
+
+  const categoryFilterItems = useMemo(
+    () =>
+      categoryKeys.map((key) => ({
+        key,
+        label: key === "all" ? tp("allMenu") : categoryLabel(key, tp),
+        count: categoryCounts[key] ?? 0,
+      })),
+    [categoryKeys, categoryCounts, tp],
+  );
+
+  const brandFilterItems = useMemo(
+    () =>
+      brandKeys.map((key) => ({
+        key,
+        label: key === "all" ? tp("allMenu") : categoryLabel(key, tp),
+        count: brandCounts[key] ?? 0,
+      })),
+    [brandKeys, brandCounts, tp],
+  );
 
   const filteredGrid = useMemo(() => {
     let list = displayedProducts;
@@ -495,11 +516,41 @@ export function PosSaleClient({
         </p>
       </div>
 
+      {/* Desktop: filters in top strip so the menu column is mostly product grid */}
+      <div className="mb-0 hidden flex-wrap items-start gap-x-4 gap-y-3 rounded-2xl border border-zinc-200/80 bg-white px-3 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 xl:flex">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            {tp("categoryFilter")}
+          </span>
+          <SearchableFilterList
+            items={categoryFilterItems}
+            value={categoryKey}
+            onChange={setCategoryKey}
+            searchPlaceholder={tp("searchCategories")}
+            noMatchesLabel={tp("filterNoMatches")}
+            variant="blue"
+          />
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            {tp("brandFilter")}
+          </span>
+          <SearchableFilterList
+            items={brandFilterItems}
+            value={brandKey}
+            onChange={setBrandKey}
+            searchPlaceholder={tp("searchBrands")}
+            noMatchesLabel={tp("filterNoMatches")}
+            variant="violet"
+          />
+        </div>
+      </div>
+
       <div className="flex min-h-0 flex-1 flex-col gap-4 xl:flex-row xl:items-stretch xl:gap-6">
       <div
         className={`min-h-0 min-w-0 flex-1 xl:order-2 xl:max-w-none ${mobileTab === "menu" ? "block" : "hidden xl:block"}`}
       >
-        <div className="flex h-full min-h-0 flex-col gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-5 xl:min-h-[min(100vh-11rem,780px)]">
+        <div className="flex h-full min-h-0 flex-col gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-5 xl:min-h-[min(100vh-9rem,780px)]">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800 xl:hidden">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
@@ -521,69 +572,7 @@ export function PosSaleClient({
             </span>
           </div>
 
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 xl:mb-2">
-              {tp("categoryFilter")}
-            </p>
-            <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {categoryKeys.map((key) => {
-              const active = categoryKey === key;
-              const count = categoryCounts[key] ?? 0;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setCategoryKey(key)}
-                  className={`flex min-h-[48px] min-w-[7.5rem] shrink-0 touch-manipulation flex-col rounded-2xl border px-3 py-2.5 text-left transition active:scale-[0.98] ${
-                    active
-                      ? "border-blue-500 bg-blue-50 shadow-sm dark:border-blue-500 dark:bg-blue-950/40"
-                      : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-                  }`}
-                >
-                  <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-50">
-                    {key === "all" ? tp("allMenu") : categoryLabel(key, tp)}
-                  </span>
-                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                    {tp("itemsCount", { count })}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          </div>
-
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400 xl:mb-2">
-              {tp("brandFilter")}
-            </p>
-            <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {brandKeys.map((key) => {
-                const active = brandKey === key;
-                const count = brandCounts[key] ?? 0;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setBrandKey(key)}
-                    className={`flex min-h-[44px] min-w-[7.5rem] shrink-0 touch-manipulation flex-col rounded-2xl border px-3 py-2.5 text-left transition active:scale-[0.98] ${
-                      active
-                        ? "border-violet-500 bg-violet-50 shadow-sm dark:border-violet-500 dark:bg-violet-950/40"
-                        : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-                    }`}
-                  >
-                    <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-50">
-                      {key === "all" ? tp("allMenu") : categoryLabel(key, tp)}
-                    </span>
-                    <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                      {tp("itemsCount", { count })}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="relative xl:hidden">
+          <div className="relative border-b border-zinc-100 pb-3 dark:border-zinc-800 xl:hidden">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                 <path
@@ -603,13 +592,42 @@ export function PosSaleClient({
               placeholder={tp("searchPlaceholder")}
               autoComplete="off"
               enterKeyHint="search"
-              className="min-h-[48px] w-full rounded-2xl border border-zinc-200 bg-zinc-50/80 py-3 pl-11 pr-4 text-base text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:bg-white focus:ring-2 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:bg-zinc-950"
+              className="min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50/80 py-2.5 pl-11 pr-4 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:bg-white focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:bg-zinc-950"
             />
             {loading ? (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">
                 {tp("searching")}
               </span>
             ) : null}
+          </div>
+
+          <div className="space-y-3 xl:hidden">
+            <div>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                {tp("categoryFilter")}
+              </p>
+              <SearchableFilterList
+                items={categoryFilterItems}
+                value={categoryKey}
+                onChange={setCategoryKey}
+                searchPlaceholder={tp("searchCategories")}
+                noMatchesLabel={tp("filterNoMatches")}
+                variant="blue"
+              />
+            </div>
+            <div>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                {tp("brandFilter")}
+              </p>
+              <SearchableFilterList
+                items={brandFilterItems}
+                value={brandKey}
+                onChange={setBrandKey}
+                searchPlaceholder={tp("searchBrands")}
+                noMatchesLabel={tp("filterNoMatches")}
+                variant="violet"
+              />
+            </div>
           </div>
 
           {loadError ? (
@@ -627,11 +645,11 @@ export function PosSaleClient({
             </p>
           ) : null}
 
-          <div className="relative min-h-[200px] flex-1 sm:min-h-[280px] xl:min-h-0">
+          <div className="relative min-h-[180px] flex-1 sm:min-h-[240px] xl:min-h-0">
             {loading ? (
               <div className="pointer-events-none absolute inset-0 z-10 rounded-xl bg-white/50 dark:bg-zinc-950/50" />
             ) : null}
-            <div className="grid max-h-[min(52vh,560px)] grid-cols-2 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-3 sm:gap-3 xl:max-h-[min(calc(100vh-16rem),640px)] lg:grid-cols-4">
+            <div className="grid max-h-[min(56vh,600px)] grid-cols-2 gap-1.5 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-3 sm:gap-2 md:grid-cols-4 xl:max-h-[min(calc(100vh-13rem),680px)] xl:grid-cols-4 2xl:grid-cols-5">
               {filteredGrid.map((p) => {
                 const cat = p.category?.trim() || tp("uncategorized");
                 const br = p.brand?.trim() || null;
@@ -642,47 +660,47 @@ export function PosSaleClient({
                     type="button"
                     disabled={out}
                     onClick={() => addProduct(p)}
-                    className={`group flex touch-manipulation flex-col overflow-hidden rounded-2xl border text-left transition active:scale-[0.98] ${
+                    className={`group flex touch-manipulation flex-col overflow-hidden rounded-xl border text-left transition active:scale-[0.98] ${
                       out
                         ? "cursor-not-allowed border-zinc-200 opacity-60 dark:border-zinc-800"
-                        : "border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
+                        : "border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
                     }`}
                   >
-                    <div className="relative aspect-[4/3] w-full bg-zinc-100 dark:bg-zinc-800">
+                    <div className="relative h-[4.5rem] w-full shrink-0 bg-zinc-100 sm:h-[5.25rem] dark:bg-zinc-800">
                       {p.image_url ? (
                         <Image
                           src={p.image_url}
                           alt=""
                           fill
                           className="object-cover"
-                          sizes="(max-width: 640px) 46vw, (max-width: 1280px) 30vw, 22vw"
+                          sizes="(max-width: 640px) 45vw, (max-width: 1280px) 20vw, 14vw"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-2xl font-semibold text-zinc-400">
+                        <div className="flex h-full items-center justify-center text-lg font-semibold text-zinc-400">
                           {p.name.slice(0, 1).toUpperCase()}
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-1 flex-col gap-1 p-2.5">
-                      <span className="line-clamp-2 text-sm font-medium leading-snug text-zinc-900 dark:text-zinc-50">
+                    <div className="flex min-h-0 flex-1 flex-col gap-0.5 p-1.5 sm:p-2">
+                      <span className="line-clamp-2 text-[11px] font-medium leading-tight text-zinc-900 sm:text-xs dark:text-zinc-50">
                         {p.name}
                       </span>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-0.5">
                         <span
-                          className={`inline-flex w-fit rounded-md px-1.5 py-0.5 text-[10px] font-medium ${tagClassForCategory(cat)}`}
+                          className={`inline-flex max-w-full truncate rounded px-1 py-0.5 text-[9px] font-medium ${tagClassForCategory(cat)}`}
                         >
                           {cat}
                         </span>
                         {br ? (
-                          <span className="inline-flex w-fit rounded-md border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-700 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                          <span className="inline-flex max-w-full truncate rounded border border-zinc-200 bg-zinc-100 px-1 py-0.5 text-[9px] font-medium text-zinc-700 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
                             {br}
                           </span>
                         ) : null}
                       </div>
-                      <span className="mt-auto pt-1 text-right text-sm font-semibold tabular-nums text-blue-700 dark:text-blue-300">
+                      <span className="mt-auto pt-0.5 text-right text-[11px] font-semibold tabular-nums text-blue-700 sm:text-xs dark:text-blue-300">
                         {pkr.format(p.sale_price)}
                       </span>
-                      <span className="text-[10px] leading-tight text-zinc-500 dark:text-zinc-400">
+                      <span className="text-[9px] leading-tight text-zinc-500 dark:text-zinc-400">
                         {tp("stockLine", {
                           qty: p.current_stock.toLocaleString(intlLocaleTag(locale), {
                             minimumFractionDigits: 0,

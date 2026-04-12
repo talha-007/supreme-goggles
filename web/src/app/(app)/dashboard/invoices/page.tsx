@@ -1,3 +1,4 @@
+import { InvoiceReverseButton } from "@/components/invoices/invoice-reverse-button";
 import { requireBusinessContext, canManageInvoices } from "@/lib/auth/business-context";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { createClient } from "@/lib/supabase/server";
@@ -112,20 +113,29 @@ export default async function InvoicesPage() {
                       {pkr.format(Number(inv.paid_amount))}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/dashboard/invoices/${inv.id}`}
-                        className="font-medium text-zinc-900 underline hover:no-underline dark:text-zinc-100"
-                      >
-                        {t("view")}
-                      </Link>
-                      {canEdit && inv.status === "draft" ? (
+                      <div className="flex flex-col items-end gap-2 sm:flex-row sm:justify-end sm:gap-3">
                         <Link
-                          href={`/dashboard/invoices/${inv.id}/edit`}
-                          className="ml-3 font-medium text-zinc-900 underline hover:no-underline dark:text-zinc-100"
+                          href={`/dashboard/invoices/${inv.id}`}
+                          className="font-medium text-zinc-900 underline hover:no-underline dark:text-zinc-100"
                         >
-                          {tc("edit")}
+                          {t("view")}
                         </Link>
-                      ) : null}
+                        {canEdit && inv.status === "draft" ? (
+                          <Link
+                            href={`/dashboard/invoices/${inv.id}/edit`}
+                            className="font-medium text-zinc-900 underline hover:no-underline dark:text-zinc-100"
+                          >
+                            {tc("edit")}
+                          </Link>
+                        ) : null}
+                        {canEdit && inv.status !== "draft" && inv.status !== "cancelled" ? (
+                          <InvoiceReverseButton
+                            invoiceId={inv.id}
+                            compact
+                            className="!px-2 !py-1 text-xs"
+                          />
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 );

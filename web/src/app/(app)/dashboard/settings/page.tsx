@@ -4,8 +4,11 @@ import {
   canManageBusinessSettings,
   requireBusinessContext,
 } from "@/lib/auth/business-context";
+import { isSuperadminUser } from "@/lib/auth/superadmin";
 import { getBusinessInvoiceDefaults, getBusinessWhatsAppSettings } from "@/lib/settings/actions";
+import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 
 export default async function SettingsPage() {
   const ctx = await requireBusinessContext();
@@ -13,6 +16,14 @@ export default async function SettingsPage() {
   const defaults = await getBusinessInvoiceDefaults();
   const wa = await getBusinessWhatsAppSettings();
   const t = await getTranslations("settings");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const showAdmin =
+    user &&
+    isSuperadminUser({ userId: user.id, email: user.email });
 
   const initial = defaults ?? {
     default_tax_rate: 0,
@@ -35,6 +46,18 @@ export default async function SettingsPage() {
         {t("title")}
       </h1>
       <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{t("subtitle")}</p>
+
+      {showAdmin ? (
+        <section className="mt-8 rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900/60 dark:bg-violet-950/35">
+          <Link
+            href="/admin"
+            className="text-sm font-semibold text-violet-900 underline decoration-violet-400 underline-offset-2 hover:text-violet-800 dark:text-violet-200 dark:hover:text-violet-100"
+          >
+            {t("adminConsole")}
+          </Link>
+          <p className="mt-1 text-sm text-violet-900/90 dark:text-violet-200/85">{t("adminConsoleDesc")}</p>
+        </section>
+      ) : null}
 
       <section className="mt-10 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
         <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{t("invoiceSection")}</h2>

@@ -13,11 +13,14 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const { data: membership } = await supabase
+  const { data: membershipRows } = await supabase
     .from("business_members")
     .select("business_id")
     .eq("user_id", user.id)
-    .maybeSingle();
+    .order("id", { ascending: true })
+    .limit(1);
+
+  const membership = membershipRows?.[0];
 
   if (!membership?.business_id) {
     redirect("/onboarding");

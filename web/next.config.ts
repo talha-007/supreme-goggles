@@ -29,6 +29,8 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       allowedOrigins: ["*"], // 🔥 quick fix
+      /** Default 1MB rejects product photo uploads before the action runs; app allows images up to 2MB + form fields. */
+      bodySizeLimit: "3mb",
     },
   },
 

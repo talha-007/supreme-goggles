@@ -16,11 +16,14 @@ export default async function OnboardingPage() {
     redirect("/login");
   }
 
-  const { data: membership } = await supabase
+  const { data: membershipRows } = await supabase
     .from("business_members")
     .select("business_id")
     .eq("user_id", user.id)
-    .maybeSingle();
+    .order("id", { ascending: true })
+    .limit(1);
+
+  const membership = membershipRows?.[0];
 
   /** Must match `(app)/layout.tsx`: only skip onboarding when we have a real business id. */
   if (membership?.business_id) {

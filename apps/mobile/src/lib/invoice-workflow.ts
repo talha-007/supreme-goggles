@@ -2,10 +2,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { invoiceTotals, lineTotal } from "./invoice-calc";
 
-function roundMoney(n: number): number {
-  return Math.round(n * 100) / 100;
-}
-
 export type DraftLineInput = {
   product_id: string | null;
   product_name: string;
@@ -129,7 +125,7 @@ export async function createAndFinalizeCashSale(
 export async function finalizeDraftInvoiceCash(
   supabase: SupabaseClient,
   businessId: string,
-  userId: string,
+  _userId: string,
   invoiceId: string,
 ): Promise<{ error?: string }> {
   const { data: inv, error: invErr } = await supabase
@@ -153,24 +149,11 @@ export async function finalizeDraftInvoiceCash(
     return { error: "Add line items before finalizing." };
   }
 
-  const total = roundMoney(Number(inv.total_amount));
-
-  const { error: uerr } = await supabase
-    .from("invoices")
-    .update({ status: "unpaid" })
-    .eq("id", invoiceId)
-    .eq("business_id", businessId);
-
-  if (uerr) return { error: uerr.message };
-
-  const { error: perr } = await supabase.from("payments").insert({
-    business_id: businessId,
-    invoice_id: invoiceId,
-    amount: total,
-    method: "cash",
-    received_by: userId,
+  const { error: rpcErr } = await supabase.rpc("finalize_draft_invoice_cash", {
+    p_invoice_id: invoiceId,
+    p_amount_received: null,
   });
 
-  if (perr) return { error: perr.message };
+  if (rpcErr) return { error: rpcErr.message };
   return {};
 }

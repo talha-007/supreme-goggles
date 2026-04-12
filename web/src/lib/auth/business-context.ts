@@ -18,13 +18,15 @@ export async function requireBusinessContext(): Promise<BusinessContext> {
     redirect("/login");
   }
 
-  const { data: row } = await supabase
+  const { data: rows, error: memErr } = await supabase
     .from("business_members")
     .select("business_id, role")
     .eq("user_id", user.id)
-    .maybeSingle();
+    .order("id", { ascending: true })
+    .limit(1);
 
-  if (!row?.business_id) {
+  const row = rows?.[0];
+  if (memErr || !row?.business_id) {
     redirect("/onboarding");
   }
 
@@ -35,20 +37,23 @@ export async function requireBusinessContext(): Promise<BusinessContext> {
   };
 }
 
-export function canManageProducts(role: MemberRole): boolean {
-  return role !== "viewer";
+/**
+ * Role-based restrictions are disabled: any user with a `business_members` row
+ * gets full app access. Supabase RLS still enforces business scoping.
+ * Reintroduce per-role checks here when you add team management.
+ */
+export function canManageProducts(_role: MemberRole): boolean {
+  return true;
 }
 
-/** Same RLS rule as products: viewers read-only. */
-export function canManageCustomers(role: MemberRole): boolean {
-  return role !== "viewer";
+export function canManageCustomers(_role: MemberRole): boolean {
+  return true;
 }
 
-export function canManageInvoices(role: MemberRole): boolean {
-  return role !== "viewer";
+export function canManageInvoices(_role: MemberRole): boolean {
+  return true;
 }
 
-/** Tax defaults, shop profile fields — owners and managers only. */
-export function canManageBusinessSettings(role: MemberRole): boolean {
-  return role === "owner" || role === "manager";
+export function canManageBusinessSettings(_role: MemberRole): boolean {
+  return true;
 }

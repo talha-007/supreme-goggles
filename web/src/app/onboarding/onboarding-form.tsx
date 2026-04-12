@@ -24,6 +24,7 @@ export function OnboardingForm() {
     setError(null);
     setLoading(true);
     const supabase = createClient();
+    /** RPC inserts `business_members` with role `owner` for the signed-in user. */
     const { error: err } = await supabase.rpc("create_business_with_owner", {
       p_name: name.trim(),
       p_type: type,

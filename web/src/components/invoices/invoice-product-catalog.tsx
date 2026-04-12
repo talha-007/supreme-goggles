@@ -1,5 +1,6 @@
 "use client";
 
+import { SearchableFilterList } from "@/components/ui/searchable-filter-list";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { sanitizeProductSearchQuery } from "@/lib/products/search-query";
 import type { ProductRow } from "@/types/product";
@@ -83,6 +84,26 @@ export function InvoiceProductCatalog({ products, onPick }: Props) {
     return ["all", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [products]);
 
+  const categoryFilterItems = useMemo(
+    () =>
+      categoryKeys.map((key) => ({
+        key,
+        label: key === "all" ? tp("allMenu") : categoryLabel(key, tp),
+        count: categoryCounts[key] ?? 0,
+      })),
+    [categoryKeys, categoryCounts, tp],
+  );
+
+  const brandFilterItems = useMemo(
+    () =>
+      brandKeys.map((key) => ({
+        key,
+        label: key === "all" ? tp("allMenu") : categoryLabel(key, tp),
+        count: brandCounts[key] ?? 0,
+      })),
+    [brandKeys, brandCounts, tp],
+  );
+
   const filteredGrid = useMemo(() => {
     let list = products;
     if (categoryKey !== "all") {
@@ -115,58 +136,33 @@ export function InvoiceProductCatalog({ products, onPick }: Props) {
         </span>
       </div>
 
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-        {tp("categoryFilter")}
-      </p>
-      <div className="mb-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {categoryKeys.map((key) => {
-          const active = categoryKey === key;
-          const count = categoryCounts[key] ?? 0;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setCategoryKey(key)}
-              className={`flex min-h-[44px] min-w-[6.5rem] shrink-0 touch-manipulation flex-col rounded-2xl border px-2.5 py-2 text-left transition active:scale-[0.98] ${
-                active
-                  ? "border-blue-500 bg-blue-50 shadow-sm dark:border-blue-500 dark:bg-blue-950/40"
-                  : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <span className="text-[11px] font-semibold text-zinc-900 dark:text-zinc-50">
-                {key === "all" ? tp("allMenu") : categoryLabel(key, tp)}
-              </span>
-              <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{tp("itemsCount", { count })}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-        {tp("brandFilter")}
-      </p>
-      <div className="mb-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {brandKeys.map((key) => {
-          const active = brandKey === key;
-          const count = brandCounts[key] ?? 0;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setBrandKey(key)}
-              className={`flex min-h-[44px] min-w-[6.5rem] shrink-0 touch-manipulation flex-col rounded-2xl border px-2.5 py-2 text-left transition active:scale-[0.98] ${
-                active
-                  ? "border-violet-500 bg-violet-50 shadow-sm dark:border-violet-500 dark:bg-violet-950/40"
-                  : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-              }`}
-            >
-              <span className="text-[11px] font-semibold text-zinc-900 dark:text-zinc-50">
-                {key === "all" ? tp("allMenu") : categoryLabel(key, tp)}
-              </span>
-              <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{tp("itemsCount", { count })}</span>
-            </button>
-          );
-        })}
+      <div className="mb-3 grid gap-4 sm:grid-cols-2">
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            {tp("categoryFilter")}
+          </p>
+          <SearchableFilterList
+            items={categoryFilterItems}
+            value={categoryKey}
+            onChange={setCategoryKey}
+            searchPlaceholder={tp("searchCategories")}
+            noMatchesLabel={tp("filterNoMatches")}
+            variant="blue"
+          />
+        </div>
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            {tp("brandFilter")}
+          </p>
+          <SearchableFilterList
+            items={brandFilterItems}
+            value={brandKey}
+            onChange={setBrandKey}
+            searchPlaceholder={tp("searchBrands")}
+            noMatchesLabel={tp("filterNoMatches")}
+            variant="violet"
+          />
+        </div>
       </div>
 
       <div className="relative mb-3">

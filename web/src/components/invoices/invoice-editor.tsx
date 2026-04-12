@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  deleteDraftInvoiceItem,
   saveDraftAndFinalizeCash,
   saveDraftAndFinalizeCredit,
   saveInvoiceDraft,
@@ -178,6 +179,20 @@ export function InvoiceEditor({
   }
 
   function removeRow(i: number) {
+    const line = lines[i];
+    if (!line) return;
+    if (invoiceId && line.itemId) {
+      setError(null);
+      startTransition(async () => {
+        const res = await deleteDraftInvoiceItem(invoiceId, line.itemId!);
+        if (res.error) {
+          setError(res.error);
+          return;
+        }
+        router.refresh();
+      });
+      return;
+    }
     setLines((prev) => (prev.length <= 1 ? prev : prev.filter((_, j) => j !== i)));
   }
 

@@ -1,5 +1,6 @@
 import { ProductEditForm } from "@/components/products/product-edit-form";
 import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-context";
+import { getProductTaxonomy } from "@/lib/products/taxonomy";
 import { createClient } from "@/lib/supabase/server";
 import type { ProductRow } from "@/types/product";
 import Link from "next/link";
@@ -29,6 +30,7 @@ export default async function EditProductPage({
   }
 
   const product = row as ProductRow;
+  const taxonomy = await getProductTaxonomy();
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -45,7 +47,7 @@ export default async function EditProductPage({
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{product.name}</p>
       </div>
       <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-        <ProductEditForm product={product} />
+        <ProductEditForm product={product} taxonomy={taxonomy} />
       </div>
     </div>
   );

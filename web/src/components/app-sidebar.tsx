@@ -47,7 +47,7 @@ export function SidebarNav({ links, onLinkClick }: SidebarNavProps) {
 /** Visible from `lg` and up; hidden on small screens (use mobile drawer in `AppShell`). */
 export function AppSidebarDesktop({ links, brandTitle }: { links: readonly NavLinkItem[]; brandTitle: string }) {
   return (
-    <aside className="hidden w-56 shrink-0 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 lg:flex">
+    <aside className="hidden w-56 shrink-0 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 lg:sticky lg:top-0 lg:flex lg:h-screen lg:max-h-screen lg:overflow-y-auto lg:self-start">
       <SidebarBrand title={brandTitle} />
       <SidebarNav links={links} />
     </aside>

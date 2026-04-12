@@ -1,6 +1,7 @@
 "use client";
 
 import { ProductBarcodeField } from "@/components/products/product-barcode-field";
+import { SearchableSuggestionsInput } from "@/components/ui/searchable-suggestions-input";
 import { PRODUCT_UNITS } from "@/types/product";
 import type { ProductRow } from "@/types/product";
 import { useTranslations } from "next-intl";
@@ -14,6 +15,9 @@ type Props = {
   barcodeFromUrl?: string;
   /** Autofocus barcode field for USB scanner setup at the counter. */
   scanMode?: boolean;
+  /** Distinct values from existing products (searchable when non-empty). */
+  categorySuggestions?: readonly string[];
+  brandSuggestions?: readonly string[];
 };
 
 export function ProductFields({
@@ -21,6 +25,8 @@ export function ProductFields({
   existingImageUrl,
   barcodeFromUrl,
   scanMode = false,
+  categorySuggestions = [],
+  brandSuggestions = [],
 }: Props) {
   const t = useTranslations("productFields");
   const d = defaultValues ?? {};
@@ -94,30 +100,56 @@ export function ProductFields({
           className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="category" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {t("category")}
-        </label>
-        <input
-          id="category"
-          name="category"
-          type="text"
-          defaultValue={d.category ?? ""}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="brand" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {t("brand")}
-        </label>
-        <input
-          id="brand"
-          name="brand"
-          type="text"
-          defaultValue={d.brand ?? ""}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        />
-      </div>
+      {categorySuggestions.length > 0 ? (
+        <div className="relative z-10">
+          <SearchableSuggestionsInput
+            id="category"
+            name="category"
+            label={t("category")}
+            defaultValue={d.category ?? ""}
+            suggestions={categorySuggestions}
+            noMatchesLabel={t("taxonomyNoMatches")}
+          />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1">
+          <label htmlFor="category" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            {t("category")}
+          </label>
+          <input
+            id="category"
+            name="category"
+            type="text"
+            defaultValue={d.category ?? ""}
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          />
+        </div>
+      )}
+      {brandSuggestions.length > 0 ? (
+        <div className="relative z-10">
+          <SearchableSuggestionsInput
+            id="brand"
+            name="brand"
+            label={t("brand")}
+            defaultValue={d.brand ?? ""}
+            suggestions={brandSuggestions}
+            noMatchesLabel={t("taxonomyNoMatches")}
+          />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1">
+          <label htmlFor="brand" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            {t("brand")}
+          </label>
+          <input
+            id="brand"
+            name="brand"
+            type="text"
+            defaultValue={d.brand ?? ""}
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          />
+        </div>
+      )}
       <div className="flex flex-col gap-1">
         <label htmlFor="unit" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
           {t("unit")}
