@@ -17,6 +17,7 @@ export default async function NewProductPage({
   const params = await searchParams;
   const barcodeFromUrl = params.barcode?.trim() ? params.barcode.trim().slice(0, 80) : undefined;
   const scanMode = params.scan === "1";
+  const taxonomy = await getProductTaxonomy();
 
   return (
     <div className="mx-auto max-w-2xl">

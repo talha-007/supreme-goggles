@@ -29,6 +29,8 @@ export function ProductFields({
   brandSuggestions = [],
 }: Props) {
   const t = useTranslations("productFields");
+  const categoryListId = useId();
+  const brandListId = useId();
   const d = defaultValues ?? {};
   const barcodeValue = d.barcode ?? barcodeFromUrl ?? "";
 
