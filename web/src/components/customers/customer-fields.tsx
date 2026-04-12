@@ -1,7 +1,10 @@
-import { CUSTOMER_TYPES } from "@/types/customer";
-import type { CustomerRow } from "@/types/customer";
+"use client";
+
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
-import { getLocale, getTranslations } from "next-intl/server";
+import type { CustomerRow } from "@/types/customer";
+import { CUSTOMER_TYPES } from "@/types/customer";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo } from "react";
 
 type Props = {
   defaultValues?: Partial<CustomerRow>;
@@ -9,18 +12,22 @@ type Props = {
   showOutstandingReadOnly?: boolean;
 };
 
-export async function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props) {
-  const t = await getTranslations("customerFields");
-  const tType = await getTranslations("customerType");
-  const locale = await getLocale();
+export function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props) {
+  const t = useTranslations("customerFields");
+  const tType = useTranslations("customerType");
+  const locale = useLocale();
   const d = defaultValues ?? {};
 
-  const money = new Intl.NumberFormat(intlLocaleTag(locale), {
-    style: "currency",
-    currency: "PKR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
+  const money = useMemo(
+    () =>
+      new Intl.NumberFormat(intlLocaleTag(locale), {
+        style: "currency",
+        currency: "PKR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      }),
+    [locale],
+  );
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
