@@ -1,5 +1,7 @@
 import { appNav } from "@/components/app-sidebar";
 import { AppShell } from "@/components/app-shell";
+import { requireBusinessContext } from "@/lib/auth/business-context";
+import { hasSubscriptionAccess, isSuperAdminByEnv } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
@@ -21,31 +23,20 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const ctx = await requireBusinessContext();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: membership } = await supabase
-    .from("business_members")
-    .select("business_id")
-    .eq("user_id", user.id)
-    .order("id", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (!membership?.business_id) {
-    redirect("/onboarding");
+  const superAdminBypass = isSuperAdminByEnv(ctx.userId, ctx.userEmail);
+  const hasAccess = superAdminBypass
+    ? true
+    : await hasSubscriptionAccess(supabase, ctx.businessId);
+  if (!hasAccess) {
+    redirect("/subscription-expired");
   }
 
   const { data: businessRow } = await supabase
     .from("businesses")
     .select("name")
-    .eq("id", membership.business_id)
+    .eq("id", ctx.businessId)
     .maybeSingle();
 
   const businessName = businessRow?.name ?? "Business";

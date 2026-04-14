@@ -6,28 +6,27 @@ function truthyEnv(v: string | undefined): boolean {
   return s === "1" || s === "true" || s === "yes";
 }
 
+function parseCsvEnv(raw: string | undefined): string[] {
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((s) => s.split("#")[0]?.trim() ?? "")
+    .filter((s) => s.length > 0);
+}
+
 /**
- * When true, billing checks are skipped and everyone is treated as subscribed.
- * - `next dev` — always skip (full feature testing).
- * - `NEXT_PUBLIC_SUBSCRIPTION_BYPASS=true` — skip (e.g. `next build && next start` locally).
- * - `NEXT_PUBLIC_BILLING_ENFORCE` unset/false — skip until you turn on enforcement.
+ * Billing is enforced by default.
+ * Use `NEXT_PUBLIC_SUBSCRIPTION_BYPASS=true` only for local/manual testing.
  */
 export function subscriptionGateSkippedByEnv(): boolean {
-  if (process.env.NODE_ENV === "development") {
-    return true;
-  }
   if (truthyEnv(process.env.NEXT_PUBLIC_SUBSCRIPTION_BYPASS)) {
-    return true;
-  }
-  if (!truthyEnv(process.env.NEXT_PUBLIC_BILLING_ENFORCE)) {
     return true;
   }
   return false;
 }
 
 /**
- * Whether this business may use paid features. Call from server layouts/actions when you add gates.
- * With default env (no enforce), always true. When enforcement is on, reads `businesses.subscription_status`.
+ * Whether this business may use paid features.
  */
 export async function hasSubscriptionAccess(
   supabase: SupabaseClient,
@@ -74,4 +73,15 @@ export async function hasSubscriptionAccess(
     return endsAt >= now;
   }
   return false;
+}
+
+/** Superadmin bypass by env-configured user IDs/emails. */
+export function isSuperAdminByEnv(userId: string, email: string | null | undefined): boolean {
+  const idList = parseCsvEnv(process.env.SUPERADMIN_USER_IDS);
+  if (idList.includes(userId)) return true;
+
+  const emailList = parseCsvEnv(process.env.SUPERADMIN_EMAILS).map((e) => e.toLowerCase());
+  const normalizedEmail = (email ?? "").trim().toLowerCase();
+  if (!normalizedEmail) return false;
+  return emailList.includes(normalizedEmail);
 }

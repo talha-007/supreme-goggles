@@ -1,22 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
 import type { MemberRole } from "@/types/product";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 export type BusinessContext = {
   userId: string;
+  userEmail: string | null;
   businessId: string;
   role: MemberRole;
 };
 
-export async function requireBusinessContext(): Promise<BusinessContext> {
+const getBusinessContextCached = cache(async (): Promise<BusinessContext | null> => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user) return null;
 
   const { data: rows, error: memErr } = await supabase
     .from("business_members")
@@ -26,15 +26,29 @@ export async function requireBusinessContext(): Promise<BusinessContext> {
     .limit(1);
 
   const row = rows?.[0];
-  if (memErr || !row?.business_id) {
-    redirect("/onboarding");
-  }
+  if (memErr || !row?.business_id) return null;
 
   return {
     userId: user.id,
+    userEmail: user.email ?? null,
     businessId: row.business_id,
     role: row.role as MemberRole,
   };
+});
+
+export async function requireBusinessContext(): Promise<BusinessContext> {
+  const ctx = await getBusinessContextCached();
+  if (!ctx) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      redirect("/login");
+    }
+    redirect("/onboarding");
+  }
+  return ctx;
 }
 
 /**

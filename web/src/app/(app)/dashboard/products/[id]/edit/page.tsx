@@ -25,7 +25,10 @@ export default async function EditProductPage({
     .eq("business_id", ctx.businessId)
     .maybeSingle();
 
-  if (error || !row) {
+  if (error) {
+    throw new Error(`Failed to load product: ${error.message}`);
+  }
+  if (!row) {
     notFound();
   }
 

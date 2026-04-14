@@ -54,7 +54,10 @@ export default async function PurchaseOrderDetailPage({
   const { id } = await params;
   const { po, error } = await getPurchaseOrder(id);
 
-  if (error || !po) {
+  if (error) {
+    throw new Error(`Failed to load purchase order: ${error}`);
+  }
+  if (!po) {
     notFound();
   }
 

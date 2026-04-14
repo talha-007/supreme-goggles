@@ -24,7 +24,10 @@ export default async function EditCustomerPage({
     .eq("business_id", ctx.businessId)
     .maybeSingle();
 
-  if (error || !row) {
+  if (error) {
+    throw new Error(`Failed to load customer: ${error.message}`);
+  }
+  if (!row) {
     notFound();
   }
 

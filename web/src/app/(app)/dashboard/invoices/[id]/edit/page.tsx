@@ -27,7 +27,10 @@ export default async function EditInvoicePage({
     .eq("business_id", ctx.businessId)
     .maybeSingle();
 
-  if (error || !invoice) {
+  if (error) {
+    throw new Error(`Failed to load invoice draft: ${error.message}`);
+  }
+  if (!invoice) {
     notFound();
   }
 

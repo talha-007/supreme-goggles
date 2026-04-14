@@ -56,7 +56,10 @@ export default async function InvoiceDetailPage({
     .eq("business_id", ctx.businessId)
     .maybeSingle();
 
-  if (error || !invoice) {
+  if (error) {
+    throw new Error(`Failed to load invoice: ${error.message}`);
+  }
+  if (!invoice) {
     notFound();
   }
 
