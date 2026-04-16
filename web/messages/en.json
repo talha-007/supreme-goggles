@@ -54,6 +54,7 @@
     "invoices": "Invoices",
     "purchaseOrders": "Purchase orders",
     "suppliers": "Suppliers",
+    "expenses": "Expenses",
     "settings": "Settings"
   },
   "shell": {
@@ -152,6 +153,23 @@
     "whatsappSectionDesc": "Configure the server env: {phoneId}, {token}, and a UTILITY template named {template} using named placeholders only (lowercase snake_case). Either two body variables {varTitle} and {varBody}, or set {singleBody} and use a single {varBodyOnly} (title and body are combined). If Meta says the template has too many variables for its length, add more fixed text in the template body or use the single-variable option. Override names with {paramTitle} / {paramBody}. Daily digests run via {cronPath} + {cronSecret} and {serviceKey}.",
     "adminConsole": "Platform admin — subscriptions",
     "adminConsoleDesc": "Open the superadmin dashboard to set subscription status for each business."
+  },
+  "expenses": {
+    "title": "Business expenses",
+    "subtitle": "Track non-inventory business spending across your shop.",
+    "addExpense": "Add expense",
+    "statsPeriodLabel": "Period",
+    "statSales": "Sales",
+    "statExpenses": "Expenses",
+    "statNet": "Net",
+    "statNetHint": "Margin {margin}%",
+    "empty": "No expenses yet.",
+    "addOne": "Add one",
+    "colDate": "Date",
+    "colCategory": "Category",
+    "colDescription": "Description",
+    "colVendor": "Vendor",
+    "colPayment": "Payment"
   },
   "admin": {
     "title": "Platform admin",

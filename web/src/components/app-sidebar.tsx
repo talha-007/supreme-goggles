@@ -9,6 +9,7 @@ export const appNav = [
   { href: "/dashboard/invoices", key: "invoices" },
   { href: "/dashboard/purchase-orders", key: "purchaseOrders" },
   { href: "/dashboard/suppliers", key: "suppliers" },
+  { href: "/dashboard/expenses", key: "expenses" },
   { href: "/dashboard/settings", key: "settings" },
 ] as const;
 
