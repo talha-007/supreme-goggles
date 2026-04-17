@@ -147,12 +147,23 @@
   "settings": {
     "title": "ترتیبات",
     "subtitle": "انوائس ڈیفالٹس اور مالک کے WhatsApp الرٹس۔",
+    "profileSection": "کاروباری پروفائل",
+    "profileSectionDesc": "کاروبار کا نام اور لوگو اپ ڈیٹ کریں۔",
     "invoiceSection": "انوائس اور ٹیکس ڈیفالٹس",
     "invoiceSectionDesc": "نئی انوائسز ان اقدار سے شروع ہوتی ہیں۔ ہر فروخت پر ٹیکس اور چھوٹ بدل سکتے ہیں۔",
     "whatsappSection": "WhatsApp الرٹس",
     "whatsappSectionDesc": "سرور ماحولیات: {phoneId}، {token}، اور UTILITY ٹیمپلیٹ {template} — صرف نام والے پلیس ہولڈرز (snake_case)۔ یا دو باڈی متغیرات {varTitle} اور {varBody}، یا {singleBody} سیٹ کر کے ایک {varBodyOnly}۔ اگر Meta طول کے مقابلے میں زیادہ متغیر کہے تو جملہ بڑھائیں یا ایک متغیر استعمال کریں۔ نام {paramTitle} / {paramBody} سے۔ روزانہ ڈائجسٹ {cronPath} + {cronSecret} اور {serviceKey} کے ساتھ۔",
     "adminConsole": "پلیٹ فارم ایڈمن — سبسکرپشنز",
     "adminConsoleDesc": "ہر کاروبار کی سبسکرپشن حالت سیٹ کرنے کے لیے سپر ایڈمن ڈیش بورڈ کھولیں۔"
+  },
+  "businessProfile": {
+    "businessName": "کاروبار کا نام",
+    "logo": "کاروبار کا لوگو",
+    "logoAlt": "کاروبار کے لوگو کا پیش منظر",
+    "logoPreview": "موجودہ لوگو",
+    "logoHint": "JPEG، PNG، GIF یا WebP۔ زیادہ سے زیادہ 2MB۔",
+    "removeLogo": "موجودہ لوگو ہٹائیں",
+    "saveButton": "پروفائل محفوظ کریں"
   },
   "expenses": {
     "title": "کاروباری اخراجات",

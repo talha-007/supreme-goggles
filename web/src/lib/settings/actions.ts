@@ -4,6 +4,7 @@ import {
   requireBusinessContext,
   canManageBusinessSettings,
 } from "@/lib/auth/business-context";
+import { deleteBusinessLogoByUrl, uploadBusinessLogo } from "@/lib/storage/business-logos";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -20,6 +21,11 @@ export type BusinessWhatsAppSettings = {
   whatsapp_notify_po: boolean;
   whatsapp_notify_receive: boolean;
   whatsapp_notify_low_stock: boolean;
+};
+
+export type BusinessProfileSettings = {
+  name: string;
+  logo_url: string | null;
 };
 
 export type SettingsActionState = { error?: string };
@@ -105,6 +111,22 @@ export async function getBusinessWhatsAppSettings(): Promise<BusinessWhatsAppSet
   };
 }
 
+export async function getBusinessProfileSettings(): Promise<BusinessProfileSettings | null> {
+  const ctx = await requireBusinessContext();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("businesses")
+    .select("name, logo_url")
+    .eq("id", ctx.businessId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return {
+    name: String(data.name ?? ""),
+    logo_url: (data.logo_url as string | null) ?? null,
+  };
+}
+
 export async function updateBusinessWhatsAppSettings(
   _prev: SettingsActionState,
   formData: FormData,
@@ -128,5 +150,59 @@ export async function updateBusinessWhatsAppSettings(
   }
 
   revalidatePath("/dashboard/settings");
+  return {};
+}
+
+export async function updateBusinessProfileSettings(
+  _prev: SettingsActionState,
+  formData: FormData,
+): Promise<SettingsActionState> {
+  const ctx = await requireBusinessContext();
+  if (!canManageBusinessSettings(ctx.role)) {
+    return { error: "Only owners and managers can change these settings." };
+  }
+
+  const supabase = await createClient();
+
+  const { data: existing } = await supabase
+    .from("businesses")
+    .select("logo_url")
+    .eq("id", ctx.businessId)
+    .maybeSingle();
+  const oldLogoUrl = (existing?.logo_url as string | null) ?? null;
+
+  let nextLogoUrl: string | null = oldLogoUrl;
+  const removeLogo = formData.get("remove_logo") === "on";
+  const logoFile = formData.get("logo");
+
+  if (logoFile instanceof File && logoFile.size > 0) {
+    const up = await uploadBusinessLogo(supabase, ctx.businessId, logoFile);
+    if ("error" in up) return { error: up.error };
+    nextLogoUrl = up.url;
+  } else if (removeLogo) {
+    nextLogoUrl = null;
+  }
+
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return { error: "Business name is required." };
+
+  const { error } = await supabase.rpc("update_business_profile_settings", {
+    p_name: name,
+    p_logo_url: nextLogoUrl ?? "",
+  });
+
+  if (error) {
+    if (nextLogoUrl && nextLogoUrl !== oldLogoUrl) {
+      await deleteBusinessLogoByUrl(supabase, nextLogoUrl);
+    }
+    return { error: error.message };
+  }
+
+  if (oldLogoUrl && oldLogoUrl !== nextLogoUrl) {
+    await deleteBusinessLogoByUrl(supabase, oldLogoUrl);
+  }
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard", "layout");
   return {};
 }

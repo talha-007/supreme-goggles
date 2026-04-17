@@ -1,3 +1,4 @@
+import { BusinessProfileForm } from "@/components/settings/business-profile-form";
 import { InvoiceDefaultsForm } from "@/components/settings/invoice-defaults-form";
 import { WhatsappSettingsForm } from "@/components/settings/whatsapp-settings-form";
 import {
@@ -5,7 +6,11 @@ import {
   requireBusinessContext,
 } from "@/lib/auth/business-context";
 import { isSuperadminUser } from "@/lib/auth/superadmin";
-import { getBusinessInvoiceDefaults, getBusinessWhatsAppSettings } from "@/lib/settings/actions";
+import {
+  getBusinessInvoiceDefaults,
+  getBusinessProfileSettings,
+  getBusinessWhatsAppSettings,
+} from "@/lib/settings/actions";
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -13,6 +18,7 @@ import Link from "next/link";
 export default async function SettingsPage() {
   const ctx = await requireBusinessContext();
   const canEditSettings = canManageBusinessSettings(ctx.role);
+  const profile = await getBusinessProfileSettings();
   const defaults = await getBusinessInvoiceDefaults();
   const wa = await getBusinessWhatsAppSettings();
   const t = await getTranslations("settings");
@@ -40,6 +46,11 @@ export default async function SettingsPage() {
     whatsapp_notify_low_stock: false,
   };
 
+  const profileInitial = profile ?? {
+    name: "Business",
+    logo_url: null as string | null,
+  };
+
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -58,6 +69,14 @@ export default async function SettingsPage() {
           <p className="mt-1 text-sm text-violet-900/90 dark:text-violet-200/85">{t("adminConsoleDesc")}</p>
         </section>
       ) : null}
+
+      <section className="mt-10 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{t("profileSection")}</h2>
+        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("profileSectionDesc")}</p>
+        <div className="mt-6">
+          <BusinessProfileForm initial={profileInitial} canEdit={canEditSettings} />
+        </div>
+      </section>
 
       <section className="mt-10 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
         <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{t("invoiceSection")}</h2>

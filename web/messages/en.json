@@ -147,12 +147,23 @@
   "settings": {
     "title": "Settings",
     "subtitle": "Invoice defaults and owner WhatsApp alerts.",
+    "profileSection": "Business profile",
+    "profileSectionDesc": "Update your business display name and logo.",
     "invoiceSection": "Invoice & tax defaults",
     "invoiceSectionDesc": "New invoices start with these values. Staff can still adjust tax and discounts on each sale.",
     "whatsappSection": "WhatsApp alerts",
     "whatsappSectionDesc": "Configure the server env: {phoneId}, {token}, and a UTILITY template named {template} using named placeholders only (lowercase snake_case). Either two body variables {varTitle} and {varBody}, or set {singleBody} and use a single {varBodyOnly} (title and body are combined). If Meta says the template has too many variables for its length, add more fixed text in the template body or use the single-variable option. Override names with {paramTitle} / {paramBody}. Daily digests run via {cronPath} + {cronSecret} and {serviceKey}.",
     "adminConsole": "Platform admin — subscriptions",
     "adminConsoleDesc": "Open the superadmin dashboard to set subscription status for each business."
+  },
+  "businessProfile": {
+    "businessName": "Business name",
+    "logo": "Business logo",
+    "logoAlt": "Business logo preview",
+    "logoPreview": "Current logo",
+    "logoHint": "JPEG, PNG, GIF, or WebP. Max 2MB.",
+    "removeLogo": "Remove current logo",
+    "saveButton": "Save profile"
   },
   "expenses": {
     "title": "Business expenses",
