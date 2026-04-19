@@ -43,9 +43,10 @@ export async function getNewInvoiceEditorData(): Promise<NewInvoiceEditorData> {
       .eq("is_active", true)
       .order("name"),
     supabase
-      .from("restaurant_waiters")
+      .from("restaurant_staff")
       .select("id, name")
       .eq("business_id", ctx.businessId)
+      .eq("role", "waiter")
       .eq("is_active", true)
       .order("name"),
     getBusinessInvoiceDefaults(),
@@ -69,18 +70,20 @@ export async function getNewInvoiceEditorData(): Promise<NewInvoiceEditorData> {
 }
 
 /** Full product rows for POS grid (images, categories). */
-export async function getPosCatalogProducts(): Promise<ProductRow[]> {
+export async function getPosCatalogProducts(options?: { menuOnly?: boolean }): Promise<ProductRow[]> {
   const ctx = await requireBusinessContext();
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let q = supabase
     .from("products")
     .select(
-      "id, business_id, name, sku, barcode, category, brand, description, unit, purchase_price, sale_price, current_stock, reorder_level, is_active, image_url, created_at, updated_at",
+      "id, business_id, name, sku, barcode, category, brand, description, unit, purchase_price, sale_price, current_stock, reorder_level, requires_prescription, mrp, is_menu_item, is_active, image_url, created_at, updated_at",
     )
     .eq("business_id", ctx.businessId)
-    .eq("is_active", true)
-    .order("name")
-    .limit(500);
+    .eq("is_active", true);
+  if (options?.menuOnly) {
+    q = q.eq("is_menu_item", true);
+  }
+  const { data, error } = await q.order("name").limit(500);
 
   if (error) return [];
   return (data ?? []) as ProductRow[];

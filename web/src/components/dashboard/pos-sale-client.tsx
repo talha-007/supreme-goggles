@@ -34,6 +34,8 @@ type Props = {
   customers: CustomerOption[];
   restaurantTables?: { id: string; name: string }[];
   restaurantWaiters?: { id: string; name: string }[];
+  forceRestaurantMode?: boolean;
+  defaultWaiterId?: string | null;
   invoiceDefaults: InvoiceEditorDefaults | null;
   cancelHref: string;
   firstDraftSaveBehavior: "navigate-to-edit" | "refresh-only";
@@ -77,6 +79,8 @@ export function PosSaleClient({
   customers,
   restaurantTables = [],
   restaurantWaiters = [],
+  forceRestaurantMode = false,
+  defaultWaiterId = null,
   invoiceDefaults = null,
   cancelHref,
   firstDraftSaveBehavior,
@@ -116,7 +120,7 @@ export function PosSaleClient({
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState("");
   const [restaurantTableId, setRestaurantTableId] = useState("");
-  const [waiterId, setWaiterId] = useState("");
+  const [waiterId, setWaiterId] = useState(defaultWaiterId ?? "");
   const [serviceMode, setServiceMode] = useState<"counter" | "dine_in" | "takeaway" | "delivery">("counter");
   const [restaurantOrderStatus, setRestaurantOrderStatus] = useState<
     "new" | "preparing" | "served" | "settled"
@@ -263,11 +267,16 @@ export function PosSaleClient({
     if (!Number.isFinite(r) || r + 0.001 < total) return null;
     return Math.round((r - total) * 100) / 100;
   }, [cashReceived, previewTotals.total]);
+  const isRestaurantMode =
+    forceRestaurantMode || restaurantTables.length > 0 || restaurantWaiters.length > 0;
 
   const addProduct = useCallback(
     (p: ProductRow) => {
       setError(null);
-      if (p.current_stock <= 0) {
+      const restaurantMode =
+        forceRestaurantMode || restaurantTables.length > 0 || restaurantWaiters.length > 0;
+      const enforceStock = !restaurantMode || p.is_menu_item !== true;
+      if (enforceStock && p.current_stock <= 0) {
         setError(tp("outOfStock"));
         return;
       }
@@ -291,7 +300,13 @@ export function PosSaleClient({
         ];
       });
     },
-    [defaultLineDisc, tp],
+    [
+      defaultLineDisc,
+      forceRestaurantMode,
+      restaurantTables.length,
+      restaurantWaiters.length,
+      tp,
+    ],
   );
 
   function updateLineQty(i: number, delta: number) {
@@ -440,7 +455,6 @@ export function PosSaleClient({
     }) ?? "—";
 
   const showMobileCartBar = lines.length > 0 && mobileTab === "menu";
-  const isRestaurantMode = restaurantTables.length > 0 || restaurantWaiters.length > 0;
 
   return (
     <div
@@ -673,7 +687,8 @@ export function PosSaleClient({
               {filteredGrid.map((p) => {
                 const cat = p.category?.trim() || tp("uncategorized");
                 const br = p.brand?.trim() || null;
-                const out = p.current_stock <= 0;
+                const enforceStock = !isRestaurantMode || p.is_menu_item !== true;
+                const out = enforceStock && p.current_stock <= 0;
                 return (
                   <button
                     key={p.id}

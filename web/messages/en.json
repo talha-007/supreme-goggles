@@ -626,6 +626,8 @@
   },
   "pdf": {
     "invoiceHash": "Invoice #",
+    "copyLabelCustomer": "Customer Copy",
+    "copyLabelRestaurant": "Restaurant Copy",
     "status": "Status",
     "salesInvoice": "SALES INVOICE",
     "billTo": "Bill to",

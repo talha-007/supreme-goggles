@@ -26,6 +26,17 @@ export function RestaurantRealtimeAlerts({
     () => `restaurant-realtime-${mode}-${businessId}`,
     [mode, businessId],
   );
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const audioEnabledKey = `restaurant.audio.${mode}.${businessId}`;
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(audioEnabledKey);
+    if (saved === "1") setAudioEnabled(true);
+  }, [audioEnabledKey]);
+
+  useEffect(() => {
+    window.localStorage.setItem(audioEnabledKey, audioEnabled ? "1" : "0");
+  }, [audioEnabled, audioEnabledKey]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -54,6 +65,25 @@ export function RestaurantRealtimeAlerts({
 
           if (message) {
             setNotice({ id: crypto.randomUUID(), text: message });
+            if (audioEnabled) {
+              try {
+                const ctx = new window.AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = "sine";
+                osc.frequency.value = 880;
+                gain.gain.value = 0.03;
+                osc.start();
+                window.setTimeout(() => {
+                  osc.stop();
+                  ctx.close();
+                }, 180);
+              } catch {
+                // no-op
+              }
+            }
           }
 
           if (refreshTimer.current != null) {
@@ -72,7 +102,7 @@ export function RestaurantRealtimeAlerts({
       }
       supabase.removeChannel(channel);
     };
-  }, [businessId, channelName, mode, router]);
+  }, [audioEnabled, businessId, channelName, mode, router]);
 
   useEffect(() => {
     if (!notice) return;
@@ -80,11 +110,30 @@ export function RestaurantRealtimeAlerts({
     return () => window.clearTimeout(t);
   }, [notice]);
 
-  if (!notice) return null;
+  if (!notice) {
+    return (
+      <div className="mb-4 flex justify-end">
+        <button
+          type="button"
+          onClick={() => setAudioEnabled((v) => !v)}
+          className="rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+        >
+          {audioEnabled ? "Sound on" : "Sound off"}
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="mb-4 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-100">
-      {notice.text}
+    <div className="mb-4 flex items-center justify-between gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-100">
+      <span>{notice.text}</span>
+      <button
+        type="button"
+        onClick={() => setAudioEnabled((v) => !v)}
+        className="rounded-md border border-sky-300 bg-white px-2 py-0.5 text-xs text-sky-900 hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-100"
+      >
+        {audioEnabled ? "Sound on" : "Sound off"}
+      </button>
     </div>
   );
 }

@@ -431,7 +431,7 @@ export async function updateRestaurantOrderStatus(
   const supabase = await createClient();
   const { data: inv } = await supabase
     .from("invoices")
-    .select("id, business_id, status")
+    .select("id, business_id, status, restaurant_order_status")
     .eq("id", invoiceId)
     .maybeSingle();
   if (!inv || inv.business_id !== ctx.businessId) {
@@ -439,6 +439,9 @@ export async function updateRestaurantOrderStatus(
   }
   if (inv.status === "cancelled") {
     return { error: "Cancelled invoice cannot be updated." };
+  }
+  if (nextStatus === "settled" && inv.status !== "paid") {
+    return { error: "Only fully paid invoices can be marked settled." };
   }
 
   const { error } = await supabase
@@ -450,6 +453,41 @@ export async function updateRestaurantOrderStatus(
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/invoices");
+  revalidatePath(`/dashboard/invoices/${invoiceId}`);
+  return {};
+}
+
+export async function assignInvoiceWaiter(
+  invoiceId: string,
+  waiterId: string | null,
+): Promise<InvoiceActionState> {
+  const ctx = await requireBusinessContext();
+  if (!canManageInvoices(ctx.role)) {
+    return { error: "Permission denied." };
+  }
+  const supabase = await createClient();
+  const { data: inv } = await supabase
+    .from("invoices")
+    .select("id, business_id, status")
+    .eq("id", invoiceId)
+    .maybeSingle();
+  if (!inv || inv.business_id !== ctx.businessId) {
+    return { error: "Invoice not found." };
+  }
+  if (inv.status === "cancelled") {
+    return { error: "Cancelled invoice cannot be reassigned." };
+  }
+
+  const nextWaiterId = waiterId && waiterId.trim() !== "" ? waiterId : null;
+  const { error } = await supabase
+    .from("invoices")
+    .update({ waiter_id: nextWaiterId })
+    .eq("id", invoiceId)
+    .eq("business_id", ctx.businessId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/restaurant/waiter-board");
+  revalidatePath("/dashboard/restaurant/counter");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
   return {};
 }

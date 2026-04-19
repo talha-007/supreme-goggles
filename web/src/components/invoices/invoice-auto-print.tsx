@@ -25,38 +25,55 @@ export function InvoiceAutoPrint({ invoiceId }: { invoiceId: string }) {
       window.setTimeout(() => sessionStorage.removeItem(dedupeKey), 4000);
     }
 
-    const pdfUrl = `/api/invoices/${invoiceId}/pdf`;
+    const printUrls = [
+      `/api/invoices/${invoiceId}/pdf?copy=customer`,
+      `/api/invoices/${invoiceId}/pdf?copy=restaurant`,
+    ];
 
-    const iframe = document.createElement("iframe");
-    iframe.setAttribute("aria-hidden", "true");
-    iframe.style.cssText =
-      "position:fixed;inset:0;width:0;height:0;border:0;opacity:0;pointer-events:none";
-    iframe.src = pdfUrl;
+    const printOne = (pdfUrl: string) =>
+      new Promise<void>((resolve) => {
+        const iframe = document.createElement("iframe");
+        iframe.setAttribute("aria-hidden", "true");
+        iframe.style.cssText =
+          "position:fixed;inset:0;width:0;height:0;border:0;opacity:0;pointer-events:none";
+        iframe.src = pdfUrl;
 
-    const fallbackOpen = () => {
-      window.open(pdfUrl, "_blank", "noopener,noreferrer");
-      iframe.remove();
-    };
+        const fallbackOpen = () => {
+          window.open(pdfUrl, "_blank", "noopener,noreferrer");
+          iframe.remove();
+          resolve();
+        };
 
-    const fallbackTimer = window.setTimeout(fallbackOpen, 2500);
+        const fallbackTimer = window.setTimeout(fallbackOpen, 2500);
 
-    iframe.onload = () => {
-      window.clearTimeout(fallbackTimer);
-      try {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-      } catch {
-        fallbackOpen();
+        iframe.onload = () => {
+          window.clearTimeout(fallbackTimer);
+          try {
+            iframe.contentWindow?.focus();
+            iframe.contentWindow?.print();
+          } catch {
+            fallbackOpen();
+            return;
+          }
+          window.setTimeout(() => {
+            iframe.remove();
+            resolve();
+          }, 900);
+        };
+
+        iframe.onerror = () => {
+          window.clearTimeout(fallbackTimer);
+          fallbackOpen();
+        };
+
+        document.body.appendChild(iframe);
+      });
+
+    void (async () => {
+      for (const url of printUrls) {
+        await printOne(url);
       }
-      window.setTimeout(() => iframe.remove(), 60_000);
-    };
-
-    iframe.onerror = () => {
-      window.clearTimeout(fallbackTimer);
-      fallbackOpen();
-    };
-
-    document.body.appendChild(iframe);
+    })();
 
     router.replace(`/dashboard/invoices/${invoiceId}`, { scroll: false });
   }, [invoiceId, printFlag, router]);

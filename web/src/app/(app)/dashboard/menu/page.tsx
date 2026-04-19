@@ -1,4 +1,4 @@
-import { requireBusinessContext } from "@/lib/auth/business-context";
+import { requireBusinessContext, isRestrictedRestaurantStaff } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -27,6 +27,7 @@ export default async function MenuPage() {
 
   const caps = resolveBusinessCapabilities((businessRow?.type as BusinessType | null) ?? "shop", settingsRow);
   if (caps.type !== "restaurant") redirect("/dashboard");
+  if (isRestrictedRestaurantStaff(ctx)) redirect("/dashboard");
 
   const items = (rows ?? []) as {
     id: string;
@@ -46,7 +47,7 @@ export default async function MenuPage() {
           </p>
         </div>
         <Link
-          href="/dashboard/products/new"
+          href="/dashboard/products/new?menu=1"
           className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
         >
           Add menu item
@@ -78,7 +79,11 @@ export default async function MenuPage() {
                   <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-50">{item.name}</td>
                   <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{item.category ?? "—"}</td>
                   <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">PKR {Number(item.sale_price).toFixed(2)}</td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{item.is_active ? "Active" : "Inactive"}</td>
+                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
+                    <Link href={`/dashboard/products/${item.id}/edit?menu=1`} className="underline">
+                      {item.is_active ? "Active" : "Inactive"}
+                    </Link>
+                  </td>
                 </tr>
               ))
             )}

@@ -175,6 +175,7 @@ type Props = {
   items: InvoiceItemRow[];
   labels: InvoicePdfLabels;
   locale: AppLocale;
+  copyLabel?: string | null;
 };
 
 export function InvoicePdfDocument({
@@ -184,6 +185,7 @@ export function InvoicePdfDocument({
   items,
   labels,
   locale,
+  copyLabel,
 }: Props) {
   const intlTag = intlLocaleTag(locale);
   const dash = "—";
@@ -232,6 +234,11 @@ export function InvoicePdfDocument({
         <Text style={[styles.center, { fontSize: 7, fontFamily: "Helvetica-Bold", marginTop: 6 }]}>
           {labels.taxInvoiceTitle}
         </Text>
+        {copyLabel ? (
+          <Text style={[styles.center, { fontSize: 7, fontFamily: "Helvetica-Bold", marginTop: 2 }]}>
+            {copyLabel}
+          </Text>
+        ) : null}
 
         <View style={styles.divider} />
 

@@ -17,7 +17,7 @@ import ur from "../../../../../../messages/ur.json";
 export const runtime = "nodejs";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params;
@@ -82,6 +82,14 @@ export async function GET(
     ? (cookieLocale as AppLocale)
     : defaultLocale;
   const pdfLabels = (locale === "ur" ? ur : en).pdf as InvoicePdfLabels;
+  const reqUrl = new URL(request.url);
+  const copyParam = reqUrl.searchParams.get("copy");
+  const copyLabel =
+    copyParam === "customer"
+      ? pdfLabels.copyLabelCustomer
+      : copyParam === "restaurant"
+        ? pdfLabels.copyLabelRestaurant
+        : null;
 
   const buffer = await renderToBuffer(
     <InvoicePdfDocument
@@ -91,6 +99,7 @@ export async function GET(
       items={(items ?? []) as InvoiceItemRow[]}
       labels={pdfLabels}
       locale={locale}
+      copyLabel={copyLabel}
     />,
   );
 

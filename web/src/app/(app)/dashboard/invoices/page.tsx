@@ -52,7 +52,7 @@ export default async function InvoicesPage() {
         name
       ),
       restaurant_tables ( name ),
-      restaurant_waiters ( name )
+      restaurant_staff!invoices_waiter_id_fkey ( name )
     `,
     )
     .eq("business_id", ctx.businessId)
@@ -70,7 +70,7 @@ export default async function InvoicesPage() {
   type Row = InvoiceRow & {
     customers: { name: string } | null;
     restaurant_tables?: { name: string } | { name: string }[] | null;
-    restaurant_waiters?: { name: string } | { name: string }[] | null;
+    restaurant_staff?: { name: string } | { name: string }[] | null;
   };
   const invoices = (rows ?? []) as Row[];
 
@@ -121,9 +121,9 @@ export default async function InvoicesPage() {
                 const table = Array.isArray(inv.restaurant_tables)
                   ? (inv.restaurant_tables[0]?.name ?? tc("dash"))
                   : (inv.restaurant_tables?.name ?? tc("dash"));
-                const waiter = Array.isArray(inv.restaurant_waiters)
-                  ? (inv.restaurant_waiters[0]?.name ?? tc("dash"))
-                  : (inv.restaurant_waiters?.name ?? tc("dash"));
+                const waiter = Array.isArray(inv.restaurant_staff)
+                  ? (inv.restaurant_staff[0]?.name ?? tc("dash"))
+                  : (inv.restaurant_staff?.name ?? tc("dash"));
                 const orderStatus = inv.restaurant_order_status ?? "new";
                 return (
                   <tr key={inv.id} className="text-zinc-800 dark:text-zinc-200">

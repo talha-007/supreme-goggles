@@ -15,11 +15,13 @@ export function ProductEditForm({
   taxonomy,
   showPharmacyFields = false,
   showRestaurantFields = false,
+  menuMode = false,
 }: {
   product: ProductRow;
   taxonomy: ProductTaxonomy;
   showPharmacyFields?: boolean;
   showRestaurantFields?: boolean;
+  menuMode?: boolean;
 }) {
   const t = useTranslations("productFields");
   const updateAction = useMemo(
@@ -60,6 +62,7 @@ export function ProductEditForm({
         brandSuggestions={taxonomy.brands}
         showPharmacyFields={showPharmacyFields}
         showRestaurantFields={showRestaurantFields}
+        menuMode={menuMode}
       />
       {displayError ? (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">

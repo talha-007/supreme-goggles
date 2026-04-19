@@ -626,6 +626,8 @@
   },
   "pdf": {
     "invoiceHash": "انوائس #",
+    "copyLabelCustomer": "کسٹمر کاپی",
+    "copyLabelRestaurant": "ریسٹورنٹ کاپی",
     "status": "حالت",
     "salesInvoice": "فروخت انوائس",
     "billTo": "بل برائے",

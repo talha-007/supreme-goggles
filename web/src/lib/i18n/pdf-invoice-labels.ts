@@ -1,6 +1,8 @@
 /** Keys under `pdf` in messages — passed into thermal PDF generation. */
 export type InvoicePdfLabels = {
   invoiceHash: string;
+  copyLabelCustomer: string;
+  copyLabelRestaurant: string;
   status: string;
   salesInvoice: string;
   billTo: string;

@@ -1,5 +1,6 @@
 import { RestaurantRealtimeAlerts } from "@/components/restaurant/restaurant-realtime-alerts";
-import { requireBusinessContext } from "@/lib/auth/business-context";
+import { QuickStatusButton } from "@/components/restaurant/order-row-actions";
+import { requireBusinessContext, restaurantRoleGuard } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import { statusBadgeClass, type RestaurantOrderStatus } from "@/lib/restaurant/order-utils";
 import { createClient } from "@/lib/supabase/server";
@@ -28,6 +29,7 @@ export default async function CounterPage() {
   ]);
   const caps = resolveBusinessCapabilities((businessRow?.type as BusinessType | null) ?? "shop", settingsRow);
   if (caps.type !== "restaurant") redirect("/dashboard");
+  if (!restaurantRoleGuard(ctx, ["counter"])) redirect("/dashboard");
 
   const bills = (rows ?? []) as Array<{
     id: string;
@@ -79,9 +81,19 @@ export default async function CounterPage() {
                     <td className="px-4 py-3 text-right tabular-nums">{Number(b.total_amount).toFixed(2)}</td>
                     <td className="px-4 py-3 text-right tabular-nums">{Number(b.paid_amount).toFixed(2)}</td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/dashboard/invoices/${b.id}`} className="text-sm font-medium underline text-zinc-900 dark:text-zinc-100">
-                        Open bill
-                      </Link>
+                      <div className="flex flex-wrap justify-end gap-1.5">
+                        {b.restaurant_order_status === "served" ? (
+                          <QuickStatusButton
+                            invoiceId={b.id}
+                            nextStatus="settled"
+                            label="Settle"
+                            disabled={b.status !== "paid"}
+                          />
+                        ) : null}
+                        <Link href={`/dashboard/invoices/${b.id}`} className="text-sm font-medium underline text-zinc-900 dark:text-zinc-100">
+                          Open bill
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 );

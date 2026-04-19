@@ -20,6 +20,7 @@ type Props = {
   brandSuggestions?: readonly string[];
   showPharmacyFields?: boolean;
   showRestaurantFields?: boolean;
+  menuMode?: boolean;
 };
 
 export function ProductFields({
@@ -31,6 +32,7 @@ export function ProductFields({
   brandSuggestions = [],
   showPharmacyFields = false,
   showRestaurantFields = false,
+  menuMode = false,
 }: Props) {
   const t = useTranslations("productFields");
   const categoryListId = useId();
@@ -85,27 +87,31 @@ export function ProductFields({
           className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
         />
       </div>
-      <div className="sm:col-span-2 flex flex-col gap-1">
-        <label htmlFor="barcode" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {t("barcode")}
-        </label>
-        <ProductBarcodeField defaultValue={barcodeValue} autoFocus={scanMode} />
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          {t("barcodeHint", { scanMode: t("scanModeWord") })}
-        </p>
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="sku" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {t("sku")}
-        </label>
-        <input
-          id="sku"
-          name="sku"
-          type="text"
-          defaultValue={d.sku ?? ""}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        />
-      </div>
+      {!menuMode ? (
+        <>
+          <div className="sm:col-span-2 flex flex-col gap-1">
+            <label htmlFor="barcode" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {t("barcode")}
+            </label>
+            <ProductBarcodeField defaultValue={barcodeValue} autoFocus={scanMode} />
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              {t("barcodeHint", { scanMode: t("scanModeWord") })}
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="sku" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {t("sku")}
+            </label>
+            <input
+              id="sku"
+              name="sku"
+              type="text"
+              defaultValue={d.sku ?? ""}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            />
+          </div>
+        </>
+      ) : null}
       <div className="flex flex-col gap-1">
         <label htmlFor="category" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
           {t("category")}
@@ -126,46 +132,50 @@ export function ProductFields({
           </datalist>
         ) : null}
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="brand" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {t("brand")}
-        </label>
-        <input
-          id="brand"
-          name="brand"
-          type="text"
-          list={brandSuggestions.length > 0 ? brandListId : undefined}
-          defaultValue={d.brand ?? ""}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        />
-        {brandSuggestions.length > 0 ? (
-          <datalist id={brandListId}>
-            {brandSuggestions.map((s) => (
-              <option key={s} value={s} />
-            ))}
-          </datalist>
-        ) : null}
-      </div>
-      {categorySuggestions.length > 0 || brandSuggestions.length > 0 ? (
+      {!menuMode ? (
+        <div className="flex flex-col gap-1">
+          <label htmlFor="brand" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            {t("brand")}
+          </label>
+          <input
+            id="brand"
+            name="brand"
+            type="text"
+            list={brandSuggestions.length > 0 ? brandListId : undefined}
+            defaultValue={d.brand ?? ""}
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          />
+          {brandSuggestions.length > 0 ? (
+            <datalist id={brandListId}>
+              {brandSuggestions.map((s) => (
+                <option key={s} value={s} />
+              ))}
+            </datalist>
+          ) : null}
+        </div>
+      ) : null}
+      {categorySuggestions.length > 0 || (!menuMode && brandSuggestions.length > 0) ? (
         <p className="text-xs text-zinc-500 dark:text-zinc-400 sm:col-span-2">{t("taxonomyHint")}</p>
       ) : null}
-      <div className="flex flex-col gap-1">
-        <label htmlFor="unit" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {t("unit")}
-        </label>
-        <select
-          id="unit"
-          name="unit"
-          defaultValue={d.unit ?? "pcs"}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        >
-          {PRODUCT_UNITS.map((u) => (
-            <option key={u} value={u}>
-              {u}
-            </option>
-          ))}
-        </select>
-      </div>
+      {!menuMode ? (
+        <div className="flex flex-col gap-1">
+          <label htmlFor="unit" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            {t("unit")}
+          </label>
+          <select
+            id="unit"
+            name="unit"
+            defaultValue={d.unit ?? "pcs"}
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          >
+            {PRODUCT_UNITS.map((u) => (
+              <option key={u} value={u}>
+                {u}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
       <div className="sm:col-span-2 flex flex-col gap-1">
         <label htmlFor="description" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
           {t("description")}
@@ -178,20 +188,24 @@ export function ProductFields({
           className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
         />
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="purchase_price" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {t("purchasePrice")}
-        </label>
-        <input
-          id="purchase_price"
-          name="purchase_price"
-          type="number"
-          min={0}
-          step="0.01"
-          defaultValue={d.purchase_price ?? 0}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        />
-      </div>
+      {!menuMode ? (
+        <div className="flex flex-col gap-1">
+          <label htmlFor="purchase_price" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            {t("purchasePrice")}
+          </label>
+          <input
+            id="purchase_price"
+            name="purchase_price"
+            type="number"
+            min={0}
+            step="0.01"
+            defaultValue={d.purchase_price ?? 0}
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          />
+        </div>
+      ) : (
+        <input type="hidden" name="purchase_price" value={String(d.purchase_price ?? 0)} />
+      )}
       <div className="flex flex-col gap-1">
         <label htmlFor="sale_price" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
           {t("salePrice")}
@@ -237,47 +251,64 @@ export function ProductFields({
         </>
       ) : null}
       {showRestaurantFields ? (
-        <div className="sm:col-span-2 flex items-center gap-2">
-          <input
-            id="is_menu_item"
-            name="is_menu_item"
-            type="checkbox"
-            defaultChecked={d.is_menu_item === true}
-            className="size-4 rounded border-zinc-300"
-          />
-          <label htmlFor="is_menu_item" className="text-sm text-zinc-700 dark:text-zinc-300">
-            {t("isMenuItem")}
-          </label>
-        </div>
+        menuMode ? (
+          <input type="hidden" name="is_menu_item" value="on" />
+        ) : (
+          <div className="sm:col-span-2 flex items-center gap-2">
+            <input
+              id="is_menu_item"
+              name="is_menu_item"
+              type="checkbox"
+              defaultChecked={d.is_menu_item === true}
+              className="size-4 rounded border-zinc-300"
+            />
+            <label htmlFor="is_menu_item" className="text-sm text-zinc-700 dark:text-zinc-300">
+              {t("isMenuItem")}
+            </label>
+          </div>
+        )
       ) : null}
-      <div className="flex flex-col gap-1">
-        <label htmlFor="current_stock" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {t("currentStock")}
-        </label>
-        <input
-          id="current_stock"
-          name="current_stock"
-          type="number"
-          min={0}
-          step="0.001"
-          defaultValue={d.current_stock ?? 0}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="reorder_level" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {t("reorderLevel")}
-        </label>
-        <input
-          id="reorder_level"
-          name="reorder_level"
-          type="number"
-          min={0}
-          step="0.001"
-          defaultValue={d.reorder_level ?? 0}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        />
-      </div>
+      {!menuMode ? (
+        <>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="current_stock" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {t("currentStock")}
+            </label>
+            <input
+              id="current_stock"
+              name="current_stock"
+              type="number"
+              min={0}
+              step="0.001"
+              defaultValue={d.current_stock ?? 0}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="reorder_level" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {t("reorderLevel")}
+            </label>
+            <input
+              id="reorder_level"
+              name="reorder_level"
+              type="number"
+              min={0}
+              step="0.001"
+              defaultValue={d.reorder_level ?? 0}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            />
+          </div>
+        </>
+      ) : (
+        <>
+          <input type="hidden" name="current_stock" value={String(d.current_stock ?? 0)} />
+          <input type="hidden" name="reorder_level" value={String(d.reorder_level ?? 0)} />
+          <input type="hidden" name="sku" value={d.sku ?? ""} />
+          <input type="hidden" name="barcode" value={d.barcode ?? ""} />
+          <input type="hidden" name="brand" value={d.brand ?? ""} />
+          <input type="hidden" name="unit" value={d.unit ?? "pcs"} />
+        </>
+      )}
       <div className="sm:col-span-2 flex items-center gap-2 pt-1">
         <input
           id="is_active"

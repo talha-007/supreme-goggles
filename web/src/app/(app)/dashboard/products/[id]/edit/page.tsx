@@ -9,8 +9,10 @@ import { notFound, redirect } from "next/navigation";
 
 export default async function EditProductPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ menu?: string }>;
 }) {
   const ctx = await requireBusinessContext();
   if (!canManageProducts(ctx.role)) {
@@ -18,6 +20,8 @@ export default async function EditProductPage({
   }
 
   const { id } = await params;
+  const sp = await searchParams;
+  const menuMode = sp.menu === "1";
   const supabase = await createClient();
   const { data: row, error } = await supabase
     .from("products")
@@ -60,7 +64,7 @@ export default async function EditProductPage({
           ← Back to products
         </Link>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Edit product
+          {menuMode ? "Edit menu item" : "Edit product"}
         </h1>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{product.name}</p>
       </div>
@@ -70,6 +74,7 @@ export default async function EditProductPage({
           taxonomy={taxonomy}
           showPharmacyFields={caps.batchExpiry || caps.prescriptionFlow}
           showRestaurantFields={caps.tableService || caps.kotPrinting || caps.type === "restaurant"}
+          menuMode={menuMode}
         />
       </div>
     </div>

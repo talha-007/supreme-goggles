@@ -19,6 +19,7 @@ import type { ProductRow } from "@/types/product";
 import type { PurchaseOrderStatus } from "@/types/purchase-order";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 const statusStyle: Record<string, string> = {
   draft: "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200",
@@ -85,6 +86,11 @@ export default async function DashboardPage({
   ]);
   const caps = resolveBusinessCapabilities((businessRow?.type as BusinessType | null) ?? "shop", settingsRow);
   const isRestaurant = caps.type === "restaurant";
+  if (isRestaurant && ctx.restaurantStaffRole) {
+    if (ctx.restaurantStaffRole === "waiter") redirect("/dashboard/restaurant/waiter-board");
+    if (ctx.restaurantStaffRole === "chef") redirect("/dashboard/restaurant/kitchen");
+    if (ctx.restaurantStaffRole === "counter") redirect("/dashboard/restaurant/counter");
+  }
 
   const now = new Date();
   const { start: periodStart, end: periodEnd } = getStatsPeriodRange(statsPeriod, now);
@@ -284,6 +290,7 @@ export default async function DashboardPage({
               customers={invoiceEditorData.customers}
               restaurantTables={invoiceEditorData.restaurantTables}
               restaurantWaiters={invoiceEditorData.restaurantWaiters}
+              forceRestaurantMode={isRestaurant}
               invoiceDefaults={invoiceEditorData.invoiceDefaults}
               cancelHref="/dashboard"
               firstDraftSaveBehavior="refresh-only"

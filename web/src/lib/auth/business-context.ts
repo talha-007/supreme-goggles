@@ -8,6 +8,7 @@ export type BusinessContext = {
   userEmail: string | null;
   businessId: string;
   role: MemberRole;
+  restaurantStaffRole: "waiter" | "chef" | "counter" | null;
 };
 
 const getBusinessContextCached = cache(async (): Promise<BusinessContext | null> => {
@@ -28,11 +29,31 @@ const getBusinessContextCached = cache(async (): Promise<BusinessContext | null>
   const row = rows?.[0];
   if (memErr || !row?.business_id) return null;
 
+  let restaurantStaffRole: BusinessContext["restaurantStaffRole"] = null;
+  const { data: businessRow } = await supabase
+    .from("businesses")
+    .select("type")
+    .eq("id", row.business_id)
+    .maybeSingle();
+  if (businessRow?.type === "restaurant") {
+    const { data: staffRow } = await supabase
+      .from("restaurant_staff")
+      .select("role, is_active")
+      .eq("business_id", row.business_id)
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (staffRow?.role === "waiter" || staffRow?.role === "chef" || staffRow?.role === "counter") {
+      restaurantStaffRole = staffRow.role;
+    }
+  }
+
   return {
     userId: user.id,
     userEmail: user.email ?? null,
     businessId: row.business_id,
     role: row.role as MemberRole,
+    restaurantStaffRole,
   };
 });
 
@@ -70,4 +91,16 @@ export function canManageInvoices(_role: MemberRole): boolean {
 
 export function canManageBusinessSettings(_role: MemberRole): boolean {
   return true;
+}
+
+export function restaurantRoleGuard(
+  ctx: BusinessContext,
+  allowed: Array<"waiter" | "chef" | "counter">,
+): boolean {
+  if (!ctx.restaurantStaffRole) return true;
+  return allowed.includes(ctx.restaurantStaffRole);
+}
+
+export function isRestrictedRestaurantStaff(ctx: BusinessContext): boolean {
+  return ctx.restaurantStaffRole === "waiter" || ctx.restaurantStaffRole === "chef" || ctx.restaurantStaffRole === "counter";
 }

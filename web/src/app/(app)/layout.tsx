@@ -66,6 +66,7 @@ export default async function AppLayout({
       businessName={businessName}
       businessLogoUrl={businessLogoUrl}
       capabilities={capabilities}
+      restaurantStaffRole={ctx.restaurantStaffRole}
       brandTitle={tCommon("brand")}
       navLinks={navLinks}
     >

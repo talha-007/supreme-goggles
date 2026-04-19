@@ -65,7 +65,7 @@ export default async function InvoiceDetailPage({
         address
       ),
       restaurant_tables ( name ),
-      restaurant_waiters ( name )
+      restaurant_staff!invoices_waiter_id_fkey ( name )
     `,
     )
     .eq("id", id)
@@ -82,14 +82,14 @@ export default async function InvoiceDetailPage({
   const inv = invoice as InvoiceRow & {
     customers: { name: string; phone: string | null; address: string | null } | null;
     restaurant_tables?: { name: string } | { name: string }[] | null;
-    restaurant_waiters?: { name: string } | { name: string }[] | null;
+    restaurant_staff?: { name: string } | { name: string }[] | null;
   };
   const tableName = Array.isArray(inv.restaurant_tables)
     ? (inv.restaurant_tables[0]?.name ?? null)
     : (inv.restaurant_tables?.name ?? null);
-  const waiterName = Array.isArray(inv.restaurant_waiters)
-    ? (inv.restaurant_waiters[0]?.name ?? null)
-    : (inv.restaurant_waiters?.name ?? null);
+  const waiterName = Array.isArray(inv.restaurant_staff)
+    ? (inv.restaurant_staff[0]?.name ?? null)
+    : (inv.restaurant_staff?.name ?? null);
 
   const { data: items } = await supabase
     .from("invoice_items")
@@ -142,7 +142,7 @@ export default async function InvoiceDetailPage({
         </div>
         <div className="flex w-full max-w-full flex-wrap gap-2 sm:justify-end">
           <a
-            href={`/api/invoices/${id}/pdf`}
+            href={`/api/invoices/${id}/pdf?copy=customer`}
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"

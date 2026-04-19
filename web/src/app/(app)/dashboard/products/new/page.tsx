@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 export default async function NewProductPage({
   searchParams,
 }: {
-  searchParams: Promise<{ barcode?: string; scan?: string }>;
+  searchParams: Promise<{ barcode?: string; scan?: string; menu?: string }>;
 }) {
   const ctx = await requireBusinessContext();
   if (!canManageProducts(ctx.role)) {
@@ -19,6 +19,7 @@ export default async function NewProductPage({
   const params = await searchParams;
   const barcodeFromUrl = params.barcode?.trim() ? params.barcode.trim().slice(0, 80) : undefined;
   const scanMode = params.scan === "1";
+  const menuMode = params.menu === "1";
   const supabase = await createClient();
   const [{ data: businessRow }, { data: settingsRow }] = await Promise.all([
     supabase.from("businesses").select("type").eq("id", ctx.businessId).maybeSingle(),
@@ -46,16 +47,22 @@ export default async function NewProductPage({
           ← Back to products
         </Link>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Add product
+          {menuMode ? "Add menu item" : "Add product"}
         </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Stock can also be adjusted later from invoices and purchase orders. Use a barcode scanner on
-          the barcode field, or open{" "}
-          <Link href="/dashboard/products?scan=1" className="font-medium underline">
-            Products in scan mode
-          </Link>{" "}
-          to find items quickly.
-        </p>
+        {menuMode ? (
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            Create restaurant menu items with only menu-relevant fields.
+          </p>
+        ) : (
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            Stock can also be adjusted later from invoices and purchase orders. Use a barcode scanner on
+            the barcode field, or open{" "}
+            <Link href="/dashboard/products?scan=1" className="font-medium underline">
+              Products in scan mode
+            </Link>{" "}
+            to find items quickly.
+          </p>
+        )}
       </div>
       <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
         <ProductCreateForm
@@ -64,6 +71,7 @@ export default async function NewProductPage({
           taxonomy={taxonomy}
           showPharmacyFields={caps.batchExpiry || caps.prescriptionFlow}
           showRestaurantFields={caps.tableService || caps.kotPrinting || caps.type === "restaurant"}
+          menuMode={menuMode}
         />
       </div>
     </div>

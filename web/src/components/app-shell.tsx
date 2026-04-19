@@ -12,6 +12,7 @@ type Props = {
   businessName: string;
   businessLogoUrl?: string | null;
   capabilities?: BusinessCapabilities;
+  restaurantStaffRole?: "waiter" | "chef" | "counter" | null;
   brandTitle: string;
   navLinks: readonly NavLinkItem[];
   children: React.ReactNode;
@@ -28,6 +29,7 @@ export function AppShell({
   businessName,
   businessLogoUrl,
   capabilities,
+  restaurantStaffRole,
   brandTitle,
   navLinks,
   children,
@@ -58,24 +60,34 @@ export function AppShell({
 
   const effectiveNavLinks =
     capabilities?.type === "restaurant"
-      ? navLinks.filter((item) =>
-          [
-            "dashboard",
-            "menu",
-            "tables",
-            "waiters",
-            "waiterBoard",
-            "kitchen",
-            "counter",
-            "staff",
-            "invoices",
-            "customers",
-            "products",
-            "settings",
-          ].includes(
-            item.key,
-          ),
-        )
+      ? (restaurantStaffRole
+          ? navLinks.filter((item) => {
+              if (restaurantStaffRole === "waiter") {
+                return ["dashboard", "waiterBoard"].includes(item.key);
+              }
+              if (restaurantStaffRole === "chef") {
+                return ["dashboard", "kitchen"].includes(item.key);
+              }
+              return ["dashboard", "counter"].includes(item.key);
+            })
+          : navLinks.filter((item) =>
+              [
+                "dashboard",
+                "menu",
+                "tables",
+                "waiters",
+                "waiterBoard",
+                "kitchen",
+                "counter",
+                "staff",
+                "invoices",
+                "customers",
+                "products",
+                "settings",
+              ].includes(
+                item.key,
+              ),
+            ))
       : navLinks.filter((item) => !["menu", "tables", "waiters", "kitchen", "counter", "staff"].includes(item.key));
 
   useEffect(() => {
