@@ -28,6 +28,12 @@ export type ProductRow = {
   sale_price: number;
   current_stock: number;
   reorder_level: number;
+  /** Pharmacy flow: product requires prescription to sell. */
+  requires_prescription: boolean;
+  /** Pharmacy flow: optional MRP (maximum retail price). */
+  mrp: number | null;
+  /** Restaurant flow: true when this product is sold as a menu item. */
+  is_menu_item: boolean;
   is_active: boolean;
   /** Public URL from Supabase Storage (`product-images` bucket). */
   image_url: string | null;

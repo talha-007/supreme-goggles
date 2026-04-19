@@ -1,5 +1,6 @@
 import { ProductEditForm } from "@/components/products/product-edit-form";
 import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-context";
+import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import { getProductTaxonomy } from "@/lib/products/taxonomy";
 import { createClient } from "@/lib/supabase/server";
 import type { ProductRow } from "@/types/product";
@@ -33,6 +34,20 @@ export default async function EditProductPage({
   }
 
   const product = row as ProductRow;
+  const [{ data: businessRow }, { data: settingsRow }] = await Promise.all([
+    supabase.from("businesses").select("type").eq("id", ctx.businessId).maybeSingle(),
+    supabase
+      .from("business_settings")
+      .select(
+        "enable_table_service, enable_batch_expiry, enable_prescription_flow, enable_kot_printing, enable_quick_service_mode, default_tax_mode, rounding_rule",
+      )
+      .eq("business_id", ctx.businessId)
+      .maybeSingle(),
+  ]);
+  const caps = resolveBusinessCapabilities(
+    (businessRow?.type as BusinessType | null) ?? "shop",
+    settingsRow,
+  );
   const taxonomy = await getProductTaxonomy();
 
   return (
@@ -50,7 +65,12 @@ export default async function EditProductPage({
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{product.name}</p>
       </div>
       <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-        <ProductEditForm product={product} taxonomy={taxonomy} />
+        <ProductEditForm
+          product={product}
+          taxonomy={taxonomy}
+          showPharmacyFields={caps.batchExpiry || caps.prescriptionFlow}
+          showRestaurantFields={caps.tableService || caps.kotPrinting || caps.type === "restaurant"}
+        />
       </div>
     </div>
   );

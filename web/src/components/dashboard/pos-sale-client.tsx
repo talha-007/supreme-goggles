@@ -32,6 +32,8 @@ import {
 type Props = {
   initialCatalogProducts: ProductRow[];
   customers: CustomerOption[];
+  restaurantTables?: { id: string; name: string }[];
+  restaurantWaiters?: { id: string; name: string }[];
   invoiceDefaults: InvoiceEditorDefaults | null;
   cancelHref: string;
   firstDraftSaveBehavior: "navigate-to-edit" | "refresh-only";
@@ -73,6 +75,8 @@ function tagClassForCategory(name: string): string {
 export function PosSaleClient({
   initialCatalogProducts,
   customers,
+  restaurantTables = [],
+  restaurantWaiters = [],
   invoiceDefaults = null,
   cancelHref,
   firstDraftSaveBehavior,
@@ -111,6 +115,12 @@ export function PosSaleClient({
   const defaultLineDisc = invoiceDefaults?.defaultLineDiscountPct ?? 0;
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState("");
+  const [restaurantTableId, setRestaurantTableId] = useState("");
+  const [waiterId, setWaiterId] = useState("");
+  const [serviceMode, setServiceMode] = useState<"counter" | "dine_in" | "takeaway" | "delivery">("counter");
+  const [restaurantOrderStatus, setRestaurantOrderStatus] = useState<
+    "new" | "preparing" | "served" | "settled"
+  >("new");
   const [discountAmount, setDiscountAmount] = useState(
     String(invoiceDefaults?.defaultInvoiceDiscountAmount ?? 0),
   );
@@ -315,6 +325,10 @@ export function PosSaleClient({
     return {
       invoiceId,
       customerId: customerId || null,
+      restaurantTableId: restaurantTableId || null,
+      waiterId: waiterId || null,
+      serviceMode,
+      restaurantOrderStatus,
       discount_amount: disc,
       tax_rate: tax,
       notes: notes.trim() || null,
@@ -426,6 +440,7 @@ export function PosSaleClient({
     }) ?? "—";
 
   const showMobileCartBar = lines.length > 0 && mobileTab === "menu";
+  const isRestaurantMode = restaurantTables.length > 0 || restaurantWaiters.length > 0;
 
   return (
     <div
@@ -936,6 +951,34 @@ export function PosSaleClient({
                   </option>
                 ))}
               </select>
+              {isRestaurantMode ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <select
+                    value={restaurantTableId}
+                    onChange={(e) => setRestaurantTableId(e.target.value)}
+                    className="min-h-[44px] rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+                  >
+                    <option value="">{tp("tableOptional")}</option>
+                    {restaurantTables.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={waiterId}
+                    onChange={(e) => setWaiterId(e.target.value)}
+                    className="min-h-[44px] rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+                  >
+                    <option value="">{tp("waiterOptional")}</option>
+                    {restaurantWaiters.map((w) => (
+                      <option key={w.id} value={w.id}>
+                        {w.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
             </div>
 
             <div className="space-y-2 px-3 pb-3 sm:px-4">
@@ -1011,6 +1054,38 @@ export function PosSaleClient({
                     className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-900"
                   />
                 </div>
+                {isRestaurantMode ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-zinc-500">{tp("serviceMode")}</label>
+                      <select
+                        value={serviceMode}
+                        onChange={(e) => setServiceMode(e.target.value as typeof serviceMode)}
+                        className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-900"
+                      >
+                        <option value="counter">{tp("serviceCounter")}</option>
+                        <option value="dine_in">{tp("serviceDineIn")}</option>
+                        <option value="takeaway">{tp("serviceTakeaway")}</option>
+                        <option value="delivery">{tp("serviceDelivery")}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-zinc-500">{tp("orderStatus")}</label>
+                      <select
+                        value={restaurantOrderStatus}
+                        onChange={(e) =>
+                          setRestaurantOrderStatus(e.target.value as typeof restaurantOrderStatus)
+                        }
+                        className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-900"
+                      >
+                        <option value="new">{tp("orderStatusNew")}</option>
+                        <option value="preparing">{tp("orderStatusPreparing")}</option>
+                        <option value="served">{tp("orderStatusServed")}</option>
+                        <option value="settled">{tp("orderStatusSettled")}</option>
+                      </select>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </details>
 

@@ -1,7 +1,9 @@
 import { InvoiceAutoPrint } from "@/components/invoices/invoice-auto-print";
 import { InvoiceFinalizeButtons } from "@/components/invoices/invoice-detail-actions";
 import { InvoicePaymentForm } from "@/components/invoices/invoice-payment-form";
+import { RestaurantOrderStatusButtons } from "@/components/invoices/restaurant-order-status-buttons";
 import { InvoiceReverseButton } from "@/components/invoices/invoice-reverse-button";
+import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import { requireBusinessContext, canManageInvoices } from "@/lib/auth/business-context";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { createClient } from "@/lib/supabase/server";
@@ -32,6 +34,18 @@ export default async function InvoiceDetailPage({
   const t = await getTranslations("invoiceDetail");
   const tStatus = await getTranslations("invoiceStatus");
   const tPay = await getTranslations("invoicePayment");
+  const [{ data: businessRow }, { data: settingsRow }] = await Promise.all([
+    supabase.from("businesses").select("type").eq("id", ctx.businessId).maybeSingle(),
+    supabase
+      .from("business_settings")
+      .select(
+        "enable_table_service, enable_batch_expiry, enable_prescription_flow, enable_kot_printing, enable_quick_service_mode, default_tax_mode, rounding_rule",
+      )
+      .eq("business_id", ctx.businessId)
+      .maybeSingle(),
+  ]);
+  const caps = resolveBusinessCapabilities((businessRow?.type as BusinessType | null) ?? "shop", settingsRow);
+  const isRestaurant = caps.type === "restaurant";
 
   const pkr = new Intl.NumberFormat(intlTag, {
     style: "currency",
@@ -49,7 +63,9 @@ export default async function InvoiceDetailPage({
         name,
         phone,
         address
-      )
+      ),
+      restaurant_tables ( name ),
+      restaurant_waiters ( name )
     `,
     )
     .eq("id", id)
@@ -65,7 +81,15 @@ export default async function InvoiceDetailPage({
 
   const inv = invoice as InvoiceRow & {
     customers: { name: string; phone: string | null; address: string | null } | null;
+    restaurant_tables?: { name: string } | { name: string }[] | null;
+    restaurant_waiters?: { name: string } | { name: string }[] | null;
   };
+  const tableName = Array.isArray(inv.restaurant_tables)
+    ? (inv.restaurant_tables[0]?.name ?? null)
+    : (inv.restaurant_tables?.name ?? null);
+  const waiterName = Array.isArray(inv.restaurant_waiters)
+    ? (inv.restaurant_waiters[0]?.name ?? null)
+    : (inv.restaurant_waiters?.name ?? null);
 
   const { data: items } = await supabase
     .from("invoice_items")
@@ -160,6 +184,26 @@ export default async function InvoiceDetailPage({
             ) : (
               <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{t("walkIn")}</p>
             )}
+            {isRestaurant ? (
+              <div className="mt-3 grid gap-2 text-sm text-zinc-700 dark:text-zinc-300 sm:grid-cols-2">
+                <p>
+                  <span className="text-zinc-500 dark:text-zinc-400">Table: </span>
+                  {tableName ?? "—"}
+                </p>
+                <p>
+                  <span className="text-zinc-500 dark:text-zinc-400">Waiter: </span>
+                  {waiterName ?? "—"}
+                </p>
+                <p className="capitalize">
+                  <span className="text-zinc-500 dark:text-zinc-400">Service: </span>
+                  {String(inv.service_mode ?? "counter").replace("_", " ")}
+                </p>
+                <p className="capitalize">
+                  <span className="text-zinc-500 dark:text-zinc-400">Order: </span>
+                  {String(inv.restaurant_order_status ?? "new").replace("_", " ")}
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
@@ -243,6 +287,24 @@ export default async function InvoiceDetailPage({
 
           {canEdit && (inv.status === "unpaid" || inv.status === "partial") && balance > 0.001 ? (
             <InvoicePaymentForm invoiceId={id} balanceDue={balance} />
+          ) : null}
+          {canEdit && isRestaurant && inv.status !== "cancelled" ? (
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Order status</h3>
+              <div className="mt-2">
+                <RestaurantOrderStatusButtons
+                  invoiceId={id}
+                  currentStatus={
+                    (inv.restaurant_order_status ?? "new") as
+                      | "new"
+                      | "preparing"
+                      | "ready"
+                      | "served"
+                      | "settled"
+                  }
+                />
+              </div>
+            </div>
           ) : null}
 
           <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">

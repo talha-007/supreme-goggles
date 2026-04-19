@@ -9,13 +9,21 @@ export type NewInvoiceEditorData = {
   customers: CustomerOption[];
   products: ProductOption[];
   invoiceDefaults: InvoiceEditorDefaults | null;
+  restaurantTables: { id: string; name: string }[];
+  restaurantWaiters: { id: string; name: string }[];
 };
 
 export async function getNewInvoiceEditorData(): Promise<NewInvoiceEditorData> {
   const ctx = await requireBusinessContext();
   const supabase = await createClient();
 
-  const [{ data: products }, { data: customers }, businessDefaults] = await Promise.all([
+  const [
+    { data: products },
+    { data: customers },
+    { data: tables, error: tablesErr },
+    { data: waiters, error: waitersErr },
+    businessDefaults,
+  ] = await Promise.all([
     supabase
       .from("products")
       .select("id, name, unit, sale_price")
@@ -24,6 +32,18 @@ export async function getNewInvoiceEditorData(): Promise<NewInvoiceEditorData> {
       .order("name"),
     supabase
       .from("customers")
+      .select("id, name")
+      .eq("business_id", ctx.businessId)
+      .eq("is_active", true)
+      .order("name"),
+    supabase
+      .from("restaurant_tables")
+      .select("id, name")
+      .eq("business_id", ctx.businessId)
+      .eq("is_active", true)
+      .order("name"),
+    supabase
+      .from("restaurant_waiters")
       .select("id, name")
       .eq("business_id", ctx.businessId)
       .eq("is_active", true)
@@ -42,6 +62,8 @@ export async function getNewInvoiceEditorData(): Promise<NewInvoiceEditorData> {
   return {
     products: (products ?? []) as ProductOption[],
     customers: customers ?? [],
+    restaurantTables: tablesErr ? [] : (tables ?? []),
+    restaurantWaiters: waitersErr ? [] : (waiters ?? []),
     invoiceDefaults,
   };
 }

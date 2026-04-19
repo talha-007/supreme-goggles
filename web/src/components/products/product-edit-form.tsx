@@ -13,9 +13,13 @@ const MAX_IMAGE_MB = PRODUCT_IMAGE_MAX_BYTES / (1024 * 1024);
 export function ProductEditForm({
   product,
   taxonomy,
+  showPharmacyFields = false,
+  showRestaurantFields = false,
 }: {
   product: ProductRow;
   taxonomy: ProductTaxonomy;
+  showPharmacyFields?: boolean;
+  showRestaurantFields?: boolean;
 }) {
   const t = useTranslations("productFields");
   const updateAction = useMemo(
@@ -54,6 +58,8 @@ export function ProductEditForm({
         existingImageUrl={product.image_url}
         categorySuggestions={taxonomy.categories}
         brandSuggestions={taxonomy.brands}
+        showPharmacyFields={showPharmacyFields}
+        showRestaurantFields={showRestaurantFields}
       />
       {displayError ? (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">

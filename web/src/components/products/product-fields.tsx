@@ -18,6 +18,8 @@ type Props = {
   /** Distinct values from existing products (searchable when non-empty). */
   categorySuggestions?: readonly string[];
   brandSuggestions?: readonly string[];
+  showPharmacyFields?: boolean;
+  showRestaurantFields?: boolean;
 };
 
 export function ProductFields({
@@ -27,6 +29,8 @@ export function ProductFields({
   scanMode = false,
   categorySuggestions = [],
   brandSuggestions = [],
+  showPharmacyFields = false,
+  showRestaurantFields = false,
 }: Props) {
   const t = useTranslations("productFields");
   const categoryListId = useId();
@@ -202,6 +206,50 @@ export function ProductFields({
           className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
         />
       </div>
+      {showPharmacyFields ? (
+        <>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="mrp" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {t("mrp")}
+            </label>
+            <input
+              id="mrp"
+              name="mrp"
+              type="number"
+              min={0}
+              step="0.01"
+              defaultValue={d.mrp ?? ""}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            />
+          </div>
+          <div className="sm:col-span-2 flex items-center gap-2">
+            <input
+              id="requires_prescription"
+              name="requires_prescription"
+              type="checkbox"
+              defaultChecked={d.requires_prescription === true}
+              className="size-4 rounded border-zinc-300"
+            />
+            <label htmlFor="requires_prescription" className="text-sm text-zinc-700 dark:text-zinc-300">
+              {t("requiresPrescription")}
+            </label>
+          </div>
+        </>
+      ) : null}
+      {showRestaurantFields ? (
+        <div className="sm:col-span-2 flex items-center gap-2">
+          <input
+            id="is_menu_item"
+            name="is_menu_item"
+            type="checkbox"
+            defaultChecked={d.is_menu_item === true}
+            className="size-4 rounded border-zinc-300"
+          />
+          <label htmlFor="is_menu_item" className="text-sm text-zinc-700 dark:text-zinc-300">
+            {t("isMenuItem")}
+          </label>
+        </div>
+      ) : null}
       <div className="flex flex-col gap-1">
         <label htmlFor="current_stock" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
           {t("currentStock")}

@@ -26,6 +26,10 @@ export type LineDraft = {
 export type SaveDraftInput = {
   invoiceId: string | null;
   customerId: string | null;
+  restaurantTableId?: string | null;
+  waiterId?: string | null;
+  serviceMode?: "counter" | "dine_in" | "takeaway" | "delivery";
+  restaurantOrderStatus?: "new" | "preparing" | "served" | "settled";
   discount_amount: number;
   tax_rate: number;
   notes: string | null;
@@ -107,6 +111,10 @@ export async function saveInvoiceDraft(
       .from("invoices")
       .update({
         customer_id: input.customerId,
+        restaurant_table_id: input.restaurantTableId ?? null,
+        waiter_id: input.waiterId ?? null,
+        service_mode: input.serviceMode ?? "counter",
+        restaurant_order_status: input.restaurantOrderStatus ?? "new",
         subtotal,
         discount_amount: input.discount_amount,
         tax_rate: input.tax_rate,
@@ -133,6 +141,10 @@ export async function saveInvoiceDraft(
         business_id: ctx.businessId,
         invoice_number: num as string,
         customer_id: input.customerId,
+        restaurant_table_id: input.restaurantTableId ?? null,
+        waiter_id: input.waiterId ?? null,
+        service_mode: input.serviceMode ?? "counter",
+        restaurant_order_status: input.restaurantOrderStatus ?? "new",
         status: "draft",
         subtotal,
         discount_amount: input.discount_amount,
@@ -403,6 +415,41 @@ export async function reverseInvoice(invoiceId: string): Promise<InvoiceActionSt
 
   // Invalidate the whole dashboard tree (products, invoices, etc.) — production can cache RSC more than dev.
   revalidatePath("/dashboard", "layout");
+  revalidatePath(`/dashboard/invoices/${invoiceId}`);
+  return {};
+}
+
+export async function updateRestaurantOrderStatus(
+  invoiceId: string,
+  nextStatus: "new" | "preparing" | "ready" | "served" | "settled",
+): Promise<InvoiceActionState> {
+  const ctx = await requireBusinessContext();
+  if (!canManageInvoices(ctx.role)) {
+    return { error: "Permission denied." };
+  }
+
+  const supabase = await createClient();
+  const { data: inv } = await supabase
+    .from("invoices")
+    .select("id, business_id, status")
+    .eq("id", invoiceId)
+    .maybeSingle();
+  if (!inv || inv.business_id !== ctx.businessId) {
+    return { error: "Invoice not found." };
+  }
+  if (inv.status === "cancelled") {
+    return { error: "Cancelled invoice cannot be updated." };
+  }
+
+  const { error } = await supabase
+    .from("invoices")
+    .update({ restaurant_order_status: nextStatus })
+    .eq("id", invoiceId)
+    .eq("business_id", ctx.businessId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/invoices");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
   return {};
 }

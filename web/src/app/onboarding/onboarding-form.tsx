@@ -7,6 +7,9 @@ import { useState } from "react";
 
 const BUSINESS_TYPES = [
   { value: "shop", key: "typeShop" as const },
+  { value: "general_store", key: "typeGeneralStore" as const },
+  { value: "restaurant", key: "typeRestaurant" as const },
+  { value: "pharmacy", key: "typePharmacy" as const },
   { value: "retailer", key: "typeRetailer" as const },
   { value: "wholesaler", key: "typeWholesaler" as const },
 ] as const;

@@ -3,6 +3,13 @@ import Link from "next/link";
 /** Translation keys under `nav` in messages. */
 export const appNav = [
   { href: "/dashboard", key: "dashboard" },
+  { href: "/dashboard/menu", key: "menu" },
+  { href: "/dashboard/restaurant/tables", key: "tables" },
+  { href: "/dashboard/restaurant/waiters", key: "waiters" },
+  { href: "/dashboard/restaurant/waiter-board", key: "waiterBoard" },
+  { href: "/dashboard/restaurant/kitchen", key: "kitchen" },
+  { href: "/dashboard/restaurant/counter", key: "counter" },
+  { href: "/dashboard/restaurant/staff", key: "staff" },
   { href: "/dashboard/products", key: "products" },
   { href: "/dashboard/products?stock=low", key: "lowStock" },
   { href: "/dashboard/customers", key: "customers" },
@@ -35,6 +42,48 @@ function NavIcon({ navKey }: { navKey: NavLinkKey }) {
       return (
         <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
           <path d="M10 2 2 17h16L10 2Zm0 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 7Zm0 7.25a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z" />
+        </svg>
+      );
+    case "menu":
+      return (
+        <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+          <path d="M4 3.75A1.75 1.75 0 0 1 5.75 2h8.5A1.75 1.75 0 0 1 16 3.75v12.5A1.75 1.75 0 0 1 14.25 18h-8.5A1.75 1.75 0 0 1 4 16.25V3.75Zm3 .75a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5H7Zm0 3a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5H7Zm0 3a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5H7Z" />
+        </svg>
+      );
+    case "tables":
+      return (
+        <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+          <path d="M3 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2H3V6Zm1 4h5v6H7v-4H6v4H4v-6Zm7 0h5v6h-2v-4h-1v4h-2v-6Z" />
+        </svg>
+      );
+    case "waiters":
+    case "waiterBoard":
+      return (
+        <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+          <path d="M4 4.5A1.5 1.5 0 0 1 5.5 3h9A1.5 1.5 0 0 1 16 4.5v11a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 4 15.5v-11Zm3 .5a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5H7Zm0 3a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5H7Zm0 3a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5H7Z" />
+        </svg>
+      );
+      return (
+        <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+          <path d="M10 2a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-6 14a6 6 0 0 1 12 0H4Z" />
+        </svg>
+      );
+    case "kitchen":
+      return (
+        <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+          <path d="M5 3a1 1 0 0 1 1 1v5.5a2.5 2.5 0 0 0 5 0V4a1 1 0 1 1 2 0v5.5a4.5 4.5 0 0 1-9 0V4a1 1 0 0 1 1-1Zm6 12a1 1 0 1 1 0 2H5a1 1 0 1 1 0-2h6Z" />
+        </svg>
+      );
+    case "counter":
+      return (
+        <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+          <path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h9A2.5 2.5 0 0 1 17 5.5v9a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 3 14.5v-9ZM6 7a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H6Zm0 4a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H6Z" />
+        </svg>
+      );
+    case "staff":
+      return (
+        <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+          <path d="M7 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm6 2a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM2.5 16a4.5 4.5 0 0 1 9 0h-9Zm8.5 0a3.5 3.5 0 0 1 7 0h-7Z" />
         </svg>
       );
     case "customers":

@@ -6,6 +6,7 @@ import { PosSaleClient } from "@/components/dashboard/pos-sale-client";
 import { resolveInventoryCost } from "@/lib/dashboard/inventory-cost";
 import { getStatsPeriodRange, parseStatsPeriod } from "@/lib/dashboard/stats-period";
 import { getNewInvoiceEditorData, getPosCatalogProducts } from "@/lib/invoices/new-invoice-data";
+import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import {
   requireBusinessContext,
   canManageInvoices,
@@ -72,6 +73,18 @@ export default async function DashboardPage({
   const t = await getTranslations("dashboard");
   const tCommon = await getTranslations("common");
   const tInv = await getTranslations("invoiceStatus");
+  const [{ data: businessRow }, { data: settingsRow }] = await Promise.all([
+    supabase.from("businesses").select("type").eq("id", bid).maybeSingle(),
+    supabase
+      .from("business_settings")
+      .select(
+        "enable_table_service, enable_batch_expiry, enable_prescription_flow, enable_kot_printing, enable_quick_service_mode, default_tax_mode, rounding_rule",
+      )
+      .eq("business_id", bid)
+      .maybeSingle(),
+  ]);
+  const caps = resolveBusinessCapabilities((businessRow?.type as BusinessType | null) ?? "shop", settingsRow);
+  const isRestaurant = caps.type === "restaurant";
 
   const now = new Date();
   const { start: periodStart, end: periodEnd } = getStatsPeriodRange(statsPeriod, now);
@@ -87,6 +100,7 @@ export default async function DashboardPage({
     reorderCandidatesRes,
     openPoCountRes,
     openPoRowsRes,
+    openRestaurantTablesRes,
     invoiceEditorData,
     posCatalogProducts,
   ] = await Promise.all([
@@ -152,6 +166,13 @@ export default async function DashboardPage({
       .in("status", ["draft", "ordered", "partial"])
       .order("created_at", { ascending: false })
       .limit(6),
+    supabase
+      .from("invoices")
+      .select("id, invoice_number, restaurant_order_status, restaurant_tables ( name )")
+      .eq("business_id", bid)
+      .in("restaurant_order_status", ["new", "preparing"])
+      .order("updated_at", { ascending: false })
+      .limit(8),
     canEdit ? getNewInvoiceEditorData() : Promise.resolve(null),
     canEdit ? getPosCatalogProducts() : Promise.resolve([]),
   ]);
@@ -179,6 +200,12 @@ export default async function DashboardPage({
     created_at: string;
   };
   const openPosList = (openPoRowsRes.data ?? []) as OpenPoRow[];
+  const openTables = (openRestaurantTablesRes.data ?? []) as Array<{
+    id: string;
+    invoice_number: string;
+    restaurant_order_status: string;
+    restaurant_tables: { name: string } | { name: string }[] | null;
+  }>;
 
   const receivableData = receivableRows.data ?? [];
   const periodData = (periodRows.data ?? []) as InvoiceRow[];
@@ -255,6 +282,8 @@ export default async function DashboardPage({
             <PosSaleClient
               initialCatalogProducts={catalogRows}
               customers={invoiceEditorData.customers}
+              restaurantTables={invoiceEditorData.restaurantTables}
+              restaurantWaiters={invoiceEditorData.restaurantWaiters}
               invoiceDefaults={invoiceEditorData.invoiceDefaults}
               cancelHref="/dashboard"
               firstDraftSaveBehavior="refresh-only"
@@ -308,6 +337,34 @@ export default async function DashboardPage({
         />
         <OpenPosPanel items={openPosList} />
       </div>
+      {isRestaurant ? (
+        <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Open tables</h3>
+            <Link href="/dashboard/invoices" className="text-xs font-medium text-zinc-700 underline dark:text-zinc-300">
+              {tCommon("viewAll")}
+            </Link>
+          </div>
+          {openTables.length === 0 ? (
+            <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">No open dine-in orders.</p>
+          ) : (
+            <ul className="mt-3 space-y-2 text-sm">
+              {openTables.map((row) => {
+                const tableName = Array.isArray(row.restaurant_tables)
+                  ? (row.restaurant_tables[0]?.name ?? "—")
+                  : (row.restaurant_tables?.name ?? "—");
+                return (
+                  <li key={row.id} className="flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2 dark:border-zinc-800">
+                    <span className="font-medium text-zinc-900 dark:text-zinc-50">{tableName}</span>
+                    <span className="text-zinc-600 dark:text-zinc-300">{row.invoice_number}</span>
+                    <span className="capitalize text-zinc-500 dark:text-zinc-400">{row.restaurant_order_status}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      ) : null}
 
       <div className="mt-10">
         <div className="flex items-center justify-between gap-4">

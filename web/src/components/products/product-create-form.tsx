@@ -13,9 +13,17 @@ type CreateProps = {
   barcodeFromUrl?: string;
   scanMode?: boolean;
   taxonomy: ProductTaxonomy;
+  showPharmacyFields?: boolean;
+  showRestaurantFields?: boolean;
 };
 
-export function ProductCreateForm({ barcodeFromUrl, scanMode, taxonomy }: CreateProps) {
+export function ProductCreateForm({
+  barcodeFromUrl,
+  scanMode,
+  taxonomy,
+  showPharmacyFields = false,
+  showRestaurantFields = false,
+}: CreateProps) {
   const t = useTranslations("productFields");
   const [state, formAction, pending] = useActionState(createProduct, {} as ProductActionState);
   const [clientError, setClientError] = useState<string | null>(null);
@@ -48,6 +56,8 @@ export function ProductCreateForm({ barcodeFromUrl, scanMode, taxonomy }: Create
         scanMode={scanMode}
         categorySuggestions={taxonomy.categories}
         brandSuggestions={taxonomy.brands}
+        showPharmacyFields={showPharmacyFields}
+        showRestaurantFields={showRestaurantFields}
       />
       {displayError ? (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">

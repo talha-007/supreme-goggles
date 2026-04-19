@@ -21,6 +21,10 @@ export type InvoiceRow = {
   total_amount: number;
   paid_amount: number;
   due_date: string | null;
+  restaurant_table_id?: string | null;
+  waiter_id?: string | null;
+  service_mode?: "counter" | "dine_in" | "takeaway" | "delivery";
+  restaurant_order_status?: "new" | "preparing" | "served" | "settled";
   notes: string | null;
   /** Set when stock was deducted at finalize; void restores inventory when this or sale stock movements exist. */
   stock_deducted_at?: string | null;

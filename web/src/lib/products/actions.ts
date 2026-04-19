@@ -22,6 +22,13 @@ function parseQty(value: FormDataEntryValue | null): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+function parseNullableMoney(value: FormDataEntryValue | null): number | null {
+  if (value === null || String(value).trim() === "") return null;
+  const n = Number(String(value).replace(/,/g, ""));
+  if (!Number.isFinite(n)) return null;
+  return Math.round(n * 100) / 100;
+}
+
 export type ProductActionState = { error?: string };
 
 export async function createProduct(
@@ -60,6 +67,9 @@ export async function createProduct(
       sale_price: parseMoney(formData.get("sale_price")),
       current_stock: parseQty(formData.get("current_stock")),
       reorder_level: parseQty(formData.get("reorder_level")),
+      requires_prescription: formData.get("requires_prescription") === "on",
+      mrp: parseNullableMoney(formData.get("mrp")),
+      is_menu_item: formData.get("is_menu_item") === "on",
       is_active: formData.get("is_active") === "on",
       created_by: ctx.userId,
     })
@@ -156,6 +166,9 @@ export async function updateProduct(
     sale_price: parseMoney(formData.get("sale_price")),
     current_stock: parseQty(formData.get("current_stock")),
     reorder_level: parseQty(formData.get("reorder_level")),
+    requires_prescription: formData.get("requires_prescription") === "on",
+    mrp: parseNullableMoney(formData.get("mrp")),
+    is_menu_item: formData.get("is_menu_item") === "on",
     is_active: formData.get("is_active") === "on",
   };
 

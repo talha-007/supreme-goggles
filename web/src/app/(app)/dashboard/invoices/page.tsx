@@ -1,4 +1,5 @@
 import { InvoiceReverseButton } from "@/components/invoices/invoice-reverse-button";
+import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import { requireBusinessContext, canManageInvoices } from "@/lib/auth/business-context";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { createClient } from "@/lib/supabase/server";
@@ -29,6 +30,19 @@ export default async function InvoicesPage() {
     maximumFractionDigits: 2,
   });
 
+  const [{ data: businessRow }, { data: settingsRow }] = await Promise.all([
+    supabase.from("businesses").select("type").eq("id", ctx.businessId).maybeSingle(),
+    supabase
+      .from("business_settings")
+      .select(
+        "enable_table_service, enable_batch_expiry, enable_prescription_flow, enable_kot_printing, enable_quick_service_mode, default_tax_mode, rounding_rule",
+      )
+      .eq("business_id", ctx.businessId)
+      .maybeSingle(),
+  ]);
+  const caps = resolveBusinessCapabilities((businessRow?.type as BusinessType | null) ?? "shop", settingsRow);
+  const isRestaurant = caps.type === "restaurant";
+
   const { data: rows, error } = await supabase
     .from("invoices")
     .select(
@@ -36,7 +50,9 @@ export default async function InvoicesPage() {
       *,
       customers (
         name
-      )
+      ),
+      restaurant_tables ( name ),
+      restaurant_waiters ( name )
     `,
     )
     .eq("business_id", ctx.businessId)
@@ -51,7 +67,11 @@ export default async function InvoicesPage() {
     );
   }
 
-  type Row = InvoiceRow & { customers: { name: string } | null };
+  type Row = InvoiceRow & {
+    customers: { name: string } | null;
+    restaurant_tables?: { name: string } | { name: string }[] | null;
+    restaurant_waiters?: { name: string } | { name: string }[] | null;
+  };
   const invoices = (rows ?? []) as Row[];
 
   return (
@@ -80,6 +100,9 @@ export default async function InvoicesPage() {
               <th className="px-4 py-3">{t("colInvoice")}</th>
               <th className="px-4 py-3">{t("colCustomer")}</th>
               <th className="px-4 py-3">{t("colStatus")}</th>
+              {isRestaurant ? <th className="px-4 py-3">Table</th> : null}
+              {isRestaurant ? <th className="px-4 py-3">Waiter</th> : null}
+              {isRestaurant ? <th className="px-4 py-3">Order</th> : null}
               <th className="px-4 py-3 text-right">{t("colTotal")}</th>
               <th className="px-4 py-3 text-right">{t("colPaid")}</th>
               <th className="px-4 py-3 text-right">{t("colActions")}</th>
@@ -88,13 +111,20 @@ export default async function InvoicesPage() {
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
             {invoices.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-zinc-500">
+                <td colSpan={isRestaurant ? 9 : 6} className="px-4 py-10 text-center text-zinc-500">
                   {t("empty")}
                 </td>
               </tr>
             ) : (
               invoices.map((inv) => {
                 const cust = inv.customers?.name ?? tc("dash");
+                const table = Array.isArray(inv.restaurant_tables)
+                  ? (inv.restaurant_tables[0]?.name ?? tc("dash"))
+                  : (inv.restaurant_tables?.name ?? tc("dash"));
+                const waiter = Array.isArray(inv.restaurant_waiters)
+                  ? (inv.restaurant_waiters[0]?.name ?? tc("dash"))
+                  : (inv.restaurant_waiters?.name ?? tc("dash"));
+                const orderStatus = inv.restaurant_order_status ?? "new";
                 return (
                   <tr key={inv.id} className="text-zinc-800 dark:text-zinc-200">
                     <td className="px-4 py-3 font-mono text-sm">{inv.invoice_number}</td>
@@ -106,6 +136,9 @@ export default async function InvoicesPage() {
                         {tStatus(inv.status as "draft" | "unpaid" | "partial" | "paid" | "cancelled")}
                       </span>
                     </td>
+                    {isRestaurant ? <td className="px-4 py-3">{table}</td> : null}
+                    {isRestaurant ? <td className="px-4 py-3">{waiter}</td> : null}
+                    {isRestaurant ? <td className="px-4 py-3 capitalize">{String(orderStatus).replace("_", " ")}</td> : null}
                     <td className="px-4 py-3 text-right tabular-nums">
                       {pkr.format(Number(inv.total_amount))}
                     </td>

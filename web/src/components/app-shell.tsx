@@ -1,6 +1,7 @@
 "use client";
 
 import { AppSidebarDesktop, NavLinkItem, SidebarNav } from "@/components/app-sidebar";
+import type { BusinessCapabilities } from "@/lib/business/capabilities";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import Image from "next/image";
@@ -10,6 +11,7 @@ import { useEffect, useState } from "react";
 type Props = {
   businessName: string;
   businessLogoUrl?: string | null;
+  capabilities?: BusinessCapabilities;
   brandTitle: string;
   navLinks: readonly NavLinkItem[];
   children: React.ReactNode;
@@ -22,7 +24,14 @@ function businessInitials(name: string): string {
   return `${words[0][0] ?? ""}${words[1][0] ?? ""}`.toUpperCase();
 }
 
-export function AppShell({ businessName, businessLogoUrl, brandTitle, navLinks, children }: Props) {
+export function AppShell({
+  businessName,
+  businessLogoUrl,
+  capabilities,
+  brandTitle,
+  navLinks,
+  children,
+}: Props) {
   const t = useTranslations("shell");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
@@ -47,6 +56,28 @@ export function AppShell({ businessName, businessLogoUrl, brandTitle, navLinks, 
     };
   }, [mobileOpen]);
 
+  const effectiveNavLinks =
+    capabilities?.type === "restaurant"
+      ? navLinks.filter((item) =>
+          [
+            "dashboard",
+            "menu",
+            "tables",
+            "waiters",
+            "waiterBoard",
+            "kitchen",
+            "counter",
+            "staff",
+            "invoices",
+            "customers",
+            "products",
+            "settings",
+          ].includes(
+            item.key,
+          ),
+        )
+      : navLinks.filter((item) => !["menu", "tables", "waiters", "kitchen", "counter", "staff"].includes(item.key));
+
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
     const onChange = () => {
@@ -66,7 +97,12 @@ export function AppShell({ businessName, businessLogoUrl, brandTitle, navLinks, 
   }, [mobileOpen]);
 
   return (
-    <div className="flex min-h-full flex-1">
+    <div
+      className="flex min-h-full flex-1"
+      data-business-type={capabilities?.type}
+      data-cap-batch-expiry={capabilities?.batchExpiry ? "1" : "0"}
+      data-cap-table-service={capabilities?.tableService ? "1" : "0"}
+    >
       <a
         href="#main-content"
         className="sr-only left-4 top-4 z-[100] rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white focus:fixed focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-zinc-400"
@@ -75,7 +111,7 @@ export function AppShell({ businessName, businessLogoUrl, brandTitle, navLinks, 
       </a>
       <AppSidebarDesktop
         brandTitle={brandTitle}
-        links={navLinks}
+        links={effectiveNavLinks}
         collapsed={desktopCollapsed}
         onToggleCollapsed={() => setDesktopCollapsed((v) => !v)}
       />
@@ -108,7 +144,7 @@ export function AppShell({ businessName, businessLogoUrl, brandTitle, navLinks, 
                 </svg>
               </button>
             </div>
-            <SidebarNav links={navLinks} onLinkClick={() => setMobileOpen(false)} />
+            <SidebarNav links={effectiveNavLinks} onLinkClick={() => setMobileOpen(false)} />
           </aside>
         </>
       ) : null}
