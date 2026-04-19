@@ -3,19 +3,40 @@
 import { AppSidebarDesktop, NavLinkItem, SidebarNav } from "@/components/app-sidebar";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 type Props = {
   businessName: string;
+  businessLogoUrl?: string | null;
   brandTitle: string;
   navLinks: readonly NavLinkItem[];
   children: React.ReactNode;
 };
 
-export function AppShell({ businessName, brandTitle, navLinks, children }: Props) {
+function businessInitials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "B";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return `${words[0][0] ?? ""}${words[1][0] ?? ""}`.toUpperCase();
+}
+
+export function AppShell({ businessName, businessLogoUrl, brandTitle, navLinks, children }: Props) {
   const t = useTranslations("shell");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("app.sidebar.collapsed");
+    if (saved === "1") {
+      setDesktopCollapsed(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("app.sidebar.collapsed", desktopCollapsed ? "1" : "0");
+  }, [desktopCollapsed]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -52,7 +73,12 @@ export function AppShell({ businessName, brandTitle, navLinks, children }: Props
       >
         {t("skipToContent")}
       </a>
-      <AppSidebarDesktop brandTitle={brandTitle} links={navLinks} />
+      <AppSidebarDesktop
+        brandTitle={brandTitle}
+        links={navLinks}
+        collapsed={desktopCollapsed}
+        onToggleCollapsed={() => setDesktopCollapsed((v) => !v)}
+      />
 
       {mobileOpen ? (
         <>
@@ -101,9 +127,24 @@ export function AppShell({ businessName, brandTitle, navLinks, children }: Props
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="min-w-0 flex-1 truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">
-            {businessName}
-          </span>
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            {businessLogoUrl ? (
+              <Image
+                src={businessLogoUrl}
+                alt={`${businessName} logo`}
+                width={24}
+                height={24}
+                className="h-6 w-6 shrink-0 rounded object-contain"
+              />
+            ) : (
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-zinc-200 text-[10px] font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+                {businessInitials(businessName)}
+              </div>
+            )}
+            <span className="min-w-0 truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">
+              {businessName}
+            </span>
+          </div>
           <LanguageSwitcher />
           <SignOutButton />
         </header>

@@ -35,21 +35,28 @@ export default async function AppLayout({
 
   const { data: businessRow } = await supabase
     .from("businesses")
-    .select("name")
+    .select("name, logo_url")
     .eq("id", ctx.businessId)
     .maybeSingle();
 
   const businessName = businessRow?.name ?? "Business";
+  const businessLogoUrl = (businessRow?.logo_url as string | null) ?? null;
 
   const tNav = await getTranslations("nav");
   const tCommon = await getTranslations("common");
   const navLinks = appNav.map((item) => ({
     href: item.href,
     label: tNav(item.key),
+    key: item.key,
   }));
 
   return (
-    <AppShell businessName={businessName} brandTitle={tCommon("brand")} navLinks={navLinks}>
+    <AppShell
+      businessName={businessName}
+      businessLogoUrl={businessLogoUrl}
+      brandTitle={tCommon("brand")}
+      navLinks={navLinks}
+    >
       {children}
     </AppShell>
   );
