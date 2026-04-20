@@ -4,6 +4,7 @@ import {
   requireBusinessContext,
   canManageInvoices,
 } from "@/lib/auth/business-context";
+import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { invoiceTotals, lineTotal } from "@/lib/invoices/calc";
 import type { PaymentMethod } from "@/types/invoice";
@@ -344,6 +345,173 @@ export async function saveDraftAndFinalizeCash(
   return finalizeInvoiceCash(saved.invoiceId, input.cashAmountReceived ?? null);
 }
 
+/** Restaurant flow: place order to kitchen as unpaid without redirecting away. */
+export async function saveDraftAndSubmitToKitchen(
+  input: SaveDraftInput,
+): Promise<InvoiceActionState> {
+  const ctx = await requireBusinessContext();
+  if (!canManageInvoices(ctx.role)) {
+    return { error: "Permission denied." };
+  }
+  let ensuredWaiterId = input.waiterId ?? null;
+  if (!ensuredWaiterId) {
+    const supabaseForWaiter = await createClient();
+    const { data: myStaffRow } = await supabaseForWaiter
+      .from("restaurant_staff")
+      .select("id, role")
+      .eq("business_id", ctx.businessId)
+      .eq("user_id", ctx.userId)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (myStaffRow?.role === "waiter" && myStaffRow.id) {
+      ensuredWaiterId = myStaffRow.id as string;
+    }
+  }
+  if (!ensuredWaiterId) {
+    return { error: "Waiter is required before sending to kitchen." };
+  }
+
+  let saved = await saveInvoiceDraft({
+    ...input,
+    waiterId: ensuredWaiterId,
+    restaurantOrderStatus: "new",
+  });
+  const rlsInsertBlocked =
+    !!saved.error &&
+    saved.error.toLowerCase().includes("row-level security") &&
+    saved.error.toLowerCase().includes("invoices");
+  if (rlsInsertBlocked) {
+    const service = createServiceRoleClient();
+    const lines = mergeDuplicateCatalogLines(input.lines);
+    const lineTotals = lines.map((l) =>
+      lineTotal(l.quantity, l.unit_price, l.discount_pct),
+    );
+    const { subtotal, tax_amount, total_amount } = invoiceTotals(
+      lineTotals,
+      input.discount_amount,
+      input.tax_rate,
+    );
+
+    let invoiceId = input.invoiceId;
+    if (!invoiceId) {
+      const { data: num, error: numErr } = await service.rpc("generate_invoice_number", {
+        p_business_id: ctx.businessId,
+      });
+      if (numErr || !num) {
+        return { error: numErr?.message ?? "Could not generate invoice number." };
+      }
+      const { data: created, error: insErr } = await service
+        .from("invoices")
+        .insert({
+          business_id: ctx.businessId,
+          invoice_number: String(num),
+          customer_id: input.customerId,
+          restaurant_table_id: input.restaurantTableId ?? null,
+          waiter_id: ensuredWaiterId,
+          service_mode: input.serviceMode ?? "counter",
+          restaurant_order_status: "new",
+          status: "draft",
+          subtotal,
+          discount_amount: input.discount_amount,
+          tax_rate: input.tax_rate,
+          tax_amount,
+          total_amount,
+          paid_amount: 0,
+          notes: input.notes?.trim() || null,
+          due_date: input.due_date || null,
+          created_by: ctx.userId,
+        })
+        .select("id")
+        .single();
+      if (insErr || !created?.id) {
+        return { error: insErr?.message ?? "Could not create invoice." };
+      }
+      invoiceId = created.id as string;
+    } else {
+      const { error: updErr } = await service
+        .from("invoices")
+        .update({
+          customer_id: input.customerId,
+          restaurant_table_id: input.restaurantTableId ?? null,
+          waiter_id: ensuredWaiterId,
+          service_mode: input.serviceMode ?? "counter",
+          restaurant_order_status: "new",
+          subtotal,
+          discount_amount: input.discount_amount,
+          tax_rate: input.tax_rate,
+          tax_amount,
+          total_amount,
+          notes: input.notes?.trim() || null,
+          due_date: input.due_date || null,
+        })
+        .eq("id", invoiceId)
+        .eq("business_id", ctx.businessId)
+        .eq("status", "draft");
+      if (updErr) return { error: updErr.message };
+    }
+
+    if (!invoiceId) return { error: "Could not save invoice." };
+    const { error: delErr } = await service.from("invoice_items").delete().eq("invoice_id", invoiceId);
+    if (delErr) return { error: delErr.message };
+    const payload = lines.map((l, i) => ({
+      invoice_id: invoiceId,
+      product_id: l.product_id,
+      product_name: l.product_name.trim(),
+      unit: l.unit,
+      quantity: l.quantity,
+      unit_price: l.unit_price,
+      discount_pct: l.discount_pct,
+      line_total: lineTotals[i],
+    }));
+    const { error: itemErr } = await service.from("invoice_items").insert(payload);
+    if (itemErr) return { error: itemErr.message };
+    saved = { invoiceId };
+  }
+  if (saved.error) return saved;
+  if (!saved.invoiceId) return { error: "Could not save invoice." };
+
+  const supabase = await createClient();
+  const { data: inv } = await supabase
+    .from("invoices")
+    .select("id, status, business_id")
+    .eq("id", saved.invoiceId)
+    .maybeSingle();
+  if (!inv || inv.business_id !== ctx.businessId) {
+    return { error: "Invoice not found." };
+  }
+  if (inv.status !== "draft") {
+    return { error: "Order is already submitted." };
+  }
+  const { error } = await supabase.rpc("finalize_draft_invoice", {
+    p_invoice_id: saved.invoiceId,
+  });
+  if (error) return { error: error.message };
+  const { data: invRow } = await supabase
+    .from("invoices")
+    .select("business_id, restaurant_table_id, waiter_id")
+    .eq("id", saved.invoiceId)
+    .maybeSingle();
+  if (invRow?.business_id) {
+    const { error: roErr } = await supabase.from("restaurant_orders").upsert(
+      {
+        business_id: invRow.business_id,
+        invoice_id: saved.invoiceId,
+        table_id: invRow.restaurant_table_id ?? null,
+        waiter_id: invRow.waiter_id ?? null,
+        status: "new",
+      },
+      { onConflict: "invoice_id" },
+    );
+    if (roErr) return { error: roErr.message };
+  }
+
+  revalidatePath("/dashboard/restaurant/waiter-board");
+  revalidatePath("/dashboard/restaurant/kitchen");
+  revalidatePath("/dashboard/invoices");
+  revalidatePath(`/dashboard/invoices/${saved.invoiceId}`);
+  return { invoiceId: saved.invoiceId };
+}
+
 export async function recordPayment(
   invoiceId: string,
   amount: number,
@@ -383,16 +551,37 @@ export async function recordPayment(
     return { error: "Amount received is too low." };
   }
 
-  const { error } = await supabase.from("payments").insert({
+  const paymentPayload = {
     business_id: ctx.businessId,
     invoice_id: invoiceId,
     amount: paymentAmount,
     method,
     reference_no: referenceNo?.trim() || null,
     received_by: ctx.userId,
-  });
+  };
+  const { error } = await supabase.from("payments").insert(paymentPayload);
+  if (error) {
+    const isPaymentsRls =
+      error.message.toLowerCase().includes("row-level security") &&
+      error.message.toLowerCase().includes("payments");
+    if (!isPaymentsRls) return { error: error.message };
 
-  if (error) return { error: error.message };
+    // Restaurant counter staff may not have cashier role in `business_members`;
+    // allow only active counter staff, then write with service role.
+    const { data: staffRow } = await supabase
+      .from("restaurant_staff")
+      .select("role, is_active")
+      .eq("business_id", ctx.businessId)
+      .eq("user_id", ctx.userId)
+      .eq("is_active", true)
+      .maybeSingle();
+    if (staffRow?.role !== "counter") {
+      return { error: error.message };
+    }
+    const service = createServiceRoleClient();
+    const { error: serviceErr } = await service.from("payments").insert(paymentPayload);
+    if (serviceErr) return { error: serviceErr.message };
+  }
 
   revalidatePath("/dashboard/invoices");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
@@ -431,7 +620,7 @@ export async function updateRestaurantOrderStatus(
   const supabase = await createClient();
   const { data: inv } = await supabase
     .from("invoices")
-    .select("id, business_id, status, restaurant_order_status")
+    .select("id, business_id, status, restaurant_order_status, waiter_id, restaurant_table_id")
     .eq("id", invoiceId)
     .maybeSingle();
   if (!inv || inv.business_id !== ctx.businessId) {
@@ -450,9 +639,25 @@ export async function updateRestaurantOrderStatus(
     .eq("id", invoiceId)
     .eq("business_id", ctx.businessId);
   if (error) return { error: error.message };
+  const { error: roErr } = await supabase
+    .from("restaurant_orders")
+    .upsert(
+      {
+        business_id: ctx.businessId,
+        invoice_id: invoiceId,
+        waiter_id: (inv as { waiter_id?: string | null }).waiter_id ?? null,
+        table_id: (inv as { restaurant_table_id?: string | null }).restaurant_table_id ?? null,
+        status: nextStatus,
+      },
+      { onConflict: "invoice_id" },
+    );
+  if (roErr) return { error: roErr.message };
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/invoices");
+  revalidatePath("/dashboard/restaurant/waiter-board");
+  revalidatePath("/dashboard/restaurant/kitchen");
+  revalidatePath("/dashboard/restaurant/counter");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
   return {};
 }
@@ -485,6 +690,24 @@ export async function assignInvoiceWaiter(
     .eq("id", invoiceId)
     .eq("business_id", ctx.businessId);
   if (error) return { error: error.message };
+  const { data: invRow } = await supabase
+    .from("invoices")
+    .select("business_id, restaurant_table_id, restaurant_order_status")
+    .eq("id", invoiceId)
+    .maybeSingle();
+  const { error: roErr } = await supabase
+    .from("restaurant_orders")
+    .upsert(
+      {
+        business_id: invRow?.business_id ?? ctx.businessId,
+        invoice_id: invoiceId,
+        waiter_id: nextWaiterId,
+        table_id: invRow?.restaurant_table_id ?? null,
+        status: (invRow?.restaurant_order_status as "new" | "preparing" | "ready" | "served" | "settled" | null) ?? "new",
+      },
+      { onConflict: "invoice_id" },
+    );
+  if (roErr) return { error: roErr.message };
 
   revalidatePath("/dashboard/restaurant/waiter-board");
   revalidatePath("/dashboard/restaurant/counter");

@@ -22,7 +22,11 @@ export function WaiterAssignSelect({
       disabled={pending}
       onChange={(e) =>
         startTransition(async () => {
-          await assignInvoiceWaiter(invoiceId, e.target.value || null);
+          const res = await assignInvoiceWaiter(invoiceId, e.target.value || null);
+          if (res.error) {
+            window.alert(res.error);
+            return;
+          }
           router.refresh();
         })
       }
@@ -59,7 +63,11 @@ export function QuickStatusButton({
       disabled={isDisabled}
       onClick={() =>
         startTransition(async () => {
-          await updateRestaurantOrderStatus(invoiceId, nextStatus);
+          const res = await updateRestaurantOrderStatus(invoiceId, nextStatus);
+          if (res.error) {
+            window.alert(res.error);
+            return;
+          }
           router.refresh();
         })
       }

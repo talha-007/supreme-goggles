@@ -1,4 +1,3 @@
-import { RestaurantRealtimeAlerts } from "@/components/restaurant/restaurant-realtime-alerts";
 import { QuickStatusButton } from "@/components/restaurant/order-row-actions";
 import { requireBusinessContext, restaurantRoleGuard } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
@@ -20,10 +19,10 @@ export default async function CounterPage() {
       .eq("business_id", ctx.businessId)
       .maybeSingle(),
     supabase
-      .from("invoices")
-      .select("id, invoice_number, total_amount, paid_amount, status, restaurant_order_status, restaurant_tables ( name )")
+      .from("restaurant_orders")
+      .select("invoice_id, status, invoices!restaurant_orders_invoice_id_fkey ( id, invoice_number, total_amount, paid_amount, status ), restaurant_tables ( name )")
       .eq("business_id", ctx.businessId)
-      .in("restaurant_order_status", ["served", "settled"])
+      .in("status", ["served", "settled"])
       .order("updated_at", { ascending: false })
       .limit(20),
   ]);
@@ -32,20 +31,19 @@ export default async function CounterPage() {
   if (!restaurantRoleGuard(ctx, ["counter"])) redirect("/dashboard");
 
   const bills = (rows ?? []) as Array<{
-    id: string;
-    invoice_number: string;
-    total_amount: number;
-    paid_amount: number;
-    status: string;
-    restaurant_order_status: RestaurantOrderStatus;
+    invoice_id: string;
+    status: RestaurantOrderStatus;
     restaurant_tables: { name: string } | { name: string }[] | null;
+    invoices:
+      | { id: string; invoice_number: string; total_amount: number; paid_amount: number; status: string }
+      | Array<{ id: string; invoice_number: string; total_amount: number; paid_amount: number; status: string }>
+      | null;
   }>;
 
   return (
     <div className="mx-auto max-w-5xl">
       <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Counter desk</h1>
       <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Settle served orders and print receipts.</p>
-      <RestaurantRealtimeAlerts businessId={ctx.businessId} mode="counter" />
       {error ? <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error.message}</p> : null}
       <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
         <table className="w-full text-left text-sm">
@@ -68,29 +66,31 @@ export default async function CounterPage() {
               </tr>
             ) : (
               bills.map((b) => {
+                const inv = Array.isArray(b.invoices) ? (b.invoices[0] ?? null) : b.invoices;
+                if (!inv) return null;
                 const table = Array.isArray(b.restaurant_tables) ? (b.restaurant_tables[0]?.name ?? "—") : (b.restaurant_tables?.name ?? "—");
                 return (
-                  <tr key={b.id}>
-                    <td className="px-4 py-3 font-mono">{b.invoice_number}</td>
+                  <tr key={b.invoice_id}>
+                    <td className="px-4 py-3 font-mono">{inv.invoice_number}</td>
                     <td className="px-4 py-3">{table}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClass(b.restaurant_order_status)}`}>
-                        {b.restaurant_order_status}
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClass(b.status)}`}>
+                        {b.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">{Number(b.total_amount).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{Number(b.paid_amount).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{Number(inv.total_amount).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{Number(inv.paid_amount).toFixed(2)}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex flex-wrap justify-end gap-1.5">
-                        {b.restaurant_order_status === "served" ? (
+                        {b.status === "served" ? (
                           <QuickStatusButton
-                            invoiceId={b.id}
+                            invoiceId={b.invoice_id}
                             nextStatus="settled"
-                            label="Settle"
-                            disabled={b.status !== "paid"}
+                            label="Settle & print"
+                            disabled={inv.status !== "paid"}
                           />
                         ) : null}
-                        <Link href={`/dashboard/invoices/${b.id}`} className="text-sm font-medium underline text-zinc-900 dark:text-zinc-100">
+                        <Link href={`/dashboard/invoices/${b.invoice_id}`} className="text-sm font-medium underline text-zinc-900 dark:text-zinc-100">
                           Open bill
                         </Link>
                       </div>

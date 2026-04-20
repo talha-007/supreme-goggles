@@ -5,7 +5,6 @@ export const appNav = [
   { href: "/dashboard", key: "dashboard" },
   { href: "/dashboard/menu", key: "menu" },
   { href: "/dashboard/restaurant/tables", key: "tables" },
-  { href: "/dashboard/restaurant/waiters", key: "waiters" },
   { href: "/dashboard/restaurant/waiter-board", key: "waiterBoard" },
   { href: "/dashboard/restaurant/kitchen", key: "kitchen" },
   { href: "/dashboard/restaurant/counter", key: "counter" },
@@ -56,7 +55,6 @@ function NavIcon({ navKey }: { navKey: NavLinkKey }) {
           <path d="M3 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2H3V6Zm1 4h5v6H7v-4H6v4H4v-6Zm7 0h5v6h-2v-4h-1v4h-2v-6Z" />
         </svg>
       );
-    case "waiters":
     case "waiterBoard":
       return (
         <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>

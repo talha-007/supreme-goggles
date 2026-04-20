@@ -4,8 +4,8 @@ import { AppSidebarDesktop, NavLinkItem, SidebarNav } from "@/components/app-sid
 import type { BusinessCapabilities } from "@/lib/business/capabilities";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
+import type { AppLocale } from "@/i18n/routing";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -14,6 +14,16 @@ type Props = {
   capabilities?: BusinessCapabilities;
   restaurantStaffRole?: "waiter" | "chef" | "counter" | null;
   brandTitle: string;
+  shellLabels: {
+    skipToContent: string;
+    openMenu: string;
+    closeMenu: string;
+    navigation: string;
+    language: string;
+    signOut: string;
+    signingOut: string;
+  };
+  locale: AppLocale;
   navLinks: readonly NavLinkItem[];
   children: React.ReactNode;
 };
@@ -31,10 +41,11 @@ export function AppShell({
   capabilities,
   restaurantStaffRole,
   brandTitle,
+  shellLabels,
+  locale,
   navLinks,
   children,
 }: Props) {
-  const t = useTranslations("shell");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
 
@@ -75,7 +86,6 @@ export function AppShell({
                 "dashboard",
                 "menu",
                 "tables",
-                "waiters",
                 "waiterBoard",
                 "kitchen",
                 "counter",
@@ -88,7 +98,7 @@ export function AppShell({
                 item.key,
               ),
             ))
-      : navLinks.filter((item) => !["menu", "tables", "waiters", "kitchen", "counter", "staff"].includes(item.key));
+      : navLinks.filter((item) => !["menu", "tables", "kitchen", "counter", "staff"].includes(item.key));
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
@@ -119,7 +129,7 @@ export function AppShell({
         href="#main-content"
         className="sr-only left-4 top-4 z-[100] rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white focus:fixed focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-zinc-400"
       >
-        {t("skipToContent")}
+        {shellLabels.skipToContent}
       </a>
       <AppSidebarDesktop
         brandTitle={brandTitle}
@@ -133,7 +143,7 @@ export function AppShell({
           <button
             type="button"
             className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-            aria-label={t("closeMenu")}
+            aria-label={shellLabels.closeMenu}
             onClick={() => setMobileOpen(false)}
           />
           <aside
@@ -141,14 +151,14 @@ export function AppShell({
             className="fixed inset-y-0 start-0 z-50 flex w-[min(100%,16rem)] flex-col border-e border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-950 lg:hidden"
             aria-modal="true"
             role="dialog"
-            aria-label={t("navigation")}
+            aria-label={shellLabels.navigation}
           >
             <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-4 dark:border-zinc-800">
               <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{brandTitle}</span>
               <button
                 type="button"
                 className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50"
-                aria-label={t("closeMenu")}
+                aria-label={shellLabels.closeMenu}
                 onClick={() => setMobileOpen(false)}
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
@@ -168,7 +178,7 @@ export function AppShell({
             className="inline-flex shrink-0 items-center justify-center rounded-lg p-2 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-900 lg:hidden"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
-            aria-label={t("openMenu")}
+            aria-label={shellLabels.openMenu}
             onClick={() => setMobileOpen(true)}
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
@@ -193,8 +203,8 @@ export function AppShell({
               {businessName}
             </span>
           </div>
-          <LanguageSwitcher />
-          <SignOutButton />
+          <LanguageSwitcher locale={locale} languageLabel={shellLabels.language} />
+          <SignOutButton label={shellLabels.signOut} loadingLabel={shellLabels.signingOut} />
         </header>
         <main id="main-content" className="flex-1 bg-zinc-50 p-4 dark:bg-zinc-900 sm:p-6" tabIndex={-1}>
           {children}

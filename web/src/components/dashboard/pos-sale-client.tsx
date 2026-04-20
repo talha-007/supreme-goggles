@@ -4,6 +4,7 @@ import type { CustomerOption } from "@/components/invoices/invoice-editor";
 import {
   saveDraftAndFinalizeCash,
   saveDraftAndFinalizeCredit,
+  saveDraftAndSubmitToKitchen,
   saveInvoiceDraft,
   type LineDraft,
   type SaveDraftInput,
@@ -35,6 +36,7 @@ type Props = {
   restaurantTables?: { id: string; name: string }[];
   restaurantWaiters?: { id: string; name: string }[];
   forceRestaurantMode?: boolean;
+  restaurantWorkflowMode?: "counter-sale" | "order-to-kitchen";
   defaultWaiterId?: string | null;
   invoiceDefaults: InvoiceEditorDefaults | null;
   cancelHref: string;
@@ -42,11 +44,18 @@ type Props = {
   fullPageInvoiceHref: string;
 };
 
-async function fetchProductSearch(q: string, signal: AbortSignal): Promise<ProductRow[]> {
+async function fetchProductSearch(
+  q: string,
+  signal: AbortSignal,
+  options?: { menuOnly?: boolean },
+): Promise<ProductRow[]> {
   const params = new URLSearchParams();
   const sq = sanitizeProductSearchQuery(q);
   if (sq) params.set("q", sq);
   params.set("limit", sq ? "100" : "80");
+  if (options?.menuOnly) {
+    params.set("menuOnly", "1");
+  }
   const res = await fetch(`/api/dashboard/products/search?${params}`, { signal });
   const json = (await res.json()) as { products?: ProductRow[]; error?: string };
   if (!res.ok) {
@@ -80,6 +89,7 @@ export function PosSaleClient({
   restaurantTables = [],
   restaurantWaiters = [],
   forceRestaurantMode = false,
+  restaurantWorkflowMode = "counter-sale",
   defaultWaiterId = null,
   invoiceDefaults = null,
   cancelHref,
@@ -124,7 +134,7 @@ export function PosSaleClient({
   const [serviceMode, setServiceMode] = useState<"counter" | "dine_in" | "takeaway" | "delivery">("counter");
   const [restaurantOrderStatus, setRestaurantOrderStatus] = useState<
     "new" | "preparing" | "served" | "settled"
-  >("new");
+  >(restaurantWorkflowMode === "order-to-kitchen" ? "new" : "served");
   const [discountAmount, setDiscountAmount] = useState(
     String(invoiceDefaults?.defaultInvoiceDiscountAmount ?? 0),
   );
@@ -145,6 +155,7 @@ export function PosSaleClient({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [categoryKey, setCategoryKey] = useState<string>("all");
   const [brandKey, setBrandKey] = useState<string>("all");
+  const menuOnlySearch = restaurantWorkflowMode === "order-to-kitchen";
 
   useEffect(() => {
     const sq = sanitizeProductSearchQuery(q);
@@ -159,7 +170,9 @@ export function PosSaleClient({
       setLoading(true);
       setLoadError(null);
       try {
-        const rows = await fetchProductSearch(q, ac.signal);
+        const rows = await fetchProductSearch(q, ac.signal, {
+          menuOnly: menuOnlySearch,
+        });
         setDisplayedProducts(rows);
       } catch (e) {
         if (e instanceof Error && e.name === "AbortError") return;
@@ -173,7 +186,7 @@ export function PosSaleClient({
       window.clearTimeout(debounceTimer);
       ac.abort();
     };
-  }, [q, initialCatalogProducts, tp]);
+  }, [q, initialCatalogProducts, menuOnlySearch, tp]);
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = { all: initialCatalogProducts.length };
@@ -368,10 +381,41 @@ export function PosSaleClient({
           if (firstDraftSaveBehavior === "navigate-to-edit") {
             router.push(`/dashboard/invoices/${res.invoiceId}/edit`);
           }
-          router.refresh();
-        } else {
-          router.refresh();
         }
+      }
+    });
+  }
+
+  function sendToKitchen() {
+    setError(null);
+    if (!restaurantTableId) {
+      setError("Select a table before sending to kitchen.");
+      return;
+    }
+    if (restaurantWorkflowMode === "order-to-kitchen" && !waiterId) {
+      setError("Select waiter before sending to kitchen.");
+      return;
+    }
+    startTransition(async () => {
+      const res = await saveDraftAndSubmitToKitchen({
+        ...buildInput(),
+        restaurantOrderStatus: "new",
+      });
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      if (res.invoiceId) {
+        // Start fresh for the next customer after successful kitchen handoff.
+        setInvoiceId(null);
+        setCustomerId("");
+        setRestaurantTableId("");
+        setWaiterId(defaultWaiterId ?? "");
+        setNotes("");
+        setLines([]);
+        setRestaurantOrderStatus("new");
+        setQ("");
+        setMobileTab("menu");
       }
     });
   }
@@ -502,8 +546,8 @@ export function PosSaleClient({
         </button>
       </div>
 
-      <div className="mb-0 hidden gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-4 xl:grid xl:grid-cols-[minmax(200px,280px)_1fr_auto] xl:items-center">
-        <div className="flex min-w-0 items-center gap-2">
+      <div className="mb-0 hidden gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-4 xl:flex xl:flex-wrap xl:items-end">
+        <div className="flex min-w-0 items-center gap-2 xl:w-[min(100%,300px)]">
           <label htmlFor="pos-customer-top" className="sr-only">
             {ti("customer")}
           </label>
@@ -528,7 +572,27 @@ export function PosSaleClient({
             +
           </Link>
         </div>
-        <div className="relative min-w-0">
+        {isRestaurantMode && restaurantWorkflowMode === "order-to-kitchen" ? (
+          <div className="min-w-[220px] xl:w-[min(100%,260px)]">
+            <label htmlFor="pos-table-top" className="mb-1 block text-xs font-medium text-zinc-500 dark:text-zinc-400">
+              Select table (required)
+            </label>
+            <select
+              id="pos-table-top"
+              value={restaurantTableId}
+              onChange={(e) => setRestaurantTableId(e.target.value)}
+              className="min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            >
+              <option value="">Select table (required)</option>
+              {restaurantTables.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+        <div className="relative min-w-[240px] flex-1">
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
               <path
@@ -554,7 +618,7 @@ export function PosSaleClient({
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">{tp("searching")}</span>
           ) : null}
         </div>
-        <p className="hidden text-end text-xs text-zinc-500 dark:text-zinc-400 xl:block">
+        <p className="hidden text-end text-xs text-zinc-500 dark:text-zinc-400 xl:ms-auto xl:block">
           {dateStr} · {timeStr}
         </p>
       </div>
@@ -683,7 +747,7 @@ export function PosSaleClient({
             {loading ? (
               <div className="pointer-events-none absolute inset-0 z-10 rounded-xl bg-white/50 dark:bg-zinc-950/50" />
             ) : null}
-            <div className="grid max-h-[min(56vh,600px)] grid-cols-2 gap-1.5 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-3 sm:gap-2 md:grid-cols-4 xl:max-h-[min(calc(100vh-13rem),680px)] xl:grid-cols-4 2xl:grid-cols-5">
+            <div className="grid max-h-[min(56vh,600px)] grid-cols-2 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:max-h-[min(calc(100vh-13rem),680px)] 2xl:grid-cols-5">
               {filteredGrid.map((p) => {
                 const cat = p.category?.trim() || tp("uncategorized");
                 const br = p.brand?.trim() || null;
@@ -695,13 +759,13 @@ export function PosSaleClient({
                     type="button"
                     disabled={out}
                     onClick={() => addProduct(p)}
-                    className={`group flex touch-manipulation flex-col overflow-hidden rounded-xl border text-left transition active:scale-[0.98] ${
+                    className={`group flex h-full touch-manipulation flex-col overflow-hidden rounded-2xl border text-left transition active:scale-[0.98] ${
                       out
                         ? "cursor-not-allowed border-zinc-200 opacity-60 dark:border-zinc-800"
-                        : "border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
+                        : "border-zinc-200 bg-white shadow-sm hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
                     }`}
                   >
-                    <div className="relative h-[4.5rem] w-full shrink-0 bg-zinc-100 sm:h-[5.25rem] dark:bg-zinc-800">
+                    <div className="relative h-[5.5rem] w-full shrink-0 bg-zinc-100 sm:h-[6.25rem] dark:bg-zinc-800">
                       {p.image_url ? (
                         <Image
                           src={p.image_url}
@@ -716,8 +780,8 @@ export function PosSaleClient({
                         </div>
                       )}
                     </div>
-                    <div className="flex min-h-0 flex-1 flex-col gap-0.5 p-1.5 sm:p-2">
-                      <span className="line-clamp-2 text-[11px] font-medium leading-tight text-zinc-900 sm:text-xs dark:text-zinc-50">
+                    <div className="flex min-h-0 flex-1 flex-col gap-1.5 p-2.5">
+                      <span className="line-clamp-2 min-h-[2.4em] text-xs font-semibold leading-tight text-zinc-900 sm:text-sm dark:text-zinc-50">
                         {p.name}
                       </span>
                       <div className="flex flex-wrap gap-0.5">
@@ -732,7 +796,7 @@ export function PosSaleClient({
                           </span>
                         ) : null}
                       </div>
-                      <span className="mt-auto pt-0.5 text-right text-[11px] font-semibold tabular-nums text-blue-700 sm:text-xs dark:text-blue-300">
+                      <span className="mt-auto pt-0.5 text-right text-xs font-semibold tabular-nums text-blue-700 sm:text-sm dark:text-blue-300">
                         {pkr.format(p.sale_price)}
                       </span>
                       <span className="text-[9px] leading-tight text-zinc-500 dark:text-zinc-400">
@@ -973,7 +1037,9 @@ export function PosSaleClient({
                     onChange={(e) => setRestaurantTableId(e.target.value)}
                     className="min-h-[44px] rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
                   >
-                    <option value="">{tp("tableOptional")}</option>
+                    <option value="">
+                      {restaurantWorkflowMode === "order-to-kitchen" ? "Select table (required)" : tp("tableOptional")}
+                    </option>
                     {restaurantTables.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.name}
@@ -985,7 +1051,9 @@ export function PosSaleClient({
                     onChange={(e) => setWaiterId(e.target.value)}
                     className="min-h-[44px] rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
                   >
-                    <option value="">{tp("waiterOptional")}</option>
+                    <option value="">
+                      {restaurantWorkflowMode === "order-to-kitchen" ? "Select waiter (required)" : tp("waiterOptional")}
+                    </option>
                     {restaurantWaiters.map((w) => (
                       <option key={w.id} value={w.id}>
                         {w.name}
@@ -1105,6 +1173,16 @@ export function PosSaleClient({
             </details>
 
           <div className="space-y-3 border-t border-zinc-100 px-3 py-4 sm:px-4 dark:border-zinc-800 xl:hidden">
+            {restaurantWorkflowMode === "order-to-kitchen" ? (
+              <button
+                type="button"
+                onClick={sendToKitchen}
+                disabled={pending || lines.length === 0}
+                className="min-h-[52px] w-full touch-manipulation rounded-2xl bg-amber-600 py-3.5 text-base font-semibold text-white shadow-md shadow-amber-600/25 transition hover:bg-amber-700 active:bg-amber-800 disabled:opacity-50 sm:text-sm dark:shadow-amber-900/40"
+              >
+                {pending ? tc("working") : "Send to kitchen"}
+              </button>
+            ) : null}
             <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/90 px-3 py-2 dark:border-emerald-900/40 dark:bg-emerald-950/30">
               <label className="text-xs font-medium text-emerald-900 dark:text-emerald-200">{ti("cashReceived")}</label>
               <input
@@ -1130,22 +1208,26 @@ export function PosSaleClient({
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={chargeCash}
-              disabled={pending || lines.length === 0}
-              className="min-h-[52px] w-full touch-manipulation rounded-2xl bg-blue-600 py-3.5 text-base font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 sm:text-sm dark:shadow-blue-900/40"
-            >
-              {pending ? tc("working") : tp("placeOrderCash")}
-            </button>
-            <button
-              type="button"
-              onClick={chargeCredit}
-              disabled={pending || lines.length === 0}
-              className="min-h-[48px] w-full touch-manipulation rounded-2xl border-2 border-blue-200 bg-white py-3 text-base font-semibold text-blue-800 hover:bg-blue-50 active:bg-blue-100/80 disabled:opacity-50 sm:text-sm dark:border-blue-900 dark:bg-zinc-950 dark:text-blue-200 dark:hover:bg-blue-950/40"
-            >
-              {pending ? tc("working") : ti("creditLater")}
-            </button>
+            {restaurantWorkflowMode === "counter-sale" ? (
+              <>
+                <button
+                  type="button"
+                  onClick={chargeCash}
+                  disabled={pending || lines.length === 0}
+                  className="min-h-[52px] w-full touch-manipulation rounded-2xl bg-blue-600 py-3.5 text-base font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 sm:text-sm dark:shadow-blue-900/40"
+                >
+                  {pending ? tc("working") : tp("placeOrderCash")}
+                </button>
+                <button
+                  type="button"
+                  onClick={chargeCredit}
+                  disabled={pending || lines.length === 0}
+                  className="min-h-[48px] w-full touch-manipulation rounded-2xl border-2 border-blue-200 bg-white py-3 text-base font-semibold text-blue-800 hover:bg-blue-50 active:bg-blue-100/80 disabled:opacity-50 sm:text-sm dark:border-blue-900 dark:bg-zinc-950 dark:text-blue-200 dark:hover:bg-blue-950/40"
+                >
+                  {pending ? tc("working") : ti("creditLater")}
+                </button>
+              </>
+            ) : null}
 
             <div className="flex flex-col gap-2 sm:flex-row">
               <Link
@@ -1191,14 +1273,25 @@ export function PosSaleClient({
           >
             {pending ? tc("saving") : ti("saveDraft")}
           </button>
-          <button
-            type="button"
-            onClick={chargeCredit}
-            disabled={pending || lines.length === 0}
-            className="min-h-[40px] rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50 dark:border-sky-900 dark:bg-sky-950/50 dark:text-sky-100"
-          >
-            {pending ? tc("working") : ti("creditLater")}
-          </button>
+          {restaurantWorkflowMode === "counter-sale" ? (
+            <button
+              type="button"
+              onClick={chargeCredit}
+              disabled={pending || lines.length === 0}
+              className="min-h-[40px] rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50 dark:border-sky-900 dark:bg-sky-950/50 dark:text-sky-100"
+            >
+              {pending ? tc("working") : ti("creditLater")}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={sendToKitchen}
+              disabled={pending || lines.length === 0}
+              className="min-h-[40px] rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-100"
+            >
+              {pending ? tc("working") : "Send to kitchen"}
+            </button>
+          )}
           <Link
             href={cancelHref}
             className="inline-flex min-h-[40px] items-center rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-100 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"
@@ -1220,14 +1313,16 @@ export function PosSaleClient({
             onChange={(e) => setCashReceived(e.target.value)}
             className="h-10 w-[7.5rem] rounded-lg border border-emerald-200 bg-emerald-50/80 px-2 text-sm tabular-nums dark:border-emerald-800 dark:bg-emerald-950/30"
           />
-          <button
-            type="button"
-            onClick={chargeCash}
-            disabled={pending || lines.length === 0}
-            className="min-h-[44px] min-w-[8rem] rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
-          >
-            {pending ? tc("working") : tp("placeOrderCash")}
-          </button>
+          {restaurantWorkflowMode === "counter-sale" ? (
+            <button
+              type="button"
+              onClick={chargeCash}
+              disabled={pending || lines.length === 0}
+              className="min-h-[44px] min-w-[8rem] rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {pending ? tc("working") : tp("placeOrderCash")}
+            </button>
+          ) : null}
         </div>
         <div className="flex w-full flex-wrap items-end justify-between gap-3 sm:ms-auto sm:w-auto sm:justify-end">
           <div className="text-end">

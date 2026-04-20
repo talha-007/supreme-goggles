@@ -2,6 +2,7 @@ import { appNav } from "@/components/app-sidebar";
 import { AppShell } from "@/components/app-shell";
 import { requireBusinessContext } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
+import { defaultLocale } from "@/i18n/routing";
 import { hasSubscriptionAccess, isSuperAdminByEnv } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
@@ -55,6 +56,8 @@ export default async function AppLayout({
 
   const tNav = await getTranslations("nav");
   const tCommon = await getTranslations("common");
+  const tShell = await getTranslations("shell");
+  const tSignOut = await getTranslations("signOut");
   const navLinks = appNav.map((item) => ({
     href: item.href,
     label: tNav(item.key),
@@ -68,6 +71,16 @@ export default async function AppLayout({
       capabilities={capabilities}
       restaurantStaffRole={ctx.restaurantStaffRole}
       brandTitle={tCommon("brand")}
+      shellLabels={{
+        skipToContent: tShell("skipToContent"),
+        openMenu: tShell("openMenu"),
+        closeMenu: tShell("closeMenu"),
+        navigation: tShell("navigation"),
+        language: tCommon("language"),
+        signOut: tSignOut("label"),
+        signingOut: tSignOut("loading"),
+      }}
+      locale={defaultLocale}
       navLinks={navLinks}
     >
       {children}

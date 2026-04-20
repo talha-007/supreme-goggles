@@ -1,14 +1,17 @@
 "use client";
 
 import { setUserLocale } from "@/i18n/actions";
-import { isAppLocale } from "@/i18n/routing";
-import { useLocale, useTranslations } from "next-intl";
+import { isAppLocale, type AppLocale } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
-export function LanguageSwitcher() {
-  const t = useTranslations("common");
-  const locale = useLocale();
+export function LanguageSwitcher({
+  locale,
+  languageLabel,
+}: {
+  locale: AppLocale;
+  languageLabel: string;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -23,13 +26,13 @@ export function LanguageSwitcher() {
 
   return (
     <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-      <span className="hidden sm:inline">{t("language")}</span>
+      <span className="hidden sm:inline">{languageLabel}</span>
       <select
         value={locale}
         onChange={onChange}
         disabled={pending}
         className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-        aria-label={t("language")}
+        aria-label={languageLabel}
       >
         <option value="en">English</option>
         <option value="ur">اردو</option>
