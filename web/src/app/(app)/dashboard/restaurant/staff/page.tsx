@@ -1,6 +1,6 @@
 import { StaffAccountCreateForm } from "@/components/restaurant/staff-account-create-form";
 import { StaffPasswordResetForm } from "@/components/restaurant/staff-password-reset-form";
-import { requireBusinessContext, isRestrictedRestaurantStaff } from "@/lib/auth/business-context";
+import { requireBusinessContext, guardOwnerPage } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import { fetchAllAuthUsersViaAdminApi } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -27,7 +27,7 @@ export default async function RestaurantStaffPage() {
   ]);
   const caps = resolveBusinessCapabilities((businessRow?.type as BusinessType | null) ?? "shop", settingsRow);
   if (caps.type !== "restaurant") redirect("/dashboard");
-  if (isRestrictedRestaurantStaff(ctx)) redirect("/dashboard");
+  guardOwnerPage(ctx);
 
   const staff = (rows ?? []) as Array<{
     id: string;

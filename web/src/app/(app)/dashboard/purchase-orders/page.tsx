@@ -1,4 +1,4 @@
-import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageProducts, guardOwnerPage } from "@/lib/auth/business-context";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { getPurchaseOrders } from "@/lib/purchase-orders/actions";
 import type { PurchaseOrderRow } from "@/types/purchase-order";
@@ -16,6 +16,7 @@ const statusStyle: Record<string, string> = {
 
 export default async function PurchaseOrdersPage() {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   if (!canManageProducts(ctx.role)) {
     redirect("/dashboard");
   }

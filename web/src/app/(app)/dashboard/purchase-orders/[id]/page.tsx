@@ -3,7 +3,7 @@ import { PoDetailActions } from "@/components/purchase-orders/po-detail-actions"
 import { PoLineQuickAdd } from "@/components/purchase-orders/po-line-quick-add";
 import { ReceivePoForm } from "@/components/purchase-orders/receive-po-form";
 import { getPurchaseOrder } from "@/lib/purchase-orders/actions";
-import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageProducts, guardOwnerPage } from "@/lib/auth/business-context";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import type { PurchaseOrderItemRow, PurchaseOrderStatus } from "@/types/purchase-order";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -35,6 +35,7 @@ export default async function PurchaseOrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   if (!canManageProducts(ctx.role)) {
     redirect("/dashboard");
   }

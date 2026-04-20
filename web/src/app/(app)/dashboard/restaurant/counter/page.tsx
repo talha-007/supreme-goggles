@@ -1,3 +1,4 @@
+import { OrdersRealtimeSync } from "@/components/restaurant/orders-realtime-sync";
 import { QuickStatusButton } from "@/components/restaurant/order-row-actions";
 import { requireBusinessContext, restaurantRoleGuard } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
@@ -44,6 +45,7 @@ export default async function CounterPage() {
     <div className="mx-auto max-w-5xl">
       <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Counter desk</h1>
       <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Settle served orders and print receipts.</p>
+      <OrdersRealtimeSync businessId={ctx.businessId} />
       {error ? <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error.message}</p> : null}
       <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
         <table className="w-full text-left text-sm">

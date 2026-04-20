@@ -1,6 +1,6 @@
 import { appNav } from "@/components/app-sidebar";
 import { AppShell } from "@/components/app-shell";
-import { requireBusinessContext } from "@/lib/auth/business-context";
+import { requireBusinessContext, isRestrictedRestaurantStaff } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import { defaultLocale } from "@/i18n/routing";
 import { hasSubscriptionAccess, isSuperAdminByEnv } from "@/lib/subscription";
@@ -58,11 +58,24 @@ export default async function AppLayout({
   const tCommon = await getTranslations("common");
   const tShell = await getTranslations("shell");
   const tSignOut = await getTranslations("signOut");
-  const navLinks = appNav.map((item) => ({
-    href: item.href,
-    label: tNav(item.key),
-    key: item.key,
-  }));
+
+  // Restricted restaurant staff only see their own board in the nav.
+  const staffNavKey =
+    ctx.restaurantStaffRole === "waiter" ? "waiterBoard"
+    : ctx.restaurantStaffRole === "chef" ? "kitchen"
+    : ctx.restaurantStaffRole === "counter" ? "counter"
+    : null;
+
+  const navLinks = appNav
+    .filter((item) => {
+      if (!isRestrictedRestaurantStaff(ctx)) return true; // owners/managers see all
+      return item.key === staffNavKey;
+    })
+    .map((item) => ({
+      href: item.href,
+      label: tNav(item.key),
+      key: item.key,
+    }));
 
   return (
     <AppShell

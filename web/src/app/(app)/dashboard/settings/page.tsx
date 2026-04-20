@@ -3,6 +3,7 @@ import { InvoiceDefaultsForm } from "@/components/settings/invoice-defaults-form
 import { WhatsappSettingsForm } from "@/components/settings/whatsapp-settings-form";
 import {
   canManageBusinessSettings,
+  guardOwnerPage,
   requireBusinessContext,
 } from "@/lib/auth/business-context";
 import { isSuperadminUser } from "@/lib/auth/superadmin";
@@ -17,6 +18,7 @@ import Link from "next/link";
 
 export default async function SettingsPage() {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   const canEditSettings = canManageBusinessSettings(ctx.role);
   const profile = await getBusinessProfileSettings();
   const defaults = await getBusinessInvoiceDefaults();

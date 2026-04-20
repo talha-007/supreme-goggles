@@ -1,5 +1,5 @@
 import { CustomerEditForm } from "@/components/customers/customer-edit-form";
-import { requireBusinessContext, canManageCustomers } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageCustomers, guardOwnerPage } from "@/lib/auth/business-context";
 import { createClient } from "@/lib/supabase/server";
 import type { CustomerRow } from "@/types/customer";
 import Link from "next/link";
@@ -11,6 +11,7 @@ export default async function EditCustomerPage({
   params: Promise<{ id: string }>;
 }) {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   if (!canManageCustomers(ctx.role)) {
     redirect("/dashboard/customers");
   }

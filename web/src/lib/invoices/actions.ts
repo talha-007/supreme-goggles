@@ -561,23 +561,21 @@ export async function recordPayment(
   };
   const { error } = await supabase.from("payments").insert(paymentPayload);
   if (error) {
-    const isPaymentsRls =
-      error.message.toLowerCase().includes("row-level security") &&
-      error.message.toLowerCase().includes("payments");
-    if (!isPaymentsRls) return { error: error.message };
+    const isRls =
+      error.message.toLowerCase().includes("row-level security");
+    if (!isRls) return { error: error.message };
 
-    // Restaurant counter staff may not have cashier role in `business_members`;
-    // allow only active counter staff, then write with service role.
+    // Fallback: any active restaurant staff on this business may record a
+    // payment (e.g. counter staff whose user is not in business_members).
     const { data: staffRow } = await supabase
       .from("restaurant_staff")
-      .select("role, is_active")
+      .select("id")
       .eq("business_id", ctx.businessId)
       .eq("user_id", ctx.userId)
       .eq("is_active", true)
       .maybeSingle();
-    if (staffRow?.role !== "counter") {
-      return { error: error.message };
-    }
+    if (!staffRow) return { error: error.message };
+
     const service = createServiceRoleClient();
     const { error: serviceErr } = await service.from("payments").insert(paymentPayload);
     if (serviceErr) return { error: serviceErr.message };

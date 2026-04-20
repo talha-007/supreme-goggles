@@ -1,5 +1,5 @@
 import { ProductEditForm } from "@/components/products/product-edit-form";
-import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageProducts, guardOwnerPage } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import { getProductTaxonomy } from "@/lib/products/taxonomy";
 import { createClient } from "@/lib/supabase/server";
@@ -15,6 +15,7 @@ export default async function EditProductPage({
   searchParams: Promise<{ menu?: string }>;
 }) {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   if (!canManageProducts(ctx.role)) {
     redirect("/dashboard/products");
   }

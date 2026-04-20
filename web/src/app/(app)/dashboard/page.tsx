@@ -11,6 +11,7 @@ import {
   requireBusinessContext,
   canManageInvoices,
   canManageProducts,
+  guardOwnerPage,
 } from "@/lib/auth/business-context";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { createClient } from "@/lib/supabase/server";
@@ -59,6 +60,7 @@ export default async function DashboardPage({
   const sp = await searchParams;
   const statsPeriod = parseStatsPeriod(sp.period);
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   const canEdit = canManageInvoices(ctx.role);
   const canProducts = canManageProducts(ctx.role);
   const supabase = await createClient();

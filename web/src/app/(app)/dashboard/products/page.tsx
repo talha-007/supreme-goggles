@@ -1,5 +1,5 @@
 import { ProductsCatalogClient } from "@/components/products/products-catalog-client";
-import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageProducts, guardOwnerPage } from "@/lib/auth/business-context";
 import { sanitizeProductSearchQuery } from "@/lib/products/search-query";
 import { createClient } from "@/lib/supabase/server";
 import type { ProductRow } from "@/types/product";
@@ -11,6 +11,7 @@ export default async function ProductsPage({
   searchParams: Promise<{ q?: string; stock?: string; scan?: string }>;
 }) {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   const canEdit = canManageProducts(ctx.role);
   const params = await searchParams;
 

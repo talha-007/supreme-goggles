@@ -1,4 +1,4 @@
-import { requireBusinessContext, canManageCustomers } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageCustomers, guardOwnerPage } from "@/lib/auth/business-context";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { createClient } from "@/lib/supabase/server";
 import type { CustomerRow } from "@/types/customer";
@@ -15,6 +15,7 @@ export default async function CustomersPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   const canEdit = canManageCustomers(ctx.role);
   const params = await searchParams;
   const rawQ = params.q ?? "";

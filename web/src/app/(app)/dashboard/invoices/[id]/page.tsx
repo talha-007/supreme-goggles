@@ -4,7 +4,7 @@ import { InvoicePaymentForm } from "@/components/invoices/invoice-payment-form";
 import { RestaurantOrderStatusButtons } from "@/components/invoices/restaurant-order-status-buttons";
 import { InvoiceReverseButton } from "@/components/invoices/invoice-reverse-button";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
-import { requireBusinessContext, canManageInvoices } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageInvoices, guardOwnerPage } from "@/lib/auth/business-context";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { createClient } from "@/lib/supabase/server";
 import type { InvoiceItemRow, InvoiceRow } from "@/types/invoice";
@@ -26,6 +26,7 @@ export default async function InvoiceDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   const canEdit = canManageInvoices(ctx.role);
   const { id } = await params;
   const supabase = await createClient();

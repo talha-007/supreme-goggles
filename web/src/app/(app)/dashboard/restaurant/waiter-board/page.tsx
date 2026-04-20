@@ -1,23 +1,24 @@
 import { PosSaleClient } from "@/components/dashboard/pos-sale-client";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { QuickStatusButton, WaiterAssignSelect } from "@/components/restaurant/order-row-actions";
+import { OrderAlertToggle } from "@/components/restaurant/order-alert-toggle";
+import { OrdersRealtimeSync } from "@/components/restaurant/orders-realtime-sync";
+import { WaiterBoardTabs, type WaiterOrder } from "@/components/restaurant/waiter-board-tabs";
 import { requireBusinessContext, restaurantRoleGuard } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import { getNewInvoiceEditorData, getPosCatalogProducts } from "@/lib/invoices/new-invoice-data";
-import { statusBadgeClass, type RestaurantOrderStatus } from "@/lib/restaurant/order-utils";
+import { type RestaurantOrderStatus } from "@/lib/restaurant/order-utils";
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function WaiterBoardPage() {
   const ctx = await requireBusinessContext();
   const supabase = await createClient();
+
   const [
     { data: businessRow },
     { data: settingsRow },
-    { data: rows, error },
-    { data: sentRows, error: sentErr },
-    { data: waitersRows },
+    { data: activeRows, error: activeErr },
+    { data: servedRows, error: servedErr },
     { data: myStaffRow },
     { data: kpiRows, error: kpiErr },
     invoiceEditorData,
@@ -31,27 +32,26 @@ export default async function WaiterBoardPage() {
       )
       .eq("business_id", ctx.businessId)
       .maybeSingle(),
+    // new / preparing / ready — "live" orders
     supabase
       .from("restaurant_orders")
-      .select("invoice_id, status, waiter_id, restaurant_tables ( name ), restaurant_staff ( name ), invoices!restaurant_orders_invoice_id_fkey ( invoice_number )")
-      .eq("business_id", ctx.businessId)
-      .in("status", ["ready", "served"])
-      .order("updated_at", { ascending: false })
-      .limit(30),
-    supabase
-      .from("restaurant_orders")
-      .select("invoice_id, status, waiter_id, restaurant_tables ( name ), invoices!restaurant_orders_invoice_id_fkey ( invoice_number )")
+      .select(
+        "invoice_id, status, waiter_id, restaurant_tables ( name ), invoices!restaurant_orders_invoice_id_fkey ( invoice_number )",
+      )
       .eq("business_id", ctx.businessId)
       .in("status", ["new", "preparing", "ready"])
-      .order("updated_at", { ascending: false })
-      .limit(50),
+      .order("created_at", { ascending: true })
+      .limit(100),
+    // served — history (include invoice payment status)
     supabase
-      .from("restaurant_staff")
-      .select("id, name")
+      .from("restaurant_orders")
+      .select(
+        "invoice_id, status, waiter_id, restaurant_tables ( name ), invoices!restaurant_orders_invoice_id_fkey ( invoice_number, status )",
+      )
       .eq("business_id", ctx.businessId)
-      .eq("role", "waiter")
-      .eq("is_active", true)
-      .order("name"),
+      .eq("status", "served")
+      .order("updated_at", { ascending: false })
+      .limit(30),
     supabase
       .from("restaurant_staff")
       .select("id, role")
@@ -68,35 +68,36 @@ export default async function WaiterBoardPage() {
     getNewInvoiceEditorData(),
     getPosCatalogProducts({ menuOnly: true }),
   ]);
-  const caps = resolveBusinessCapabilities((businessRow?.type as BusinessType | null) ?? "shop", settingsRow);
+
+  const caps = resolveBusinessCapabilities(
+    (businessRow?.type as BusinessType | null) ?? "shop",
+    settingsRow,
+  );
   if (caps.type !== "restaurant") redirect("/dashboard");
   if (!restaurantRoleGuard(ctx, ["waiter"])) redirect("/dashboard");
-  const restrictedWaiterId = myStaffRow?.role === "waiter" ? (myStaffRow.id as string) : null;
 
-  const sourceOrders = (rows ?? []) as Array<{
-    invoice_id: string;
-    status: RestaurantOrderStatus;
-    restaurant_tables: { name: string } | { name: string }[] | null;
-    restaurant_staff: { name: string } | { name: string }[] | null;
-    waiter_id?: string | null;
-    invoices: { invoice_number: string } | { invoice_number: string }[] | null;
-  }>;
-  const orders =
-    restrictedWaiterId
-      ? sourceOrders.filter((o) => o.waiter_id === restrictedWaiterId)
-      : sourceOrders;
-  const waiters = (waitersRows ?? []) as Array<{ id: string; name: string }>;
-  const sentOrders = ((sentRows ?? []) as Array<{
-    invoice_id: string;
-    status: RestaurantOrderStatus;
-    waiter_id: string | null;
-    restaurant_tables: { name: string } | { name: string }[] | null;
-    invoices: { invoice_number: string } | { invoice_number: string }[] | null;
-  }>).filter((r) => (restrictedWaiterId ? r.waiter_id === restrictedWaiterId : true));
-  const inKitchenOrders = sentOrders.filter(
-    (r) => r.status === "new" || r.status === "preparing",
+  const restrictedWaiterId =
+    myStaffRow?.role === "waiter" ? (myStaffRow.id as string) : null;
+
+  // Filter by waiter when staff is a restricted waiter
+  function filterByWaiter(rows: WaiterOrder[]) {
+    return restrictedWaiterId
+      ? rows.filter((o) => o.waiter_id === restrictedWaiterId)
+      : rows;
+  }
+
+  const allActive = filterByWaiter(
+    (activeRows ?? []) as WaiterOrder[],
   );
-  const readyToServeOrders = sentOrders.filter((r) => r.status === "ready");
+  const inKitchenOrders = allActive.filter(
+    (o) => (o.status as RestaurantOrderStatus) === "new" || (o.status as RestaurantOrderStatus) === "preparing",
+  );
+  const readyToServeOrders = allActive.filter(
+    (o) => (o.status as RestaurantOrderStatus) === "ready",
+  );
+  const servedOrders = filterByWaiter((servedRows ?? []) as WaiterOrder[]);
+
+  // KPI stats
   const statsRows = (kpiRows ?? []) as Array<{
     id: string;
     total_amount: number;
@@ -104,11 +105,14 @@ export default async function WaiterBoardPage() {
     waiter_id: string | null;
     status: string;
   }>;
-  const waiterRows = restrictedWaiterId
+  const waiterKpiRows = restrictedWaiterId
     ? statsRows.filter((r) => r.waiter_id === restrictedWaiterId)
     : statsRows;
-  const ordersTaken = waiterRows.length;
-  const totalBillsReceived = waiterRows.reduce((s, r) => s + Number(r.paid_amount ?? 0), 0);
+  const ordersTaken = waiterKpiRows.length;
+  const totalBillsReceived = waiterKpiRows.reduce(
+    (s, r) => s + Number(r.paid_amount ?? 0),
+    0,
+  );
   const pkr = new Intl.NumberFormat("en-PK", {
     style: "currency",
     currency: "PKR",
@@ -117,188 +121,68 @@ export default async function WaiterBoardPage() {
   });
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Waiter board</h1>
-      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Take customer orders, track ready/served orders, and handoff to counter.</p>
-      {kpiErr ? <p className="mt-2 text-sm text-red-600 dark:text-red-400">{kpiErr.message}</p> : null}
+    <div className="mx-auto max-w-3xl">
+      {/* Page header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+            Waiter board
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Take orders, track kitchen progress, and serve customers.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <OrderAlertToggle businessId={ctx.businessId} mode="waiter" />
+          <OrdersRealtimeSync businessId={ctx.businessId} />
+        </div>
+      </div>
+
+      {kpiErr && (
+        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{kpiErr.message}</p>
+      )}
+      {activeErr && (
+        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{activeErr.message}</p>
+      )}
+      {servedErr && (
+        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{servedErr.message}</p>
+      )}
+
+      {/* KPI stats */}
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <StatCard label="Orders taken" value={String(ordersTaken)} hint="Assigned to this waiter" />
         <StatCard
-          label="Total bills received"
+          label="Orders taken"
+          value={String(ordersTaken)}
+          hint="Assigned to this waiter"
+        />
+        <StatCard
+          label="Bills received"
           value={pkr.format(totalBillsReceived)}
           hint="Sum of paid amount on assigned bills"
         />
       </div>
+
+      {/* Tabbed order management */}
       <div className="mt-6">
-        <PosSaleClient
-          initialCatalogProducts={posCatalogProducts}
-          customers={invoiceEditorData.customers}
-          restaurantTables={invoiceEditorData.restaurantTables}
-          restaurantWaiters={invoiceEditorData.restaurantWaiters}
-          forceRestaurantMode
-          restaurantWorkflowMode="order-to-kitchen"
-          defaultWaiterId={restrictedWaiterId}
-          invoiceDefaults={invoiceEditorData.invoiceDefaults}
-          cancelHref="/dashboard/restaurant/waiter-board"
-          firstDraftSaveBehavior="refresh-only"
-          fullPageInvoiceHref="/dashboard/invoices/new"
-        />
-      </div>
-      {sentErr ? <p className="mt-2 text-sm text-red-600 dark:text-red-400">{sentErr.message}</p> : null}
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-          <div className="border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-            In kitchen
-          </div>
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-              <tr>
-                <th className="px-4 py-3">Invoice</th>
-                <th className="px-4 py-3">Table</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-              {inKitchenOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">
-                    No orders in kitchen.
-                  </td>
-                </tr>
-              ) : (
-                inKitchenOrders.map((o) => {
-                  const inv = Array.isArray(o.invoices) ? (o.invoices[0] ?? null) : o.invoices;
-                  if (!inv) return null;
-                  const table = Array.isArray(o.restaurant_tables) ? (o.restaurant_tables[0]?.name ?? "—") : (o.restaurant_tables?.name ?? "—");
-                  return (
-                    <tr key={o.invoice_id}>
-                      <td className="px-4 py-3 font-mono">{inv.invoice_number}</td>
-                      <td className="px-4 py-3">{table}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClass(o.status)}`}>
-                          {o.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Link href={`/dashboard/invoices/${o.invoice_id}`} className="text-sm font-medium underline text-zinc-900 dark:text-zinc-100">
-                          Open
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-          <div className="border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-            Ready to serve
-          </div>
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-              <tr>
-                <th className="px-4 py-3">Invoice</th>
-                <th className="px-4 py-3">Table</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-              {readyToServeOrders.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">
-                    No ready orders yet.
-                  </td>
-                </tr>
-              ) : (
-                readyToServeOrders.map((o) => {
-                  const inv = Array.isArray(o.invoices) ? (o.invoices[0] ?? null) : o.invoices;
-                  if (!inv) return null;
-                  const table = Array.isArray(o.restaurant_tables) ? (o.restaurant_tables[0]?.name ?? "—") : (o.restaurant_tables?.name ?? "—");
-                  return (
-                    <tr key={o.invoice_id}>
-                      <td className="px-4 py-3 font-mono">{inv.invoice_number}</td>
-                      <td className="px-4 py-3">{table}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClass(o.status)}`}>
-                          {o.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Link href={`/dashboard/invoices/${o.invoice_id}`} className="text-sm font-medium underline text-zinc-900 dark:text-zinc-100">
-                          Open
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {error ? <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error.message}</p> : null}
-      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-            <tr>
-              <th className="px-4 py-3">Invoice</th>
-              <th className="px-4 py-3">Table</th>
-              <th className="px-4 py-3">Waiter</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-            {orders.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">
-                  No ready/served orders.
-                </td>
-              </tr>
-            ) : (
-              orders.map((o) => {
-                const inv = Array.isArray(o.invoices) ? (o.invoices[0] ?? null) : o.invoices;
-                if (!inv) return null;
-                const table = Array.isArray(o.restaurant_tables) ? (o.restaurant_tables[0]?.name ?? "—") : (o.restaurant_tables?.name ?? "—");
-                const waiter = Array.isArray(o.restaurant_staff) ? (o.restaurant_staff[0]?.name ?? "—") : (o.restaurant_staff?.name ?? "—");
-                return (
-                  <tr key={o.invoice_id}>
-                    <td className="px-4 py-3 font-mono">{inv.invoice_number}</td>
-                    <td className="px-4 py-3">{table}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-col gap-1">
-                        <span>{waiter}</span>
-                        <WaiterAssignSelect
-                          invoiceId={o.invoice_id}
-                          currentWaiterId={o.waiter_id ?? null}
-                          waiters={waiters}
-                        />
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClass(o.status)}`}>
-                        {o.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex flex-wrap justify-end gap-1.5">
-                        {o.status === "ready" ? (
-                          <QuickStatusButton invoiceId={o.invoice_id} nextStatus="served" label="Mark served" />
-                        ) : null}
-                        <Link href={`/dashboard/invoices/${o.invoice_id}`} className="text-sm font-medium underline text-zinc-900 dark:text-zinc-100">
-                          Open
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+        <WaiterBoardTabs
+          inKitchenOrders={inKitchenOrders}
+          readyToServeOrders={readyToServeOrders}
+          servedOrders={servedOrders}
+        >
+          <PosSaleClient
+            initialCatalogProducts={posCatalogProducts}
+            customers={invoiceEditorData.customers}
+            restaurantTables={invoiceEditorData.restaurantTables}
+            restaurantWaiters={invoiceEditorData.restaurantWaiters}
+            forceRestaurantMode
+            restaurantWorkflowMode="order-to-kitchen"
+            defaultWaiterId={restrictedWaiterId}
+            invoiceDefaults={invoiceEditorData.invoiceDefaults}
+            cancelHref="/dashboard/restaurant/waiter-board"
+            firstDraftSaveBehavior="refresh-only"
+            fullPageInvoiceHref="/dashboard/invoices/new"
+          />
+        </WaiterBoardTabs>
       </div>
     </div>
   );

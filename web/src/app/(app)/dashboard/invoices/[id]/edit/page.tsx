@@ -1,6 +1,6 @@
 import { InvoiceDraftToolbar } from "@/components/invoices/invoice-draft-toolbar";
 import { InvoiceEditor } from "@/components/invoices/invoice-editor";
-import { requireBusinessContext, canManageInvoices } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageInvoices, guardOwnerPage } from "@/lib/auth/business-context";
 import type { LineDraft } from "@/lib/invoices/actions";
 import { createClient } from "@/lib/supabase/server";
 import type { InvoiceRow } from "@/types/invoice";
@@ -13,6 +13,7 @@ export default async function EditInvoicePage({
   params: Promise<{ id: string }>;
 }) {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   if (!canManageInvoices(ctx.role)) {
     redirect("/dashboard/invoices");
   }

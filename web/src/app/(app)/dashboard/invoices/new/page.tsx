@@ -1,5 +1,5 @@
 import { InvoiceEditor } from "@/components/invoices/invoice-editor";
-import { requireBusinessContext, canManageInvoices } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageInvoices, guardOwnerPage } from "@/lib/auth/business-context";
 import type { LineDraft } from "@/lib/invoices/actions";
 import { getNewInvoiceEditorData, getPosCatalogProducts } from "@/lib/invoices/new-invoice-data";
 import Link from "next/link";
@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 
 export default async function NewInvoicePage() {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   if (!canManageInvoices(ctx.role)) {
     redirect("/dashboard/invoices");
   }

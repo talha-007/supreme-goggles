@@ -1,5 +1,5 @@
 import { RestaurantTableCreateForm } from "@/components/restaurant/table-create-form";
-import { requireBusinessContext, isRestrictedRestaurantStaff } from "@/lib/auth/business-context";
+import { requireBusinessContext, guardOwnerPage } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -26,7 +26,7 @@ export default async function RestaurantTablesPage() {
 
   const caps = resolveBusinessCapabilities((businessRow?.type as BusinessType | null) ?? "shop", settingsRow);
   if (caps.type !== "restaurant") redirect("/dashboard");
-  if (isRestrictedRestaurantStaff(ctx)) redirect("/dashboard");
+  guardOwnerPage(ctx);
 
   const tables = (rows ?? []) as { id: string; name: string; seats: number; is_active: boolean }[];
 

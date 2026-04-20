@@ -1,6 +1,6 @@
 import { PoEditor } from "@/components/purchase-orders/po-editor";
 import { listSuppliers } from "@/lib/purchase-orders/actions";
-import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageProducts, guardOwnerPage } from "@/lib/auth/business-context";
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 
 export default async function NewPurchaseOrderPage() {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   if (!canManageProducts(ctx.role)) {
     redirect("/dashboard");
   }

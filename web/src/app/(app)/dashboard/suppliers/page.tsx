@@ -1,4 +1,4 @@
-import { requireBusinessContext, canManageProducts } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageProducts, guardOwnerPage } from "@/lib/auth/business-context";
 import { createClient } from "@/lib/supabase/server";
 import type { SupplierRow } from "@/types/purchase-order";
 import Link from "next/link";
@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 
 export default async function SuppliersPage() {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   if (!canManageProducts(ctx.role)) {
     redirect("/dashboard");
   }

@@ -1,10 +1,11 @@
 import { CustomerCreateForm } from "@/components/customers/customer-create-form";
-import { requireBusinessContext, canManageCustomers } from "@/lib/auth/business-context";
+import { requireBusinessContext, canManageCustomers, guardOwnerPage } from "@/lib/auth/business-context";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function NewCustomerPage() {
   const ctx = await requireBusinessContext();
+  guardOwnerPage(ctx);
   if (!canManageCustomers(ctx.role)) {
     redirect("/dashboard/customers");
   }

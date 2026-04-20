@@ -104,3 +104,21 @@ export function restaurantRoleGuard(
 export function isRestrictedRestaurantStaff(ctx: BusinessContext): boolean {
   return ctx.restaurantStaffRole === "waiter" || ctx.restaurantStaffRole === "chef" || ctx.restaurantStaffRole === "counter";
 }
+
+/** The home URL for a restricted restaurant staff member. */
+export function getRestaurantStaffHomeUrl(ctx: BusinessContext): string {
+  if (ctx.restaurantStaffRole === "waiter") return "/dashboard/restaurant/waiter-board";
+  if (ctx.restaurantStaffRole === "chef") return "/dashboard/restaurant/kitchen";
+  if (ctx.restaurantStaffRole === "counter") return "/dashboard/restaurant/counter";
+  return "/dashboard";
+}
+
+/**
+ * Call at the top of every "owner-only" page (invoices, products, settings, etc.).
+ * Restaurant staff (waiter / chef / counter) are sent to their own board.
+ */
+export function guardOwnerPage(ctx: BusinessContext): void {
+  if (isRestrictedRestaurantStaff(ctx)) {
+    redirect(getRestaurantStaffHomeUrl(ctx));
+  }
+}
