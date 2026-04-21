@@ -1,4 +1,4 @@
-import { Text, TextInput, View } from "react-native";
+import { Text, TextInput, type TextInputProps, View } from "react-native";
 
 type Props = {
   label: string;
@@ -7,8 +7,9 @@ type Props = {
   placeholder?: string;
   secureTextEntry?: boolean;
   keyboardType?: "default" | "email-address" | "phone-pad" | "decimal-pad" | "numeric";
-  autoCapitalize?: "none" | "sentences";
+  autoCapitalize?: TextInputProps["autoCapitalize"];
   multiline?: boolean;
+  editable?: boolean;
 };
 
 export function FormField({
@@ -20,6 +21,7 @@ export function FormField({
   keyboardType = "default",
   autoCapitalize = "none",
   multiline = false,
+  editable = true,
 }: Props) {
   return (
     <View className="mb-4">
@@ -34,10 +36,11 @@ export function FormField({
         autoCapitalize={autoCapitalize}
         autoCorrect={false}
         multiline={multiline}
+        editable={editable}
         textAlignVertical={multiline ? "top" : "center"}
         className={`rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3.5 text-base text-neutral-100 ${
           multiline ? "min-h-[88px]" : ""
-        }`}
+        } ${!editable ? "opacity-60" : ""}`}
       />
     </View>
   );

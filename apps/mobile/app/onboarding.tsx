@@ -10,6 +10,7 @@ import {
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ErrorBannerWithSupport } from "../src/components/ErrorBannerWithSupport";
 import { FormField } from "../src/components/FormField";
 import { PrimaryButton } from "../src/components/PrimaryButton";
 import { useAuth } from "../src/contexts/auth-context";
@@ -22,7 +23,7 @@ const BUSINESS_TYPES = [
 ];
 
 export default function OnboardingScreen() {
-  const { session, hasBusiness, loading: authLoading, refreshMembership } = useAuth();
+  const { session, hasBusiness, subscriptionAccess, loading: authLoading, refreshMembership } = useAuth();
   const [name, setName] = useState("");
   const [type, setType] = useState<(typeof BUSINESS_TYPES)[number]["value"]>("shop");
   const [error, setError] = useState<string | null>(null);
@@ -31,8 +32,9 @@ export default function OnboardingScreen() {
   useEffect(() => {
     if (authLoading) return;
     if (!session) router.replace("/login");
+    else if (hasBusiness && !subscriptionAccess) router.replace("/subscription-expired");
     else if (hasBusiness) router.replace("/dashboard");
-  }, [session, hasBusiness, authLoading]);
+  }, [session, hasBusiness, subscriptionAccess, authLoading]);
 
   const onSubmit = async () => {
     setError(null);
@@ -98,9 +100,9 @@ export default function OnboardingScreen() {
           </View>
 
           {error ? (
-            <Text className="mt-4 text-sm text-red-400" accessibilityRole="alert">
-              {error}
-            </Text>
+            <View className="mt-4">
+              <ErrorBannerWithSupport message={error} variant="compact" />
+            </View>
           ) : null}
 
           <PrimaryButton label="Continue" onPress={onSubmit} loading={loading} />

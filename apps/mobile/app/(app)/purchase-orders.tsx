@@ -13,6 +13,8 @@ import {
 } from "react-native";
 
 import { ConfirmDialog } from "../../src/components/ConfirmDialog";
+import { ErrorBannerWithSupport } from "../../src/components/ErrorBannerWithSupport";
+import { headerRightWithSupport } from "../../src/components/SupportHeaderButton";
 import { FormField } from "../../src/components/FormField";
 import { PrimaryButton } from "../../src/components/PrimaryButton";
 import { SearchBar } from "../../src/components/SearchBar";
@@ -170,24 +172,25 @@ export default function PurchaseOrdersScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <Pressable
-          onPress={() => {
-            setSaveError(null);
-            setLines([newLine()]);
-            setSupplierId(null);
-            setNotes("");
-            setCreateOpen(true);
-          }}
-          hitSlop={12}
-          className="mr-1 flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
-          accessibilityRole="button"
-          accessibilityLabel="New purchase order"
-        >
-          <Ionicons name="add" size={22} color="#34d399" />
-          <Text className="ml-1 text-sm font-semibold text-emerald-400">New</Text>
-        </Pressable>
-      ),
+      headerRight: () =>
+        headerRightWithSupport(
+          <Pressable
+            onPress={() => {
+              setSaveError(null);
+              setLines([newLine()]);
+              setSupplierId(null);
+              setNotes("");
+              setCreateOpen(true);
+            }}
+            hitSlop={12}
+            className="flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
+            accessibilityRole="button"
+            accessibilityLabel="New purchase order"
+          >
+            <Ionicons name="add" size={22} color="#34d399" />
+            <Text className="ml-1 text-sm font-semibold text-emerald-400">New</Text>
+          </Pressable>,
+        ),
     });
   }, [navigation]);
 
@@ -595,11 +598,7 @@ export default function PurchaseOrdersScreen() {
 
   return (
     <View className="flex-1 bg-neutral-950">
-      {error ? (
-        <Text className="px-4 pt-3 text-sm text-red-400" accessibilityRole="alert">
-          {error}
-        </Text>
-      ) : null}
+      {error ? <ErrorBannerWithSupport message={error} /> : null}
 
       <FlatList
         data={filtered}
@@ -798,11 +797,7 @@ export default function PurchaseOrdersScreen() {
                 <Text className="text-center text-sm font-medium text-emerald-500">+ Add line</Text>
               </Pressable>
 
-              {saveError ? (
-                <Text className="mb-2 text-sm text-red-400" accessibilityRole="alert">
-                  {saveError}
-                </Text>
-              ) : null}
+              {saveError ? <ErrorBannerWithSupport message={saveError} variant="compact" /> : null}
 
               <PrimaryButton label="Create draft PO" onPress={() => void onCreatePo()} loading={saving} />
               <Pressable onPress={() => setCreateOpen(false)} className="mt-3 py-3">
@@ -853,9 +848,9 @@ export default function PurchaseOrdersScreen() {
                 ) : null}
 
                 {detailActionError ? (
-                  <Text className="mt-3 text-sm text-red-400" accessibilityRole="alert">
-                    {detailActionError}
-                  </Text>
+                  <View className="mt-3">
+                    <ErrorBannerWithSupport message={detailActionError} variant="compact" />
+                  </View>
                 ) : null}
 
                 <Text className="mt-6 text-sm font-semibold uppercase tracking-wide text-neutral-500">

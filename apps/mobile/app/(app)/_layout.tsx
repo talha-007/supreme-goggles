@@ -4,7 +4,10 @@ import type { ComponentProps } from "react";
 import { ActivityIndicator, Platform, View } from "react-native";
 
 import { FloatingTabBar } from "../../src/components/FloatingTabBar";
+import { SupportHeaderButton } from "../../src/components/SupportHeaderButton";
+import { RealtimeUpdateBanner } from "../../src/components/RealtimeUpdateBanner";
 import { useAuth } from "../../src/contexts/auth-context";
+import { RealtimeNotificationsProvider } from "../../src/contexts/realtime-notifications-context";
 
 type IonName = ComponentProps<typeof Ionicons>["name"];
 
@@ -17,7 +20,7 @@ const TAB_ICONS: Record<string, { active: IonName; inactive: IonName }> = {
 };
 
 export default function AppGroupLayout() {
-  const { session, loading, hasBusiness } = useAuth();
+  const { session, loading, hasBusiness, subscriptionAccess } = useAuth();
 
   if (loading) {
     return (
@@ -35,8 +38,15 @@ export default function AppGroupLayout() {
     return <Redirect href="/onboarding" />;
   }
 
+  if (!subscriptionAccess) {
+    return <Redirect href="/subscription-expired" />;
+  }
+
   return (
-    <Tabs
+    <RealtimeNotificationsProvider>
+      <View className="flex-1 bg-neutral-950">
+        <RealtimeUpdateBanner />
+        <Tabs
       initialRouteName="dashboard"
       tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={({ route }) => ({
@@ -45,6 +55,12 @@ export default function AppGroupLayout() {
         headerTintColor: "#fafafa",
         headerTitleStyle: { fontWeight: "600" },
         headerShadowVisible: false,
+        headerRight: () => (
+          <View className="mr-1">
+            <SupportHeaderButton />
+          </View>
+        ),
+        tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: "#34d399",
         tabBarInactiveTintColor: "#737373",
         tabBarShowLabel: true,
@@ -87,6 +103,8 @@ export default function AppGroupLayout() {
       <Tabs.Screen name="quick-sale" options={{ href: null, title: "Quick sale" }} />
       <Tabs.Screen name="suppliers" options={{ href: null, title: "Suppliers" }} />
       <Tabs.Screen name="purchase-orders" options={{ href: null, title: "Purchase orders" }} />
-    </Tabs>
+        </Tabs>
+      </View>
+    </RealtimeNotificationsProvider>
   );
 }

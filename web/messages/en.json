@@ -523,10 +523,10 @@
     "balance": "Balance",
     "paymentsSection": "Payments",
     "noPayments": "No payments recorded.",
-    "reverseSectionLabel": "Void invoice",
-    "reverseInvoice": "Reverse / void invoice",
-    "reverseConfirm": "Void this invoice? Payments will be removed, customer balance will be restored, and the invoice will show as cancelled. This cannot be undone.",
-    "reverseHelp": "Use when a sale was recorded by mistake. Line items stay on file for your records. Inventory is restored for catalog lines when you void (only for sales finalized after stock tracking was enabled)."
+    "reverseSectionLabel": "Reverse this sale",
+    "reverseInvoice": "Reverse sale",
+    "reverseConfirm": "Reverse this sale? Recorded payments will be removed, what the customer owes will be corrected, stock will go back up where it was reduced, and the bill will show as cancelled. You cannot undo this.",
+    "reverseHelp": "Use this if the sale was entered by mistake. The bill stays in your history for records; payments and stock are rolled back."
   },
   "invoicePayment": {
     "title": "Record payment",

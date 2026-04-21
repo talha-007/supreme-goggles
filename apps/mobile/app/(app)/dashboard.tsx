@@ -1,10 +1,16 @@
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { router, useNavigation } from "expo-router";
 
 import { useAuth } from "../../src/contexts/auth-context";
+import { useRealtimeNotifications } from "../../src/contexts/realtime-notifications-context";
 import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
+import {
+  getRangeStartForPreset,
+  STATS_PERIOD_OPTIONS,
+  type StatsDatePreset,
+} from "../../src/lib/date-range-presets";
 import { supabase } from "../../src/lib/supabase";
 
 const pkr = new Intl.NumberFormat("en-PK", {
@@ -23,13 +29,14 @@ export default function DashboardScreen() {
   const navigation = useNavigation();
   const bottomPad = useTabScreenBottomPadding();
   const { businessId, user } = useAuth();
+  const { refreshGeneration } = useRealtimeNotifications();
+  const [statsPeriod, setStatsPeriod] = useState<StatsDatePreset>("month");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<{
     products: number;
     customers: number;
     drafts: number;
-    todaySales: number;
-    monthSales: number;
+    periodSales: number;
     outstanding: number;
   } | null>(null);
   const statsRef = useRef(stats);
@@ -42,16 +49,14 @@ export default function DashboardScreen() {
     }
     if (statsRef.current === null) setLoading(true);
     const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const rangeStart = getRangeStartForPreset(now, statsPeriod)!;
 
     const [
       productsRes,
       customersRes,
       draftsRes,
       receivableRes,
-      monthRes,
-      todayRes,
+      periodRes,
     ] = await Promise.all([
       supabase
         .from("products")
@@ -77,12 +82,9 @@ export default function DashboardScreen() {
         .from("invoices")
         .select("total_amount, status, created_at")
         .eq("business_id", businessId)
-        .gte("created_at", startOfMonth.toISOString()),
-      supabase
-        .from("invoices")
-        .select("total_amount, status, created_at")
-        .eq("business_id", businessId)
-        .gte("created_at", startOfDay.toISOString()),
+        .gte("created_at", rangeStart.toISOString())
+        .order("created_at", { ascending: false })
+        .limit(3000),
     ]);
 
     const sumMoney = (
@@ -108,8 +110,7 @@ export default function DashboardScreen() {
       return Math.round(s * 100) / 100;
     };
 
-    const monthRows = (monthRes.data ?? []) as { total_amount: unknown; status?: string }[];
-    const todayRows = (todayRes.data ?? []) as { total_amount: unknown; status?: string }[];
+    const periodRows = (periodRes.data ?? []) as { total_amount: unknown; status?: string }[];
     const receivableRows = (receivableRes.data ?? []) as {
       total_amount: unknown;
       paid_amount: unknown;
@@ -120,18 +121,14 @@ export default function DashboardScreen() {
       products: productsRes.count ?? 0,
       customers: customersRes.count ?? 0,
       drafts: draftsRes.count ?? 0,
-      todaySales: sumMoney(
-        todayRows,
-        (inv) => inv.status !== "draft" && inv.status !== "cancelled",
-      ),
-      monthSales: sumMoney(
-        monthRows,
+      periodSales: sumMoney(
+        periodRows,
         (inv) => inv.status !== "draft" && inv.status !== "cancelled",
       ),
       outstanding: outstandingPk(receivableRows),
     });
     setLoading(false);
-  }, [businessId, user]);
+  }, [businessId, user, statsPeriod]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -151,6 +148,11 @@ export default function DashboardScreen() {
     }, [load]),
   );
 
+  useEffect(() => {
+    if (refreshGeneration === 0) return;
+    void load();
+  }, [refreshGeneration, load]);
+
   if (loading || !stats) {
     return (
       <View className="flex-1 items-center justify-center bg-neutral-950">
@@ -168,6 +170,37 @@ export default function DashboardScreen() {
       <Text className="text-base text-neutral-200">
         Sales, stock, and purchasing at a glance.
       </Text>
+
+      <Text className="mt-4 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+        Sales period
+      </Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="mt-2"
+        contentContainerStyle={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingVertical: 2,
+        }}
+      >
+        {STATS_PERIOD_OPTIONS.map((o) => {
+          const active = statsPeriod === o.key;
+          return (
+            <Pressable
+              key={o.key}
+              onPress={() => setStatsPeriod(o.key)}
+              className={`mr-2 rounded-full border px-3.5 py-2 ${
+                active ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+              }`}
+            >
+              <Text className={`text-sm font-medium ${active ? "text-emerald-400" : "text-neutral-400"}`}>
+                {o.short}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
 
       <Pressable
         onPress={() => router.push("/quick-sale")}
@@ -187,9 +220,11 @@ export default function DashboardScreen() {
       </Pressable>
 
       <View className="mt-6 flex-row flex-wrap gap-3">
-        <StatCard label="Today (sales)" value={pkr.format(stats.todaySales)} />
-        <StatCard label="This month" value={pkr.format(stats.monthSales)} />
-        <StatCard label="Outstanding" value={pkr.format(stats.outstanding)} />
+        <StatCard
+          label={`Sales (${STATS_PERIOD_OPTIONS.find((x) => x.key === statsPeriod)?.label ?? "Period"})`}
+          value={pkr.format(stats.periodSales)}
+        />
+        <StatCard label="Outstanding (open bills)" value={pkr.format(stats.outstanding)} />
         <StatCard label="Draft invoices" value={String(stats.drafts)} />
         <StatCard label="Products" value={String(stats.products)} />
         <StatCard label="Customers" value={String(stats.customers)} />

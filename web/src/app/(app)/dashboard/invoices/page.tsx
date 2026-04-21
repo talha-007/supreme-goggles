@@ -65,7 +65,6 @@ export default async function InvoicesPage() {
       statusLabels={statusLabels}
       viewLabel={t("view")}
       editLabel={tc("edit")}
-      voidLabel="Void"
       newInvoiceHref="/dashboard/invoices/new"
       newInvoiceLabel={t("new")}
       title={t("title")}

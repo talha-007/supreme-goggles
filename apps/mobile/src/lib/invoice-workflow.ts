@@ -157,3 +157,83 @@ export async function finalizeDraftInvoiceCash(
   if (rpcErr) return { error: rpcErr.message };
   return {};
 }
+
+/**
+ * Finalize draft on credit: status → unpaid, stock moves, no payment row.
+ * If `customer_id` is set, adds invoice total to that customer's outstanding balance (same as web `finalizeInvoice`).
+ */
+export async function finalizeDraftInvoiceCredit(
+  supabase: SupabaseClient,
+  businessId: string,
+  _userId: string,
+  invoiceId: string,
+): Promise<{ error?: string }> {
+  const { data: inv, error: invErr } = await supabase
+    .from("invoices")
+    .select("id, status, business_id, total_amount")
+    .eq("id", invoiceId)
+    .maybeSingle();
+
+  if (invErr || !inv) return { error: invErr?.message ?? "Invoice not found." };
+  if (inv.business_id !== businessId) return { error: "Invoice not found." };
+  if (inv.status !== "draft") {
+    return { error: "Invoice is not a draft." };
+  }
+
+  const { count } = await supabase
+    .from("invoice_items")
+    .select("id", { count: "exact", head: true })
+    .eq("invoice_id", invoiceId);
+
+  if (!count || count < 1) {
+    return { error: "Add line items before finalizing." };
+  }
+
+  const { error: rpcErr } = await supabase.rpc("finalize_draft_invoice", {
+    p_invoice_id: invoiceId,
+  });
+
+  if (rpcErr) return { error: rpcErr.message };
+  return {};
+}
+
+/** Create invoice + finalize on credit in one flow (web `saveDraftAndFinalizeCredit`). */
+export async function createAndFinalizeCreditSale(
+  supabase: SupabaseClient,
+  businessId: string,
+  userId: string,
+  input: {
+    customerId: string | null;
+    notes: string | null;
+    discount_amount: number;
+    tax_rate: number;
+    lines: DraftLineInput[];
+  },
+): Promise<{ error?: string; invoiceId?: string }> {
+  const saved = await createInvoiceDraft(supabase, businessId, userId, input);
+  if (saved.error) return { error: saved.error };
+  if (!saved.invoiceId) return { error: "Could not create invoice." };
+  const fin = await finalizeDraftInvoiceCredit(supabase, businessId, userId, saved.invoiceId);
+  if (fin.error) {
+    return {
+      error: `${fin.error} The sale was saved as a draft — open Bill to retry or edit.`,
+    };
+  }
+  return { invoiceId: saved.invoiceId };
+}
+
+/**
+ * Reverse a finalized sale (same RPC as web `reverseInvoice`):
+ * removes payments, corrects customer balance, restores stock where applicable,
+ * marks the invoice cancelled.
+ */
+export async function reverseInvoice(
+  supabase: SupabaseClient,
+  invoiceId: string,
+): Promise<{ error?: string }> {
+  const { error } = await supabase.rpc("reverse_invoice", {
+    p_invoice_id: invoiceId,
+  });
+  if (error) return { error: error.message };
+  return {};
+}

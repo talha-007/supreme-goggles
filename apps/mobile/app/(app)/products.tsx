@@ -14,11 +14,14 @@ import {
   View,
 } from "react-native";
 
+import { ErrorBannerWithSupport } from "../../src/components/ErrorBannerWithSupport";
+import { headerRightWithSupport } from "../../src/components/SupportHeaderButton";
 import { FormField } from "../../src/components/FormField";
 import { PrimaryButton } from "../../src/components/PrimaryButton";
 import { ProductThumbnail } from "../../src/components/ProductThumbnail";
 import { SearchBar } from "../../src/components/SearchBar";
 import { useAuth } from "../../src/contexts/auth-context";
+import { useRealtimeNotifications } from "../../src/contexts/realtime-notifications-context";
 import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
 import { formatPkr } from "../../src/lib/format-money";
 import { deleteProductImageByUrl, uploadProductImageFromUri } from "../../src/lib/product-images";
@@ -66,6 +69,7 @@ export default function ProductsScreen() {
   const navigation = useNavigation();
   const bottomPad = useTabScreenBottomPadding();
   const { businessId, user } = useAuth();
+  const { refreshGeneration } = useRealtimeNotifications();
 
   const [rows, setRows] = useState<ProductRow[]>([]);
   const [query, setQuery] = useState("");
@@ -133,38 +137,44 @@ export default function ProductsScreen() {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    if (refreshGeneration === 0) return;
+    void load();
+  }, [refreshGeneration, load]);
+
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <Pressable
-          onPress={() => {
-            setSaveError(null);
-            setEditingId(null);
-            setName("");
-            setSku("");
-            setCategory("");
-            setBrand("");
-            setUnit("pcs");
-            setSalePrice("");
-            setPurchasePrice("");
-            setCurrentStock("0");
-            setReorderLevel("0");
-            setIsActive(true);
-            setPendingImageUri(null);
-            setPendingMimeType(null);
-            setRemoveImage(false);
-            setExistingImageUrl(null);
-            setFormOpen(true);
-          }}
-          hitSlop={12}
-          className="mr-1 flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
-          accessibilityRole="button"
-          accessibilityLabel="Add product"
-        >
-          <Ionicons name="add" size={22} color="#34d399" />
-          <Text className="ml-1 text-sm font-semibold text-emerald-400">Add</Text>
-        </Pressable>
-      ),
+      headerRight: () =>
+        headerRightWithSupport(
+          <Pressable
+            onPress={() => {
+              setSaveError(null);
+              setEditingId(null);
+              setName("");
+              setSku("");
+              setCategory("");
+              setBrand("");
+              setUnit("pcs");
+              setSalePrice("");
+              setPurchasePrice("");
+              setCurrentStock("0");
+              setReorderLevel("0");
+              setIsActive(true);
+              setPendingImageUri(null);
+              setPendingMimeType(null);
+              setRemoveImage(false);
+              setExistingImageUrl(null);
+              setFormOpen(true);
+            }}
+            hitSlop={12}
+            className="flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
+            accessibilityRole="button"
+            accessibilityLabel="Add product"
+          >
+            <Ionicons name="add" size={22} color="#34d399" />
+            <Text className="ml-1 text-sm font-semibold text-emerald-400">Add</Text>
+          </Pressable>,
+        ),
     });
   }, [navigation]);
 
@@ -369,11 +379,7 @@ export default function ProductsScreen() {
 
   return (
     <View className="flex-1 bg-neutral-950">
-      {error ? (
-        <Text className="px-4 pt-3 text-sm text-red-400" accessibilityRole="alert">
-          {error}
-        </Text>
-      ) : null}
+      {error ? <ErrorBannerWithSupport message={error} /> : null}
 
       <FlatList
         data={rows}
@@ -628,11 +634,7 @@ export default function ProductsScreen() {
                   />
                 </View>
               </View>
-              {saveError ? (
-                <Text className="mb-2 text-sm text-red-400" accessibilityRole="alert">
-                  {saveError}
-                </Text>
-              ) : null}
+              {saveError ? <ErrorBannerWithSupport message={saveError} variant="compact" /> : null}
               <PrimaryButton
                 label={editingId ? "Save changes" : "Save product"}
                 onPress={() => void onSaveProduct()}

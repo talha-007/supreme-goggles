@@ -16,17 +16,14 @@ function parseCsvEnv(raw: string | undefined): string[] {
 
 /**
  * Billing is enforced by default.
- * Use `NEXT_PUBLIC_SUBSCRIPTION_BYPASS=true` only for local/manual testing.
+ * Set `EXPO_PUBLIC_SUBSCRIPTION_BYPASS=true` only for local/manual testing.
  */
 export function subscriptionGateSkippedByEnv(): boolean {
-  if (truthyEnv(process.env.NEXT_PUBLIC_SUBSCRIPTION_BYPASS)) {
-    return true;
-  }
-  return false;
+  return truthyEnv(process.env.EXPO_PUBLIC_SUBSCRIPTION_BYPASS);
 }
 
 /**
- * Whether this business may use paid features.
+ * Whether this business may use the app (same rules as web `hasSubscriptionAccess`).
  */
 export async function hasSubscriptionAccess(
   supabase: SupabaseClient,
@@ -42,7 +39,7 @@ export async function hasSubscriptionAccess(
     .eq("id", businessId)
     .maybeSingle();
 
-  /** Fail closed: if we cannot read billing state, do not grant access. */
+  /** Fail closed: if we cannot read billing state, do not grant access (avoids RLS / network gaps acting as a bypass). */
   if (error) {
     return false;
   }
@@ -81,12 +78,15 @@ export async function hasSubscriptionAccess(
   return false;
 }
 
-/** Superadmin bypass by env-configured user IDs/emails. */
-export function isSuperAdminByEnv(userId: string, email: string | null | undefined): boolean {
-  const idList = parseCsvEnv(process.env.SUPERADMIN_USER_IDS);
+/** Optional dev bypass: `EXPO_PUBLIC_SUPERADMIN_USER_IDS` / `EXPO_PUBLIC_SUPERADMIN_EMAILS` (comma-separated). */
+export function isSuperAdminBypassMobile(
+  userId: string,
+  email: string | null | undefined,
+): boolean {
+  const idList = parseCsvEnv(process.env.EXPO_PUBLIC_SUPERADMIN_USER_IDS);
   if (idList.includes(userId)) return true;
 
-  const emailList = parseCsvEnv(process.env.SUPERADMIN_EMAILS).map((e) => e.toLowerCase());
+  const emailList = parseCsvEnv(process.env.EXPO_PUBLIC_SUPERADMIN_EMAILS).map((e) => e.toLowerCase());
   const normalizedEmail = (email ?? "").trim().toLowerCase();
   if (!normalizedEmail) return false;
   return emailList.includes(normalizedEmail);

@@ -10,6 +10,7 @@ import {
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ErrorBannerWithSupport } from "../src/components/ErrorBannerWithSupport";
 import { FormField } from "../src/components/FormField";
 import { PrimaryButton } from "../src/components/PrimaryButton";
 import { useAuth } from "../src/contexts/auth-context";
@@ -17,7 +18,7 @@ import { getEmailRedirectUrl } from "../src/lib/auth-redirect";
 import { supabase } from "../src/lib/supabase";
 
 export default function SignupScreen() {
-  const { session, hasBusiness, loading: authLoading } = useAuth();
+  const { session, hasBusiness, subscriptionAccess, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -26,9 +27,10 @@ export default function SignupScreen() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (session && hasBusiness) router.replace("/dashboard");
+    if (session && hasBusiness && !subscriptionAccess) router.replace("/subscription-expired");
+    else if (session && hasBusiness) router.replace("/dashboard");
     else if (session && !hasBusiness) router.replace("/onboarding");
-  }, [session, hasBusiness, authLoading]);
+  }, [session, hasBusiness, subscriptionAccess, authLoading]);
 
   const onSubmit = async () => {
     setError(null);
@@ -115,9 +117,9 @@ export default function SignupScreen() {
           </View>
 
           {error ? (
-            <Text className="mt-2 text-sm text-red-400" accessibilityRole="alert">
-              {error}
-            </Text>
+            <View className="mt-2">
+              <ErrorBannerWithSupport message={error} variant="compact" />
+            </View>
           ) : null}
           {message ? (
             <Text className="mt-2 text-sm text-emerald-400" accessibilityRole="text">

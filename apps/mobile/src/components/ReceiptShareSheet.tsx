@@ -10,7 +10,7 @@ type Props = {
 };
 
 export function ReceiptShareSheet({ visible, title = "Receipt", receiptText, onClose }: Props) {
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const padX = 10;
   /** Max paper fits modal; inner area is for exactly 42 monospace columns. */
   const maxPaperW = Math.min(screenWidth - 32, 360);
@@ -40,10 +40,15 @@ export function ReceiptShareSheet({ visible, title = "Receipt", receiptText, onC
 
   const lines = receiptText.split("\n");
 
+  const sheetMaxH = Math.min(screenHeight * 0.62, 520);
+
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/70">
-        <View className="max-h-[88%] rounded-t-2xl border border-neutral-800 bg-neutral-950 px-4 pb-8 pt-4">
+        <View
+          className="rounded-t-2xl border border-neutral-800 bg-neutral-950 px-4 pb-8 pt-4"
+          style={{ maxHeight: sheetMaxH }}
+        >
           <Text className="text-lg font-semibold text-neutral-100">{title}</Text>
           <Text className="mt-1 text-xs text-neutral-500">
             Thermal-width preview (~{THERMAL_CHARS} columns). Share sends this text to your printer app.
@@ -64,7 +69,7 @@ export function ReceiptShareSheet({ visible, title = "Receipt", receiptText, onC
               }}
             >
               <ScrollView
-                style={{ maxHeight: 380 }}
+                style={{ maxHeight: Math.min(280, screenHeight * 0.32) }}
                 nestedScrollEnabled
                 showsVerticalScrollIndicator
               >

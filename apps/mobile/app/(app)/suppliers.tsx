@@ -12,6 +12,8 @@ import {
   View,
 } from "react-native";
 
+import { ErrorBannerWithSupport } from "../../src/components/ErrorBannerWithSupport";
+import { headerRightWithSupport } from "../../src/components/SupportHeaderButton";
 import { FormField } from "../../src/components/FormField";
 import { PrimaryButton } from "../../src/components/PrimaryButton";
 import { SearchBar } from "../../src/components/SearchBar";
@@ -53,21 +55,22 @@ export default function SuppliersScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <Pressable
-          onPress={() => {
-            setSaveError(null);
-            setAddOpen(true);
-          }}
-          hitSlop={12}
-          className="mr-1 flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
-          accessibilityRole="button"
-          accessibilityLabel="Add supplier"
-        >
-          <Ionicons name="add" size={22} color="#34d399" />
-          <Text className="ml-1 text-sm font-semibold text-emerald-400">Add</Text>
-        </Pressable>
-      ),
+      headerRight: () =>
+        headerRightWithSupport(
+          <Pressable
+            onPress={() => {
+              setSaveError(null);
+              setAddOpen(true);
+            }}
+            hitSlop={12}
+            className="flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
+            accessibilityRole="button"
+            accessibilityLabel="Add supplier"
+          >
+            <Ionicons name="add" size={22} color="#34d399" />
+            <Text className="ml-1 text-sm font-semibold text-emerald-400">Add</Text>
+          </Pressable>,
+        ),
     });
   }, [navigation]);
 
@@ -139,11 +142,7 @@ export default function SuppliersScreen() {
 
   return (
     <View className="flex-1 bg-neutral-950">
-      {error ? (
-        <Text className="px-4 pt-3 text-sm text-red-400" accessibilityRole="alert">
-          {error}
-        </Text>
-      ) : null}
+      {error ? <ErrorBannerWithSupport message={error} /> : null}
 
       <FlatList
         data={filtered}
@@ -229,11 +228,7 @@ export default function SuppliersScreen() {
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
-              {saveError ? (
-                <Text className="mb-2 text-sm text-red-400" accessibilityRole="alert">
-                  {saveError}
-                </Text>
-              ) : null}
+              {saveError ? <ErrorBannerWithSupport message={saveError} variant="compact" /> : null}
               <PrimaryButton label="Save supplier" onPress={() => void onSaveSupplier()} loading={saving} />
               <Pressable onPress={() => setAddOpen(false)} className="mt-3 py-3">
                 <Text className="text-center text-base text-neutral-400">Cancel</Text>

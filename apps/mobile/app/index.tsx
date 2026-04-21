@@ -9,7 +9,7 @@ import { IntroSlides } from "../src/components/IntroSlides";
 type Phase = "boot" | "slides" | "routing";
 
 export default function IndexScreen() {
-  const { session, hasBusiness, loading: authLoading } = useAuth();
+  const { session, hasBusiness, subscriptionAccess, loading: authLoading } = useAuth();
   const [phase, setPhase] = useState<Phase>("boot");
 
   useEffect(() => {
@@ -21,6 +21,10 @@ export default function IndexScreen() {
   useEffect(() => {
     if (phase !== "routing") return;
     if (authLoading) return;
+    if (session && hasBusiness && !subscriptionAccess) {
+      router.replace("/subscription-expired");
+      return;
+    }
     if (session && hasBusiness) {
       router.replace("/dashboard");
       return;
@@ -30,7 +34,7 @@ export default function IndexScreen() {
       return;
     }
     router.replace("/login");
-  }, [phase, authLoading, session, hasBusiness]);
+  }, [phase, authLoading, session, hasBusiness, subscriptionAccess]);
 
   const finishIntro = async () => {
     await AsyncStorage.setItem(INTRO_KEY, "1");

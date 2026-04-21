@@ -13,20 +13,31 @@ import {
 } from "react-native";
 
 import { ConfirmDialog } from "../../src/components/ConfirmDialog";
+import { ErrorBannerWithSupport } from "../../src/components/ErrorBannerWithSupport";
+import { headerRightWithSupport } from "../../src/components/SupportHeaderButton";
 import { FormField } from "../../src/components/FormField";
 import { PrimaryButton } from "../../src/components/PrimaryButton";
 import { ProductThumbnail } from "../../src/components/ProductThumbnail";
 import { ReceiptShareSheet } from "../../src/components/ReceiptShareSheet";
 import { SearchBar } from "../../src/components/SearchBar";
 import { useAuth } from "../../src/contexts/auth-context";
+import { useRealtimeNotifications } from "../../src/contexts/realtime-notifications-context";
 import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
 import { fetchReceiptTextForInvoice } from "../../src/lib/receipt-fetch";
 import {
   createAndFinalizeCashSale,
+  createAndFinalizeCreditSale,
   createInvoiceDraft,
   finalizeDraftInvoiceCash,
+  finalizeDraftInvoiceCredit,
+  reverseInvoice,
   type DraftLineInput,
 } from "../../src/lib/invoice-workflow";
+import {
+  INVOICE_DATE_FILTER_OPTIONS,
+  isInvoiceCreatedInPreset,
+  type DateRangePreset,
+} from "../../src/lib/date-range-presets";
 import { formatPkr } from "../../src/lib/format-money";
 import { supabase } from "../../src/lib/supabase";
 import type { CustomerRow } from "../../src/types/customer";
@@ -118,6 +129,10 @@ function matchesQuery(row: InvoiceListRow, q: string): boolean {
   );
 }
 
+function matchesDatePreset(row: InvoiceListRow, preset: DateRangePreset): boolean {
+  return isInvoiceCreatedInPreset(row.created_at, preset);
+}
+
 function normalizePickRow(row: Record<string, unknown>): CatalogPickRow {
   return {
     id: String(row.id),
@@ -152,10 +167,12 @@ export default function InvoicesScreen() {
   const navigation = useNavigation();
   const bottomPad = useTabScreenBottomPadding();
   const { businessId, user } = useAuth();
+  const { refreshGeneration } = useRealtimeNotifications();
 
   const [rows, setRows] = useState<InvoiceListRow[]>([]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<BillFilter>("all");
+  const [datePreset, setDatePreset] = useState<DateRangePreset>("all");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -168,6 +185,8 @@ export default function InvoicesScreen() {
   const [invoiceDiscountStr, setInvoiceDiscountStr] = useState("0");
   const [lines, setLines] = useState<LineDraft[]>(() => [newLine()]);
   const [saving, setSaving] = useState(false);
+  const [createCheckoutBusy, setCreateCheckoutBusy] = useState<"cash" | "credit" | null>(null);
+  const createModalBusy = saving || createCheckoutBusy !== null;
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const [productPickOpen, setProductPickOpen] = useState(false);
@@ -182,44 +201,53 @@ export default function InvoicesScreen() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [workflowBusy, setWorkflowBusy] = useState(false);
-  const [finalizeOpen, setFinalizeOpen] = useState(false);
+  const [finalizeMode, setFinalizeMode] = useState<null | "cash" | "credit">(null);
+  const [reverseOpen, setReverseOpen] = useState(false);
+  const [reverseBusy, setReverseBusy] = useState(false);
 
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [receiptText, setReceiptText] = useState("");
+  const [receiptFetchBusy, setReceiptFetchBusy] = useState(false);
   /** product_id -> image_url for invoice line display */
   const [detailLineImages, setDetailLineImages] = useState<Record<string, string | null>>({});
 
   const filtered = useMemo(() => {
-    return rows.filter((r) => matchesBillFilter(r.status, filter) && matchesQuery(r, query));
-  }, [rows, filter, query]);
+    return rows.filter(
+      (r) =>
+        matchesBillFilter(r.status, filter) &&
+        matchesQuery(r, query) &&
+        matchesDatePreset(r, datePreset),
+    );
+  }, [rows, filter, query, datePreset]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <Pressable
-          onPress={() => {
-            setSaveError(null);
-            setLines([newLine()]);
-            setCustomerId(null);
-            setNotes("");
-            setTaxRateStr("0");
-            setInvoiceDiscountStr("0");
-            setProductPickOpen(false);
-            setProductPickLineKey(null);
-            setProductPickQuery("");
-            setCreateOpen(true);
-            void loadBusinessDefaults();
-            void loadCustomers();
-          }}
-          hitSlop={12}
-          className="mr-1 flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
-          accessibilityRole="button"
-          accessibilityLabel="New bill"
-        >
-          <Ionicons name="add" size={22} color="#34d399" />
-          <Text className="ml-1 text-sm font-semibold text-emerald-400">New</Text>
-        </Pressable>
-      ),
+      headerRight: () =>
+        headerRightWithSupport(
+          <Pressable
+            onPress={() => {
+              setSaveError(null);
+              setLines([newLine()]);
+              setCustomerId(null);
+              setNotes("");
+              setTaxRateStr("0");
+              setInvoiceDiscountStr("0");
+              setProductPickOpen(false);
+              setProductPickLineKey(null);
+              setProductPickQuery("");
+              setCreateOpen(true);
+              void loadBusinessDefaults();
+              void loadCustomers();
+            }}
+            hitSlop={12}
+            className="flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
+            accessibilityRole="button"
+            accessibilityLabel="New bill"
+          >
+            <Ionicons name="add" size={22} color="#34d399" />
+            <Text className="ml-1 text-sm font-semibold text-emerald-400">New</Text>
+          </Pressable>,
+        ),
     });
   }, [navigation]);
 
@@ -287,6 +315,11 @@ export default function InvoicesScreen() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (refreshGeneration === 0) return;
+    void load();
+  }, [refreshGeneration, load]);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedPickQuery(productPickQuery.trim()), 300);
@@ -413,7 +446,8 @@ export default function InvoicesScreen() {
     setDetailId(id);
     setDetail(null);
     setDetailError(null);
-    setFinalizeOpen(false);
+    setFinalizeMode(null);
+    setReverseOpen(false);
     setDetailLineImages({});
     void fetchDetail(id);
   };
@@ -422,7 +456,8 @@ export default function InvoicesScreen() {
     setDetailId(null);
     setDetail(null);
     setDetailError(null);
-    setFinalizeOpen(false);
+    setFinalizeMode(null);
+    setReverseOpen(false);
     setDetailLineImages({});
   };
 
@@ -502,7 +537,7 @@ export default function InvoicesScreen() {
     const prep = await prepareBillLines();
     if (!prep) return;
 
-    setSaving(true);
+    setCreateCheckoutBusy("cash");
     setSaveError(null);
 
     const { error: err, invoiceId } = await createAndFinalizeCashSale(supabase, businessId, prep.uid, {
@@ -513,7 +548,7 @@ export default function InvoicesScreen() {
       lines: prep.draftLines,
     });
 
-    setSaving(false);
+    setCreateCheckoutBusy(null);
     if (err) {
       setSaveError(err);
       return;
@@ -528,6 +563,44 @@ export default function InvoicesScreen() {
       const receipt = await fetchReceiptTextForInvoice(supabase, businessId, invoiceId);
       if ("error" in receipt) {
         setReceiptText(`Sale completed.\n(${receipt.error})`);
+      } else {
+        setReceiptText(receipt.text);
+      }
+      setReceiptOpen(true);
+    }
+  };
+
+  const onCompleteSaleCredit = async () => {
+    if (!businessId) return;
+    const prep = await prepareBillLines();
+    if (!prep) return;
+
+    setCreateCheckoutBusy("credit");
+    setSaveError(null);
+
+    const { error: err, invoiceId } = await createAndFinalizeCreditSale(supabase, businessId, prep.uid, {
+      customerId: customerId,
+      notes: notes.trim() || null,
+      discount_amount: prep.invDisc,
+      tax_rate: prep.tax,
+      lines: prep.draftLines,
+    });
+
+    setCreateCheckoutBusy(null);
+    if (err) {
+      setSaveError(err);
+      return;
+    }
+
+    setCreateOpen(false);
+    setProductPickOpen(false);
+    setProductPickLineKey(null);
+    void load();
+
+    if (invoiceId) {
+      const receipt = await fetchReceiptTextForInvoice(supabase, businessId, invoiceId);
+      if ("error" in receipt) {
+        setReceiptText(`Credit sale saved.\n(${receipt.error})`);
       } else {
         setReceiptText(receipt.text);
       }
@@ -574,7 +647,7 @@ export default function InvoicesScreen() {
     const uid = session?.user?.id;
     if (!uid) {
       setDetailError("You must be signed in.");
-      setFinalizeOpen(false);
+      setFinalizeMode(null);
       return;
     }
     setWorkflowBusy(true);
@@ -585,7 +658,7 @@ export default function InvoicesScreen() {
       setDetailError(err);
       return;
     }
-    setFinalizeOpen(false);
+    setFinalizeMode(null);
     void fetchDetail(detailId);
     void load();
     const receipt = await fetchReceiptTextForInvoice(supabase, businessId, detailId);
@@ -596,6 +669,68 @@ export default function InvoicesScreen() {
     }
     setReceiptOpen(true);
   };
+
+  const confirmFinalizeCredit = async () => {
+    if (!businessId || !detailId) return;
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const uid = session?.user?.id;
+    if (!uid) {
+      setDetailError("You must be signed in.");
+      setFinalizeMode(null);
+      return;
+    }
+    setWorkflowBusy(true);
+    setDetailError(null);
+    const { error: err } = await finalizeDraftInvoiceCredit(supabase, businessId, uid, detailId);
+    setWorkflowBusy(false);
+    if (err) {
+      setDetailError(err);
+      return;
+    }
+    setFinalizeMode(null);
+    void fetchDetail(detailId);
+    void load();
+    const receipt = await fetchReceiptTextForInvoice(supabase, businessId, detailId);
+    if ("error" in receipt) {
+      setReceiptText(`Sale on credit saved. (${receipt.error})`);
+    } else {
+      setReceiptText(receipt.text);
+    }
+    setReceiptOpen(true);
+  };
+
+  const confirmReverseInvoice = async () => {
+    if (!detailId) return;
+    setReverseBusy(true);
+    setDetailError(null);
+    const { error: err } = await reverseInvoice(supabase, detailId);
+    setReverseBusy(false);
+    if (err) {
+      setDetailError(err);
+      return;
+    }
+    setReverseOpen(false);
+    void fetchDetail(detailId);
+    void load();
+  };
+
+  const openReceiptShareForDetail = useCallback(async () => {
+    if (!businessId || !detailId) return;
+    setReceiptFetchBusy(true);
+    try {
+      const receipt = await fetchReceiptTextForInvoice(supabase, businessId, detailId);
+      if ("error" in receipt) {
+        setReceiptText(`Could not load receipt.\n${receipt.error}`);
+      } else {
+        setReceiptText(receipt.text);
+      }
+      setReceiptOpen(true);
+    } finally {
+      setReceiptFetchBusy(false);
+    }
+  }, [businessId, detailId]);
 
   const balanceDue =
     detail != null
@@ -612,11 +747,7 @@ export default function InvoicesScreen() {
 
   return (
     <View className="flex-1 bg-neutral-950">
-      {error ? (
-        <Text className="px-4 pt-3 text-sm text-red-400" accessibilityRole="alert">
-          {error}
-        </Text>
-      ) : null}
+      {error ? <ErrorBannerWithSupport message={error} /> : null}
 
       <FlatList
         data={filtered}
@@ -633,10 +764,11 @@ export default function InvoicesScreen() {
               placeholder="Search invoice # or customer"
               accessibilityLabel="Search bills"
             />
+            <Text className="mt-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Status</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              className="mt-3"
+              className="mt-1.5"
               contentContainerStyle={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -662,6 +794,36 @@ export default function InvoicesScreen() {
                 );
               })}
             </ScrollView>
+            <Text className="mt-3 text-xs font-semibold uppercase tracking-wide text-neutral-500">Date</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="mt-1.5"
+              contentContainerStyle={{
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: 2,
+              }}
+            >
+              {INVOICE_DATE_FILTER_OPTIONS.map((f) => {
+                const active = datePreset === f.key;
+                return (
+                  <Pressable
+                    key={f.key}
+                    onPress={() => setDatePreset(f.key)}
+                    className={`mr-2 rounded-full border px-3.5 py-2 ${
+                      active ? "border-sky-500 bg-sky-500/15" : "border-neutral-700 bg-neutral-900"
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-medium ${active ? "text-sky-400" : "text-neutral-400"}`}
+                    >
+                      {f.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
             <Text className="mt-3 text-xs text-neutral-500">
               {filtered.length === rows.length
                 ? `${rows.length} bill${rows.length === 1 ? "" : "s"}`
@@ -673,11 +835,13 @@ export default function InvoicesScreen() {
           <View className="items-center px-4 py-12">
             <Ionicons name="document-text-outline" size={48} color="#525252" />
             <Text className="mt-4 text-center text-base font-medium text-neutral-300">
-              {query.trim() || filter !== "all" ? "No bills match" : "No bills yet"}
+              {query.trim() || filter !== "all" || datePreset !== "all"
+                ? "No bills match"
+                : "No bills yet"}
             </Text>
             <Text className="mt-2 text-center text-sm leading-5 text-neutral-500">
-              {query.trim() || filter !== "all"
-                ? "Adjust search or filters."
+              {query.trim() || filter !== "all" || datePreset !== "all"
+                ? "Adjust search, status, or date filters."
                 : "Tap New to create a draft, then finalize when the customer pays cash."}
             </Text>
           </View>
@@ -743,7 +907,8 @@ export default function InvoicesScreen() {
               </Pressable>
             </View>
             <Text className="text-sm text-neutral-500">
-              Use Complete sale for a fast cash checkout, or save a draft to edit or charge later.
+              Complete sale (cash) records full payment. Credit leaves the bill unpaid and updates the customer&apos;s
+              balance when a customer is selected. Or save a draft to edit or charge later.
             </Text>
             <ScrollView keyboardShouldPersistTaps="handled" className="mt-4">
               <Text className="mb-2 text-sm font-medium text-neutral-300">Customer (optional)</Text>
@@ -870,23 +1035,32 @@ export default function InvoicesScreen() {
                 <Text className="text-center text-sm font-medium text-emerald-500">+ Add line</Text>
               </Pressable>
 
-              {saveError ? (
-                <Text className="mb-2 text-sm text-red-400" accessibilityRole="alert">
-                  {saveError}
-                </Text>
-              ) : null}
+              {saveError ? <ErrorBannerWithSupport message={saveError} variant="compact" /> : null}
 
               <PrimaryButton
                 label="Complete sale (cash)"
                 onPress={() => void onCompleteSaleCash()}
-                loading={saving}
+                loading={createCheckoutBusy === "cash"}
+                disabled={createModalBusy}
               />
+              <Pressable
+                onPress={() => void onCompleteSaleCredit()}
+                disabled={createModalBusy}
+                className="mt-2 rounded-xl border border-amber-600/50 bg-amber-950/25 py-3.5 active:opacity-90 disabled:opacity-50"
+                accessibilityRole="button"
+                accessibilityLabel="Complete sale on credit"
+              >
+                <Text className="text-center text-base font-semibold text-amber-300">
+                  {createCheckoutBusy === "credit" ? "Processing…" : "Complete sale (credit)"}
+                </Text>
+              </Pressable>
               <Text className="mt-2 text-center text-xs text-neutral-600">
-                Saves the bill and records full cash payment in one step — same as Quick sale on Home.
+                Cash: paid in full. Credit: unpaid bill; walk-in allowed; linked customer gets the amount on their
+                tab.
               </Text>
               <Pressable
                 onPress={() => void onSaveDraftOnly()}
-                disabled={saving}
+                disabled={createModalBusy}
                 className="mt-4 py-3 active:opacity-80 disabled:opacity-50"
               >
                 <Text className="text-center text-sm font-medium text-neutral-400">
@@ -1007,9 +1181,9 @@ export default function InvoicesScreen() {
                 ) : null}
 
                 {detailError ? (
-                  <Text className="mt-3 text-sm text-red-400" accessibilityRole="alert">
-                    {detailError}
-                  </Text>
+                  <View className="mt-3">
+                    <ErrorBannerWithSupport message={detailError} variant="compact" />
+                  </View>
                 ) : null}
 
                 <Text className="mt-5 text-2xl font-semibold text-emerald-400/95">
@@ -1048,16 +1222,60 @@ export default function InvoicesScreen() {
                   </View>
                 ))}
 
-                {detail.status === "draft" && detail.items.length > 0 ? (
+                {detail.status !== "draft" && detail.status !== "cancelled" ? (
                   <Pressable
-                    onPress={() => setFinalizeOpen(true)}
-                    disabled={workflowBusy}
-                    className="mt-6 rounded-xl bg-emerald-600 py-3.5 active:opacity-90 disabled:opacity-50"
+                    onPress={() => void openReceiptShareForDetail()}
+                    disabled={receiptFetchBusy}
+                    className="mt-4 rounded-xl border border-emerald-700/50 bg-emerald-950/30 py-3.5 active:opacity-90 disabled:opacity-50"
+                    accessibilityRole="button"
+                    accessibilityLabel="Share or print receipt"
                   >
-                    <Text className="text-center text-base font-semibold text-white">
-                      Finalize &amp; take cash (paid in full)
+                    <Text className="text-center text-base font-semibold text-emerald-400">
+                      {receiptFetchBusy ? "Loading receipt…" : "Share or print receipt"}
+                    </Text>
+                    <Text className="mt-1 px-1 text-center text-[11px] leading-4 text-neutral-500">
+                      Opens a preview — use Share to send to WhatsApp, email, or a printer app.
                     </Text>
                   </Pressable>
+                ) : null}
+
+                {detail.status === "draft" && detail.items.length > 0 ? (
+                  <View className="mt-6 gap-2">
+                    <Pressable
+                      onPress={() => setFinalizeMode("cash")}
+                      disabled={workflowBusy}
+                      className="rounded-xl bg-emerald-600 py-3.5 active:opacity-90 disabled:opacity-50"
+                    >
+                      <Text className="text-center text-base font-semibold text-white">
+                        Finalize &amp; take cash (paid in full)
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setFinalizeMode("credit")}
+                      disabled={workflowBusy}
+                      className="rounded-xl border border-amber-600/50 bg-amber-950/25 py-3.5 active:opacity-90 disabled:opacity-50"
+                    >
+                      <Text className="text-center text-base font-semibold text-amber-300">
+                        Finalize on credit (unpaid)
+                      </Text>
+                    </Pressable>
+                  </View>
+                ) : null}
+
+                {detail.status !== "draft" && detail.status !== "cancelled" ? (
+                  <>
+                    <Text className="mt-6 text-xs leading-5 text-neutral-500">
+                      Only if this sale was entered by mistake. Payments are removed, what the customer owes is
+                      corrected, and stock goes back up where it was reduced.
+                    </Text>
+                    <Pressable
+                      onPress={() => setReverseOpen(true)}
+                      disabled={reverseBusy || workflowBusy}
+                      className="mt-2 rounded-xl border border-red-900/60 bg-red-950/40 py-3.5 active:opacity-90 disabled:opacity-50"
+                    >
+                      <Text className="text-center text-base font-semibold text-red-400">Reverse sale</Text>
+                    </Pressable>
+                  </>
                 ) : null}
 
                 <Pressable onPress={closeDetail} className="mt-4 rounded-xl bg-neutral-800 py-3">
@@ -1074,15 +1292,33 @@ export default function InvoicesScreen() {
       </Modal>
 
       <ConfirmDialog
-        visible={finalizeOpen}
-        title="Finalize with cash"
-        message="Mark this bill as issued and record a full cash payment? Inventory will update for stocked items."
+        visible={finalizeMode !== null}
+        title={finalizeMode === "credit" ? "Finalize on credit" : "Finalize with cash"}
+        message={
+          finalizeMode === "credit"
+            ? "Finalize without taking payment? The bill stays unpaid. Stock updates for stocked items. If a customer is linked, the total is added to what they owe."
+            : "Mark this bill as issued and record a full cash payment? Inventory will update for stocked items."
+        }
         cancelLabel="Not now"
         confirmLabel="Finalize"
         variant="primary"
         loading={workflowBusy}
-        onCancel={() => setFinalizeOpen(false)}
-        onConfirm={() => void confirmFinalizeCash()}
+        onCancel={() => setFinalizeMode(null)}
+        onConfirm={() =>
+          void (finalizeMode === "credit" ? confirmFinalizeCredit() : confirmFinalizeCash())
+        }
+      />
+
+      <ConfirmDialog
+        visible={reverseOpen}
+        title="Reverse this sale?"
+        message="Recorded payments will be removed, what the customer owes will be corrected, stock will go back up where it was reduced, and the bill will show as cancelled. You cannot undo this."
+        cancelLabel="Cancel"
+        confirmLabel="Yes, reverse sale"
+        variant="danger"
+        loading={reverseBusy}
+        onCancel={() => !reverseBusy && setReverseOpen(false)}
+        onConfirm={() => void confirmReverseInvoice()}
       />
 
       <ReceiptShareSheet

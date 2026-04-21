@@ -1,5 +1,6 @@
 "use client";
 
+import { InvoiceReverseButton } from "@/components/invoices/invoice-reverse-button";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -49,7 +50,6 @@ type Props = {
   statusLabels: Record<string, string>;
   editLabel: string;
   viewLabel: string;
-  voidLabel: string;
   newInvoiceHref: string;
   newInvoiceLabel: string;
   title: string;
@@ -81,7 +81,6 @@ export function InvoicesClient({
   statusLabels,
   editLabel,
   viewLabel,
-  voidLabel,
   newInvoiceHref,
   newInvoiceLabel,
   title,
@@ -281,7 +280,7 @@ export function InvoicesClient({
                             </Link>
                           )}
                           {canEdit && inv.status !== "draft" && inv.status !== "cancelled" && (
-                            <VoidButton invoiceId={inv.id} label={voidLabel} />
+                            <InvoiceReverseButton invoiceId={inv.id} compact className="!border-0 !bg-transparent !px-0 !py-0 !text-xs !font-medium !text-red-700 hover:!bg-transparent dark:!text-red-400" />
                           )}
                         </div>
                       </td>
@@ -294,17 +293,5 @@ export function InvoicesClient({
         </div>
       </div>
     </div>
-  );
-}
-
-// Thin client wrapper so we don't need to pass InvoiceReverseButton as a server import
-function VoidButton({ invoiceId, label }: { invoiceId: string; label: string }) {
-  return (
-    <Link
-      href={`/dashboard/invoices/${invoiceId}`}
-      className="text-xs font-medium text-red-700 underline hover:no-underline dark:text-red-400"
-    >
-      {label}
-    </Link>
   );
 }

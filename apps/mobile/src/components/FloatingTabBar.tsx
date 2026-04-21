@@ -1,7 +1,11 @@
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { BottomTabBar } from "@react-navigation/bottom-tabs";
-import { Platform, StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Keyboard, Platform, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const KB_SHOW = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+const KB_HIDE = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
 /**
  * Pill-shaped tab bar with horizontal inset and shadow so it reads as “floating”.
@@ -10,6 +14,21 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export function FloatingTabBar(props: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const bottom = Math.max(insets.bottom, 10);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const show = Keyboard.addListener(KB_SHOW, () => setKeyboardVisible(true));
+    const hide = Keyboard.addListener(KB_HIDE, () => setKeyboardVisible(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
+  /** Custom tab bar + chrome is not always collapsed by `tabBarHideOnKeyboard`; hide while typing. */
+  if (keyboardVisible) {
+    return null;
+  }
 
   return (
     <View style={[styles.outer, { paddingBottom: bottom }]} pointerEvents="box-none">
