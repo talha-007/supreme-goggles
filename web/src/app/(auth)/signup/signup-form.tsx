@@ -1,27 +1,78 @@
 "use client";
 
+import { AuthPasswordField } from "@/components/auth/auth-password-field";
+import { GoogleOauthButton } from "@/components/auth/google-oauth-button";
 import { createSignUpClient } from "@/lib/supabase/signup-client";
+import { PasswordRuleChecklist } from "@/components/auth/password-rule-checklist";
+import {
+  getPasswordRulesStatus,
+  getSignUpPasswordIssue,
+  getSignupEmailIssue,
+} from "@/lib/auth/credential-validation";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
+
+const PASSWORD_ERROR_KEY = {
+  minLength: "passwordError.minLength",
+  letter: "passwordError.letter",
+  number: "passwordError.number",
+  symbol: "passwordError.symbol",
+} as const;
 
 export function SignupForm() {
   const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fieldStarted, setFieldStarted] = useState({ email: false, password: false });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
+  const emailIssue = fieldStarted.email ? getSignupEmailIssue(email) : null;
+  const emailFieldError = emailIssue
+    ? emailIssue === "empty"
+      ? t("loginFieldEmailRequired")
+      : emailIssue === "format"
+        ? t("invalidEmail")
+        : t("disposableEmailBlocked")
+    : null;
+
+  const rules = getPasswordRulesStatus(password);
+  const passwordIssue = fieldStarted.password && password.length > 0 ? getSignUpPasswordIssue(password) : null;
+  const passwordFieldError =
+    fieldStarted.password && password.length === 0
+      ? t("loginFieldPasswordRequired")
+      : fieldStarted.password && passwordIssue
+        ? t(PASSWORD_ERROR_KEY[passwordIssue])
+        : null;
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setFieldStarted({ email: true, password: true });
     setError(null);
     setMessage(null);
+    const eIssue = getSignupEmailIssue(email);
+    if (eIssue) {
+      setError(
+        eIssue === "empty"
+          ? t("loginFieldEmailRequired")
+          : eIssue === "format"
+            ? t("invalidEmail")
+            : t("disposableEmailBlocked"),
+      );
+      return;
+    }
+    const pw = getSignUpPasswordIssue(password);
+    if (pw) {
+      setError(t(PASSWORD_ERROR_KEY[pw]));
+      return;
+    }
     setLoading(true);
     const supabase = createSignUpClient();
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
     const { data, error: err } = await supabase.auth.signUp({
-      email,
+      email: email.trim(),
       password,
       options: {
         emailRedirectTo: `${siteUrl}/auth/callback`,
@@ -42,7 +93,6 @@ export function SignupForm() {
       }
       return;
     }
-    // Anti–enumeration: duplicate email often returns user with identities: [] (see gotrue-js #513).
     if (!data.user) {
       setError(t("emailAlreadyRegistered"));
       return;
@@ -56,7 +106,20 @@ export function SignupForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+    <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+      <div className="flex flex-col gap-3">
+        <GoogleOauthButton
+          label={t("googleContinue")}
+          disabled={loading}
+          onError={(msg) => {
+            setError(msg);
+            setMessage(null);
+          }}
+        />
+        <p className="text-center text-xs text-zinc-500 dark:text-zinc-400" aria-hidden>
+          {t("continueWithEmail")}
+        </p>
+      </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
           {t("email")}
@@ -66,27 +129,49 @@ export function SignupForm() {
           name="email"
           type="email"
           autoComplete="email"
-          required
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setFieldStarted((f) => ({ ...f, email: true }));
+          }}
+          onBlur={() => setFieldStarted((f) => ({ ...f, email: true }))}
+          className={`rounded-lg border bg-white px-3 py-2 text-zinc-900 outline-none focus:ring-2 dark:bg-zinc-900 dark:text-zinc-50 ${
+            emailFieldError
+              ? "border-red-500 focus:ring-red-400/40 dark:border-red-500/80"
+              : "border-zinc-200 dark:border-zinc-700"
+          }`}
         />
+        {emailFieldError ? (
+          <p className="text-sm text-red-600 dark:text-red-400" role="status" aria-live="polite">
+            {emailFieldError}
+          </p>
+        ) : null}
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="password" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
           {t("password")}
         </label>
-        <input
+        <AuthPasswordField
           id="password"
           name="password"
-          type="password"
           autoComplete="new-password"
-          required
-          minLength={6}
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setFieldStarted((f) => ({ ...f, password: true }));
+          }}
+          onBlur={() => setFieldStarted((f) => ({ ...f, password: true }))}
+          showLabel={t("showPassword")}
+          hideLabel={t("hidePassword")}
+          hasError={Boolean(passwordFieldError)}
+          aria-invalid={Boolean(passwordFieldError)}
         />
+        <PasswordRuleChecklist status={rules} />
+        {passwordFieldError ? (
+          <p className="text-sm text-red-600 dark:text-red-400" role="status" aria-live="polite">
+            {passwordFieldError}
+          </p>
+        ) : null}
       </div>
       {error ? (
         <p className="text-sm text-red-600 dark:text-red-400" role="alert">

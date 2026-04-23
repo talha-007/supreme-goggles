@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; details?: string; reason?: string }>;
+  searchParams: Promise<{ error?: string; details?: string; reason?: string; reset?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -46,6 +46,11 @@ export default async function LoginPage({
       {params.error === "oauth" && params.details ? (
         <p className="mt-4 text-sm text-red-600 dark:text-red-400" role="alert">
           {params.details}
+        </p>
+      ) : null}
+      {params.reset === "1" || params.reset === "success" ? (
+        <p className="mt-4 text-sm text-emerald-700 dark:text-emerald-400" role="status">
+          {t("loginAfterReset")}
         </p>
       ) : null}
       <div className="mt-6">

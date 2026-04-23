@@ -13,8 +13,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ErrorBannerWithSupport } from "../src/components/ErrorBannerWithSupport";
 import { FormField } from "../src/components/FormField";
+import { PasswordRuleChecklist } from "../src/components/PasswordRuleChecklist";
 import { PrimaryButton } from "../src/components/PrimaryButton";
 import { useAuth } from "../src/contexts/auth-context";
+import {
+  getPasswordRulesStatus,
+  getSignUpPasswordIssue,
+  getSignupEmailIssue,
+  SIGNUP_EMAIL_ERROR,
+  SIGNUP_PASSWORD_ERROR,
+} from "../src/lib/credential-validation";
 import { getEmailRedirectUrl } from "../src/lib/auth-redirect";
 import { getPrivacyPolicyUrl } from "../src/lib/privacy-config";
 import { supabase } from "../src/lib/supabase";
@@ -23,8 +31,8 @@ export default function SignupScreen() {
   const { session, hasBusiness, subscriptionAccess, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fieldStarted, setFieldStarted] = useState({ email: false, password: false });
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -34,12 +42,34 @@ export default function SignupScreen() {
     else if (session && !hasBusiness) router.replace("/onboarding");
   }, [session, hasBusiness, subscriptionAccess, authLoading]);
 
+  const emailIssue = fieldStarted.email ? getSignupEmailIssue(email) : null;
+  const emailFieldError = emailIssue ? SIGNUP_EMAIL_ERROR[emailIssue] : null;
+
+  const rules = getPasswordRulesStatus(password);
+  const passwordIssue = fieldStarted.password && password.length > 0 ? getSignUpPasswordIssue(password) : null;
+  const passwordFieldError =
+    fieldStarted.password && password.length === 0
+      ? "Enter a password."
+      : fieldStarted.password && passwordIssue
+        ? SIGNUP_PASSWORD_ERROR[passwordIssue]
+        : null;
+
   const onSubmit = async () => {
+    setFieldStarted({ email: true, password: true });
     setError(null);
-    setMessage(null);
+    const eIssue = getSignupEmailIssue(email);
+    if (eIssue) {
+      setError(SIGNUP_EMAIL_ERROR[eIssue]);
+      return;
+    }
+    const pw = getSignUpPasswordIssue(password);
+    if (pw) {
+      setError(SIGNUP_PASSWORD_ERROR[pw]);
+      return;
+    }
     setLoading(true);
     const { data, error: err } = await supabase.auth.signUp({
-      email,
+      email: email.trim(),
       password,
       options: { emailRedirectTo: getEmailRedirectUrl() },
     });
@@ -73,7 +103,7 @@ export default function SignupScreen() {
       );
       return;
     }
-    setMessage("Check your email to confirm your account, then sign in.");
+    router.replace("/login?postSignup=1");
   };
 
   return (
@@ -98,24 +128,34 @@ export default function SignupScreen() {
 
           <Text className="text-3xl font-bold text-neutral-100">Create account</Text>
           <Text className="mt-2 text-base text-neutral-500">
-            Create your account with email and password
+            Use a real email you can access — temporary inboxes are not allowed.
           </Text>
 
           <View className="mt-8">
             <FormField
               label="Email"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(t) => {
+                setEmail(t);
+                setFieldStarted((f) => ({ ...f, email: true }));
+              }}
               placeholder="you@store.com"
               keyboardType="email-address"
+              error={emailFieldError}
             />
             <FormField
               label="Password"
               value={password}
-              onChangeText={setPassword}
-              placeholder="At least 6 characters"
+              onChangeText={(t) => {
+                setPassword(t);
+                setFieldStarted((f) => ({ ...f, password: true }));
+              }}
+              placeholder="••••••••"
               secureTextEntry
+              showPasswordToggle
+              error={passwordFieldError}
             />
+            <PasswordRuleChecklist status={rules} />
           </View>
 
           {error ? (
@@ -123,12 +163,6 @@ export default function SignupScreen() {
               <ErrorBannerWithSupport message={error} variant="compact" />
             </View>
           ) : null}
-          {message ? (
-            <Text className="mt-2 text-sm text-emerald-400" accessibilityRole="text">
-              {message}
-            </Text>
-          ) : null}
-
           <PrimaryButton label="Create account" onPress={onSubmit} loading={loading} />
 
           <View className="mt-10 flex-row flex-wrap items-center justify-center gap-1">

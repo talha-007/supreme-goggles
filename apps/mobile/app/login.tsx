@@ -8,20 +8,41 @@ import {
   Text,
   View,
 } from "react-native";
-import { Link, router } from "expo-router";
+import { Link, router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ErrorBannerWithSupport } from "../src/components/ErrorBannerWithSupport";
 import { FormField } from "../src/components/FormField";
 import { PrimaryButton } from "../src/components/PrimaryButton";
 import { useAuth } from "../src/contexts/auth-context";
+import { isValidEmailFormat } from "../src/lib/credential-validation";
+import { LOGIN_FAILED_CREDENTIALS } from "../src/lib/login-hints";
+import { getLoginErrorTranslationId, LOGIN_ERROR_MESSAGE } from "../src/lib/map-login-error";
 import { getPrivacyPolicyUrl } from "../src/lib/privacy-config";
 import { supabase } from "../src/lib/supabase";
 
+function loginEmailFieldMessage(email: string, started: boolean): string | null {
+  if (!started) return null;
+  const s = email.trim();
+  if (s.length === 0) return "Enter your email address.";
+  if (s.length < 4) return null;
+  if (!s.includes("@") && s.length < 8) return null;
+  if (!isValidEmailFormat(email)) return "Enter a valid email address.";
+  return null;
+}
+
 export default function LoginScreen() {
+  const { postSignup, error: errorParam, reason, details } = useLocalSearchParams<{
+    postSignup?: string;
+    error?: string;
+    reason?: string;
+    details?: string;
+  }>();
   const { session, hasBusiness, subscriptionAccess, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fieldStarted, setFieldStarted] = useState({ email: false, password: false });
+  const [credentialsRejected, setCredentialsRejected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -32,16 +53,34 @@ export default function LoginScreen() {
     else if (session && !hasBusiness) router.replace("/onboarding");
   }, [session, hasBusiness, subscriptionAccess, authLoading]);
 
+  const emailFieldError = loginEmailFieldMessage(email, fieldStarted.email);
+  const passwordFieldError = fieldStarted.password && password.length === 0 ? "Enter your password." : null;
+
   const onSubmit = async () => {
+    setFieldStarted({ email: true, password: true });
+    setCredentialsRejected(false);
     setError(null);
+    if (!isValidEmailFormat(email) || !email.trim() || !password.length) return;
     setLoading(true);
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
     setLoading(false);
     if (err) {
-      setError(err.message);
+      const mapped = getLoginErrorTranslationId(err);
+      if (mapped.id === "unknown" && "params" in mapped) {
+        setError(mapped.params.message);
+        return;
+      }
+      if (mapped.id === "wrongEmailOrPassword") {
+        setError(null);
+        setCredentialsRejected(true);
+        return;
+      }
+      setError(LOGIN_ERROR_MESSAGE[mapped.id]);
       return;
     }
-    /** AuthProvider holds global routing until membership + subscription resolve (see signInRoutingHold). */
   };
 
   return (
@@ -59,22 +98,82 @@ export default function LoginScreen() {
             Sign in to your store account
           </Text>
 
+          {postSignup === "1" ? (
+            <View className="mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
+              <Text className="text-sm text-emerald-300" accessibilityRole="text">
+                Check your email to confirm your account, then sign in.
+              </Text>
+            </View>
+          ) : null}
+
+          {errorParam === "auth" && reason === "crossdevice" ? (
+            <View className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+              <Text className="text-sm text-amber-200" accessibilityRole="text">
+                This confirmation link is invalid or was opened in a different app than the one that
+                started an older sign-up. Request a new confirmation email, or sign up again — then
+                open the new link on this device.
+              </Text>
+            </View>
+          ) : null}
+
+          {errorParam === "auth" && errorParam && reason !== "crossdevice" ? (
+            <View className="mt-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2">
+              <Text className="text-sm text-rose-200" accessibilityRole="text">
+                {typeof details === "string" && details.length > 0
+                  ? decodeURIComponent(details)
+                  : "We could not complete sign-in from that link. Try again or use Forgot password."}
+              </Text>
+            </View>
+          ) : null}
+
           <View className="mt-10">
-            <FormField
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              placeholder="you@store.com"
-              keyboardType="email-address"
-            />
-            <FormField
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="••••••••"
-              secureTextEntry
-            />
+            <View>
+              <FormField
+                label="Email"
+                value={email}
+                onChangeText={(t) => {
+                  setEmail(t);
+                  setFieldStarted((f) => ({ ...f, email: true }));
+                  setCredentialsRejected(false);
+                  setError(null);
+                }}
+                placeholder="you@store.com"
+                keyboardType="email-address"
+                error={emailFieldError}
+              />
+            </View>
+            <View>
+              <FormField
+                label="Password"
+                value={password}
+                onChangeText={(t) => {
+                  setPassword(t);
+                  setFieldStarted((f) => ({ ...f, password: true }));
+                  setCredentialsRejected(false);
+                  setError(null);
+                }}
+                placeholder="••••••••"
+                secureTextEntry
+                showPasswordToggle
+                error={passwordFieldError}
+              />
+            </View>
+            <View className="flex-row justify-end">
+              <Link href="/forgot-password" asChild>
+                <Pressable hitSlop={8}>
+                  <Text className="text-sm font-medium text-emerald-500">Forgot password?</Text>
+                </Pressable>
+              </Link>
+            </View>
           </View>
+
+          {credentialsRejected ? (
+            <View className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+              <Text className="text-sm text-amber-200/90" accessibilityRole="text">
+                {LOGIN_FAILED_CREDENTIALS}
+              </Text>
+            </View>
+          ) : null}
 
           {error ? (
             <View className="mt-2">
@@ -82,11 +181,7 @@ export default function LoginScreen() {
             </View>
           ) : null}
 
-          <Pressable className="self-end py-2">
-            <Text className="text-sm font-medium text-emerald-500">Forgot password?</Text>
-          </Pressable>
-
-          <PrimaryButton label="Sign in" onPress={onSubmit} loading={loading} />
+          <PrimaryButton label="Sign in" onPress={() => void onSubmit()} loading={loading} />
 
           <View className="mt-10 flex-row flex-wrap items-center justify-center gap-1">
             <Text className="text-center text-neutral-500">New here?</Text>

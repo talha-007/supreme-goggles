@@ -1,0 +1,42 @@
+Taplite — Google sign-in and auth email templates
+==================================================
+
+Project ref: qqplffyjlpdhqwegbtea
+API URL: https://qqplffyjlpdhqwegbtea.supabase.co
+
+1) Google sign-in
+-----------------
+- In Google Cloud Console: APIs & Services → Credentials → Create OAuth 2.0 Client ID
+  (Web application).
+- Authorized redirect URIs must include exactly:
+  https://qqplffyjlpdhqwegbtea.supabase.co/auth/v1/callback
+- In the hosted dashboard: Authentication → Sign In / Providers → Google:
+  enable the provider and paste the Google Client ID and Client secret.
+
+2) Redirect and site URLs
+-------------------------
+- Authentication → URL configuration:
+  - Site URL: your production app origin, e.g. https://taplite.store
+  - Additional redirect URLs: include
+      https://taplite.store/**
+      http://localhost:3000/**
+    (add preview domains if you use Vercel previews.)
+
+3) Web app environment
+------------------------
+- In web/.env (or your host’s env): set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  and NEXT_PUBLIC_SITE_URL to the public site users see (e.g. https://taplite.store in production).
+
+4) Email templates
+-------------------
+- Authentication → Emails → Templates: for each type below, paste the subject from the
+  matching *.subject.txt and the body from the matching *.body.html (under supabase/email-templates/).
+
+  confirm-signup.*     → Confirm signup
+  magic-link.*         → Magic link
+  recovery.*           → Reset password
+  email-change.*       → Change email address
+  invite-user.*        → Invite user
+  reauthentication.*   → Reauthentication (if enabled)
+  password-changed.*   → Password changed (notification)
+  email-changed.*      → Email address changed (notification)
