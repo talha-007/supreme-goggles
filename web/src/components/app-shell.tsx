@@ -101,7 +101,10 @@ export function AppShell({
                 item.key,
               ),
             ))
-      : navLinks.filter((item) => !["menu", "tables", "kitchen", "counter", "staff"].includes(item.key));
+      : navLinks.filter(
+          (item) =>
+            !["menu", "tables", "waiterBoard", "kitchen", "counter", "staff"].includes(item.key),
+        );
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
