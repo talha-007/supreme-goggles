@@ -1,6 +1,6 @@
 "use client";
 
-import { getClientAuthRedirectOrigin } from "@/lib/auth/auth-redirect";
+import { getOauthClientRedirectOrigin } from "@/lib/auth/auth-redirect";
 import { createClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -25,7 +25,7 @@ export function GoogleOauthButton({ label, onError, disabled, className }: Props
     if (disabled || loading) return;
     setLoading(true);
     const supabase = createClient();
-    const origin = getClientAuthRedirectOrigin();
+    const origin = getOauthClientRedirectOrigin();
     if (!origin) {
       setLoading(false);
       onError(t("oauthOriginError"));

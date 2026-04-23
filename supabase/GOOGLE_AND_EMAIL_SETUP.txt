@@ -16,16 +16,45 @@ API URL: https://qqplffyjlpdhqwegbtea.supabase.co
 2) Redirect and site URLs
 -------------------------
 - Authentication → URL configuration:
-  - Site URL: your production app origin, e.g. https://taplite.store
-  - Additional redirect URLs: include
+  - Site URL: your main production app origin, e.g. https://taplite.store
+  - Additional redirect URLs must include every origin users can open the app on, e.g.:
       https://taplite.store/**
+      https://www.taplite.store/**   (if you use www and apex)
       http://localhost:3000/**
-    (add preview domains if you use Vercel previews.)
+    (add Vercel preview URLs as needed, e.g. https://*.vercel.app/**)
+  - The web app returns from Google to /auth/callback on the SAME host the user
+    had in the address bar. If a URL is not allowlisted, sign-in fails after
+    the Google account picker. If you use only one canonical host, redirect
+    the other in your DNS / hosting (www → apex or the reverse) so all traffic
+    matches one allowlisted pattern.
 
 3) Web app environment
 ------------------------
-- In web/.env (or your host’s env): set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  and NEXT_PUBLIC_SITE_URL to the public site users see (e.g. https://taplite.store in production).
+- In web/.env (or your host’s env): set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY.
+- NEXT_PUBLIC_SITE_URL: use for email links and server-side site URL. OAuth uses the
+  browser’s current origin so PKCE and cookies stay on the same host; still set
+  NEXT_PUBLIC_SITE_URL in production for forgot-password / sign-up email redirects.
+
+3b) Local development (test Google on your machine)
+-----------------------------------------------------
+- Copy web/.env.example to web/.env and fill the anon key from Project Settings → API.
+- Set:
+    NEXT_PUBLIC_SITE_URL=http://localhost:3000
+    NEXT_PUBLIC_SUPABASE_URL=https://qqplffyjlpdhqwegbtea.supabase.co
+- In Authentication → URL configuration, ensure http://localhost:3000/** is in
+  “Additional redirect URLs” (in addition to production).
+- You do not add localhost to the Google Cloud “Authorized redirect URIs” — the
+  redirect to Google still goes to …supabase.co/auth/v1/callback, same as production.
+- From web/: npm run dev, open http://localhost:3000/login, try “Continue with Google”.
+
+3c) If it still fails after the Google account screen
+-----------------------------------------------------
+- Browser devtools → Network: on /auth/callback, look for `error=` in the query
+  or check Console for [auth/callback] logs.
+- Confirm production env does not set NEXT_PUBLIC_SITE_URL to a different host
+  than the site users use (e.g. apex in env but users use www) — the app no longer
+  forces redirectTo to env for Google, but the allow list must still cover every
+  real host.
 
 4) Email templates
 -------------------
