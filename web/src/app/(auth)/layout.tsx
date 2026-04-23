@@ -21,16 +21,16 @@ export default function AuthLayout({
                 src={BRAND_LOGO.light}
                 alt="Taplite"
                 width={180}
-                height={48}
-                className="h-10 w-auto max-w-[200px] object-contain object-center dark:hidden"
+                height={64}
+                className="h-16 w-auto max-w-[200px] object-contain object-center dark:hidden"
                 priority
               />
               <Image
                 src={BRAND_LOGO.dark}
                 alt="Taplite"
                 width={180}
-                height={48}
-                className="hidden h-10 w-auto max-w-[200px] object-contain object-center dark:block"
+                height={64}
+                className="hidden h-16 w-auto max-w-[200px] object-contain object-center dark:block"
                 priority
               />
             </Link>

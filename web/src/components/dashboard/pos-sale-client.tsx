@@ -519,7 +519,7 @@ export function PosSaleClient({
           className={`min-h-[44px] flex-1 touch-manipulation rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
             mobileTab === "menu"
               ? "bg-blue-600 text-white shadow-sm"
-              : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
           }`}
         >
           {tp("browseTab")}
@@ -532,7 +532,7 @@ export function PosSaleClient({
           className={`relative min-h-[44px] flex-1 touch-manipulation rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
             mobileTab === "cart"
               ? "bg-blue-600 text-white shadow-sm"
-              : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
           }`}
         >
           {tp("cartTab")}
@@ -764,7 +764,7 @@ export function PosSaleClient({
                     className={`group flex h-full touch-manipulation flex-col overflow-hidden rounded-2xl border text-left transition active:scale-[0.98] ${
                       out
                         ? "cursor-not-allowed border-zinc-200 opacity-60 dark:border-zinc-800"
-                        : "border-zinc-200 bg-white shadow-sm hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
+                        : "border-zinc-200 bg-white shadow-sm hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-500 dark:hover:bg-zinc-800/90"
                     }`}
                   >
                     <div className="relative h-[5.5rem] w-full shrink-0 bg-zinc-100 sm:h-[6.25rem] dark:bg-zinc-800">
@@ -912,7 +912,7 @@ export function PosSaleClient({
                                 <button
                                   type="button"
                                   onClick={() => updateLineQty(i, -1)}
-                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:hover:bg-zinc-800"
+                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-zinc-50"
                                 >
                                   −
                                 </button>
@@ -920,7 +920,7 @@ export function PosSaleClient({
                                 <button
                                   type="button"
                                   onClick={() => updateLineQty(i, 1)}
-                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:hover:bg-zinc-800"
+                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-zinc-50"
                                 >
                                   +
                                 </button>
@@ -944,7 +944,7 @@ export function PosSaleClient({
                               <button
                                 type="button"
                                 onClick={() => removeLine(i)}
-                                className="rounded p-1 text-lg leading-none text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+                                className="rounded p-1 text-lg leading-none text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/50 dark:hover:text-red-200"
                                 aria-label={tp("removeLine")}
                               >
                                 ×
@@ -983,14 +983,14 @@ export function PosSaleClient({
                             <button
                               type="button"
                               onClick={() => updateLineQty(i, -1)}
-                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100 dark:border-zinc-600 dark:hover:bg-zinc-800"
+                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-zinc-50 dark:active:bg-zinc-800"
                             >
                               −
                             </button>
                             <button
                               type="button"
                               onClick={() => updateLineQty(i, 1)}
-                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100 dark:border-zinc-600 dark:hover:bg-zinc-800"
+                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-zinc-50 dark:active:bg-zinc-800"
                             >
                               +
                             </button>
@@ -1226,7 +1226,7 @@ export function PosSaleClient({
                   type="button"
                   onClick={chargeCredit}
                   disabled={pending || lines.length === 0}
-                  className="min-h-[48px] w-full touch-manipulation rounded-2xl border-2 border-blue-200 bg-white py-3 text-base font-semibold text-blue-800 hover:bg-blue-50 active:bg-blue-100/80 disabled:opacity-50 sm:text-sm dark:border-blue-900 dark:bg-zinc-950 dark:text-blue-200 dark:hover:bg-blue-950/40"
+                  className="min-h-[48px] w-full touch-manipulation rounded-2xl border-2 border-blue-200 bg-white py-3 text-base font-semibold text-blue-800 hover:bg-blue-50 active:bg-blue-100/80 disabled:opacity-50 sm:text-sm dark:border-blue-800 dark:bg-zinc-950 dark:text-blue-200 dark:hover:border-blue-600 dark:hover:bg-blue-950/40 dark:hover:text-blue-100 dark:active:bg-blue-950/60"
                 >
                   {pending ? tc("working") : ti("creditLater")}
                 </button>
@@ -1236,7 +1236,7 @@ export function PosSaleClient({
             <div className="flex flex-col gap-2 sm:flex-row">
               <Link
                 href={cancelHref}
-                className="flex min-h-[48px] flex-1 touch-manipulation items-center justify-center rounded-xl border border-zinc-300 py-3 text-center text-sm font-medium text-zinc-800 hover:bg-zinc-50 active:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                className="flex min-h-[48px] flex-1 touch-manipulation items-center justify-center rounded-xl border border-zinc-300 py-3 text-center text-sm font-medium text-zinc-800 hover:bg-zinc-50 active:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 dark:active:bg-zinc-800"
               >
                 {ti("cancel")}
               </Link>
@@ -1244,7 +1244,7 @@ export function PosSaleClient({
                 type="button"
                 onClick={save}
                 disabled={pending}
-                className="min-h-[48px] flex-1 touch-manipulation rounded-xl border border-zinc-300 bg-white py-3 text-sm font-medium text-zinc-800 hover:bg-zinc-50 active:bg-zinc-100 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200"
+                className="min-h-[48px] flex-1 touch-manipulation rounded-xl border border-zinc-300 bg-white py-3 text-sm font-medium text-zinc-800 hover:bg-zinc-50 active:bg-zinc-100 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 dark:active:bg-zinc-800"
               >
                 {pending ? tc("saving") : ti("saveDraft")}
               </button>
@@ -1273,7 +1273,7 @@ export function PosSaleClient({
             type="button"
             onClick={save}
             disabled={pending}
-            className="min-h-[40px] rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200"
+            className="min-h-[40px] rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
           >
             {pending ? tc("saving") : ti("saveDraft")}
           </button>
@@ -1282,7 +1282,7 @@ export function PosSaleClient({
               type="button"
               onClick={chargeCredit}
               disabled={pending || lines.length === 0}
-              className="min-h-[40px] rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50 dark:border-sky-900 dark:bg-sky-950/50 dark:text-sky-100"
+              className="min-h-[40px] rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-200 dark:hover:bg-sky-900/70 dark:hover:text-sky-50"
             >
               {pending ? tc("working") : ti("creditLater")}
             </button>
@@ -1291,14 +1291,14 @@ export function PosSaleClient({
               type="button"
               onClick={sendToKitchen}
               disabled={pending || lines.length === 0}
-              className="min-h-[40px] rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-100"
+              className="min-h-[40px] rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200 dark:hover:bg-amber-950/80 dark:hover:text-amber-50"
             >
               {pending ? tc("working") : "Send to kitchen"}
             </button>
           )}
           <Link
             href={cancelHref}
-            className="inline-flex min-h-[40px] items-center rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-100 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"
+            className="inline-flex min-h-[40px] items-center rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-100 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200 dark:hover:bg-red-950/60 dark:hover:text-red-100"
           >
             {ti("cancel")}
           </Link>

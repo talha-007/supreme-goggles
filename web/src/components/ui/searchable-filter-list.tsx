@@ -89,8 +89,8 @@ export function SearchableFilterList({
       : "border-violet-400/80 bg-violet-50/90 text-violet-950 dark:border-violet-600 dark:bg-violet-950/50 dark:text-violet-50";
   const idle =
     variant === "blue"
-      ? "border-zinc-200 bg-white text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-600"
-      : "border-zinc-200 bg-white text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-600";
+      ? "border-zinc-200 bg-white text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+      : "border-zinc-200 bg-white text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-50";
 
   const activeRow =
     variant === "blue"
@@ -181,7 +181,9 @@ export function SearchableFilterList({
                         setQ("");
                       }}
                       className={`flex w-full min-h-[40px] items-center justify-between gap-2 px-3 py-2 text-left text-xs font-medium transition ${
-                        isActive ? activeRow : "text-zinc-800 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                        isActive
+                          ? activeRow
+                          : "text-zinc-800 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
                       }`}
                     >
                       <span className="min-w-0 flex-1 truncate">{item.label}</span>
