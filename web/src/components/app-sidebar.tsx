@@ -1,29 +1,62 @@
+"use client";
+
 import { BRAND_LOGO } from "@/lib/brand";
+import { type NavLinkKey, type NavLinkItem, appNav } from "@/lib/nav/app-nav";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-/** Translation keys under `nav` in messages. */
-export const appNav = [
-  { href: "/dashboard", key: "dashboard" },
-  { href: "/dashboard/analytics", key: "analytics" },
-  { href: "/dashboard/menu", key: "menu" },
-  { href: "/dashboard/restaurant/tables", key: "tables" },
-  { href: "/dashboard/restaurant/waiter-board", key: "waiterBoard" },
-  { href: "/dashboard/restaurant/kitchen", key: "kitchen" },
-  { href: "/dashboard/restaurant/counter", key: "counter" },
-  { href: "/dashboard/restaurant/staff", key: "staff" },
-  { href: "/dashboard/products", key: "products" },
-  { href: "/dashboard/products?stock=low", key: "lowStock" },
-  { href: "/dashboard/customers", key: "customers" },
-  { href: "/dashboard/invoices", key: "invoices" },
-  { href: "/dashboard/purchase-orders", key: "purchaseOrders" },
-  { href: "/dashboard/suppliers", key: "suppliers" },
-  { href: "/dashboard/expenses", key: "expenses" },
-  { href: "/dashboard/settings", key: "settings" },
-] as const;
+export { appNav, type NavLinkItem, type NavLinkKey };
 
-export type NavLinkKey = (typeof appNav)[number]["key"];
-export type NavLinkItem = { href: string; label: string; key: NavLinkKey };
+/** /dashboard is only "home"; deeper routes have prefix match for detail pages. */
+function pathMatches(pathname: string, linkPath: string): boolean {
+  if (linkPath === "/dashboard") {
+    return pathname === "/dashboard";
+  }
+  return pathname === linkPath || pathname.startsWith(`${linkPath}/`);
+}
+
+/**
+ * Resolves e.g. products vs low-stock (same path, different query) so only one is active.
+ */
+function isSidebarNavItemActive(
+  pathname: string,
+  search: string,
+  itemHref: string,
+  allHrefs: readonly string[],
+): boolean {
+  const u = new URL(itemHref, "https://_");
+  const linkPath = u.pathname;
+  if (!pathMatches(pathname, linkPath)) return false;
+
+  const sp = new URLSearchParams(search);
+  const samePathHrefs = allHrefs.filter((h) => new URL(h, "https://_").pathname === linkPath);
+  const withQuery = samePathHrefs.filter((h) => new URL(h, "https://_").search);
+  const withQueryMatch = withQuery.find((h) => {
+    const p = new URL(h, "https://_").searchParams;
+    if (p.toString() === "") return false;
+    for (const [k, v] of p) {
+      if (sp.get(k) !== v) return false;
+    }
+    return true;
+  });
+  if (withQueryMatch) {
+    return itemHref === withQueryMatch;
+  }
+  return u.search === "";
+}
+
+const navLinkClass = {
+  baseCollapsed:
+    "flex items-center justify-center rounded-lg px-2 py-2 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900",
+  baseExpanded:
+    "flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900",
+  activeCollapsed:
+    "bg-emerald-100 font-medium text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100",
+  activeExpanded:
+    "bg-emerald-100 font-medium text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100",
+} as const;
 
 function NavIcon({ navKey }: { navKey: NavLinkKey }) {
   const cls = "h-4 w-4";
@@ -68,11 +101,6 @@ function NavIcon({ navKey }: { navKey: NavLinkKey }) {
       return (
         <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
           <path d="M4 4.5A1.5 1.5 0 0 1 5.5 3h9A1.5 1.5 0 0 1 16 4.5v11a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 4 15.5v-11Zm3 .5a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5H7Zm0 3a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5H7Zm0 3a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5H7Z" />
-        </svg>
-      );
-      return (
-        <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-          <path d="M10 2a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm-6 14a6 6 0 0 1 12 0H4Z" />
         </svg>
       );
     case "kitchen":
@@ -148,26 +176,62 @@ type SidebarNavProps = {
   collapsed?: boolean;
 };
 
-export function SidebarNav({ links, onLinkClick, collapsed = false }: SidebarNavProps) {
+function SidebarNavWithSearch({ links, onLinkClick, collapsed = false }: SidebarNavProps) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
+  const allHrefs = links.map((l) => l.href);
+
   return (
     <nav className="flex flex-1 flex-col gap-0.5 p-2">
+      {links.map((item) => {
+        const active = isSidebarNavItemActive(pathname, search, item.href, allHrefs);
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onLinkClick}
+            title={collapsed ? item.label : undefined}
+            aria-current={active ? "page" : undefined}
+            className={
+              collapsed
+                ? `${navLinkClass.baseCollapsed} ${active ? navLinkClass.activeCollapsed : ""}`.trim()
+                : `${navLinkClass.baseExpanded} ${active ? navLinkClass.activeExpanded : ""}`.trim()
+            }
+          >
+            <NavIcon navKey={item.key} />
+            {!collapsed ? item.label : null}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+function SidebarNavLoadingFallback({ links, onLinkClick, collapsed = false }: SidebarNavProps) {
+  return (
+    <nav className="flex flex-1 flex-col gap-0.5 p-2" aria-busy>
       {links.map((item) => (
         <Link
           key={item.href}
           href={item.href}
           onClick={onLinkClick}
           title={collapsed ? item.label : undefined}
-          className={
-            collapsed
-              ? "flex items-center justify-center rounded-lg px-2 py-2 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900"
-              : "flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900"
-          }
+          className={collapsed ? navLinkClass.baseCollapsed : navLinkClass.baseExpanded}
         >
           <NavIcon navKey={item.key} />
           {!collapsed ? item.label : null}
         </Link>
       ))}
     </nav>
+  );
+}
+
+export function SidebarNav(props: SidebarNavProps) {
+  return (
+    <Suspense fallback={<SidebarNavLoadingFallback {...props} />}>
+      <SidebarNavWithSearch {...props} />
+    </Suspense>
   );
 }
 

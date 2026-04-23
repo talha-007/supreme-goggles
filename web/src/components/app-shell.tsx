@@ -1,6 +1,7 @@
 "use client";
 
-import { AppSidebarDesktop, NavLinkItem, SidebarNav } from "@/components/app-sidebar";
+import { AppSidebarDesktop, SidebarNav } from "@/components/app-sidebar";
+import type { NavLinkItem } from "@/lib/nav/app-nav";
 import type { BusinessCapabilities } from "@/lib/business/capabilities";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignOutButton } from "@/components/sign-out-button";

@@ -1,4 +1,4 @@
-import { appNav } from "@/components/app-sidebar";
+import { appNav } from "@/lib/nav/app-nav";
 import { AppShell } from "@/components/app-shell";
 import { requireBusinessContext, isRestrictedRestaurantStaff } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
