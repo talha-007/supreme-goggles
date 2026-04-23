@@ -284,52 +284,9 @@ export default async function DashboardPage({
         ) : null}
       </div> */}
 
-      <div className="mt-2">
-        <div className="mb-1 flex flex-wrap items-center justify-end gap-3">
-          <Link
-            href={`/dashboard/analytics?period=${statsPeriod}`}
-            className="text-sm font-medium text-emerald-700 underline decoration-emerald-400/50 underline-offset-2 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
-          >
-            {tAnalytics("openInsights")} →
-          </Link>
-        </div>
-        <DashboardStatsPeriodTabs current={statsPeriod} />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            label={t("statPeriodSales")}
-            value={pkr.format(periodSales)}
-            hint={t("statPeriodSalesHint", { count: periodInvoiceCount })}
-          />
-          <StatCard label={t("statOutstanding")} value={pkr.format(outstanding)} hint={t("statOutstandingHint")} />
-          <StatCard label={t("statDrafts")} value={String(draftsCount)} hint={t("statDraftsHint")} href="/dashboard/invoices" />
-          <StatCard
-            label={t("statInventoryCost")}
-            value={pkr.format(inventoryCost)}
-            hint={t("statInventoryCostHint")}
-            href="/dashboard/products"
-          />
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label={t("statProducts")} value={String(productsCount)} hint={t("statProductsHint")} href="/dashboard/products" />
-        <StatCard label={t("statCustomers")} value={String(customersCount)} hint={t("statCustomersHint")} href="/dashboard/customers" />
-        <StatCard
-          label={t("statLowStock")}
-          value={String(lowStockCount)}
-          hint={t("statLowStockHint")}
-          href="/dashboard/products?stock=low"
-        />
-        <StatCard
-          label={t("statOpenPos")}
-          value={String(openPoCount)}
-          hint={t("statOpenPosHint")}
-          href="/dashboard/purchase-orders"
-        />
-      </div>
 
       {canEdit && invoiceEditorData ? (
-        <section id="dashboard-new-invoice" className="mt-10 scroll-mt-24">
+        <section id="dashboard-new-invoice" className="scroll-mt-24">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -472,6 +429,52 @@ export default async function DashboardPage({
             </table>
           )}
         </div>
+
+      </div>
+
+      
+      <div className="mt-2">
+        <div className="mb-1 flex flex-wrap items-center justify-end gap-3">
+          <Link
+            href={`/dashboard/analytics?period=${statsPeriod}`}
+            className="text-sm font-medium text-emerald-700 underline decoration-emerald-400/50 underline-offset-2 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+          >
+            {tAnalytics("openInsights")} →
+          </Link>
+        </div>
+        <DashboardStatsPeriodTabs current={statsPeriod} />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            label={t("statPeriodSales")}
+            value={pkr.format(periodSales)}
+            hint={t("statPeriodSalesHint", { count: periodInvoiceCount })}
+          />
+          <StatCard label={t("statOutstanding")} value={pkr.format(outstanding)} hint={t("statOutstandingHint")} />
+          <StatCard label={t("statDrafts")} value={String(draftsCount)} hint={t("statDraftsHint")} href="/dashboard/invoices" />
+          <StatCard
+            label={t("statInventoryCost")}
+            value={pkr.format(inventoryCost)}
+            hint={t("statInventoryCostHint")}
+            href="/dashboard/products"
+          />
+        </div>
+      </div>
+
+      <div className="mt-4 mb-20 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label={t("statProducts")} value={String(productsCount)} hint={t("statProductsHint")} href="/dashboard/products" />
+        <StatCard label={t("statCustomers")} value={String(customersCount)} hint={t("statCustomersHint")} href="/dashboard/customers" />
+        <StatCard
+          label={t("statLowStock")}
+          value={String(lowStockCount)}
+          hint={t("statLowStockHint")}
+          href="/dashboard/products?stock=low"
+        />
+        <StatCard
+          label={t("statOpenPos")}
+          value={String(openPoCount)}
+          hint={t("statOpenPosHint")}
+          href="/dashboard/purchase-orders"
+        />
       </div>
     </div>
   );
