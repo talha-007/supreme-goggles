@@ -23,6 +23,24 @@ function tryHashSession(url: URL) {
 }
 
 /**
+ * React 18 Strict Mode in development runs `useEffect` twice. PKCE
+ * `exchangeCodeForSession` is not idempotent: the second call can log
+ * AuthPKCECodeVerifierMissingError even when the first run succeeded and you
+ * end up logged in.
+ */
+const authCallbackInFlight = new Map<string, Promise<void>>();
+
+function runCallbackOnce(key: string, work: () => Promise<void>): Promise<void> {
+  const existing = authCallbackInFlight.get(key);
+  if (existing) return existing;
+  const p = work().finally(() => {
+    authCallbackInFlight.delete(key);
+  });
+  authCallbackInFlight.set(key, p);
+  return p;
+}
+
+/**
  * Email confirmation and OAuth run in the browser. Hash fragments (#access_token=…)
  * are not sent to the server.
  *
@@ -86,24 +104,26 @@ export default function AuthCallbackPage() {
       }
 
       if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (!error) {
-          setStatus("done");
-          router.replace(nextPath);
-          return;
-        }
-        console.error("[auth/callback] exchangeCodeForSession", error);
-        const name = error.name ?? "";
-        const isPkce =
-          name.includes("PKCE") ||
-          (typeof error.message === "string" && error.message.includes("code verifier"));
-        if (isPkce) {
-          router.replace(
-            "/login?error=auth&reason=crossdevice",
-          );
-          return;
-        }
-        router.replace("/login?error=auth");
+        await runCallbackOnce(`code:${code}`, async () => {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (!error) {
+            setStatus("done");
+            router.replace(nextPath);
+            return;
+          }
+          console.error("[auth/callback] exchangeCodeForSession", error);
+          const name = error.name ?? "";
+          const isPkce =
+            name.includes("PKCE") ||
+            (typeof error.message === "string" && error.message.includes("code verifier"));
+          if (isPkce) {
+            router.replace(
+              "/login?error=auth&reason=crossdevice",
+            );
+            return;
+          }
+          router.replace("/login?error=auth");
+        });
         return;
       }
 
