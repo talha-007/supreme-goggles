@@ -1,6 +1,6 @@
 {
   "common": {
-    "brand": "ریٹیل SaaS",
+    "brand": "Taplite",
     "language": "زبان",
     "required": "ضروری",
     "save": "محفوظ کریں",
@@ -283,7 +283,7 @@
   },
   "auth": {
     "signInTitle": "سائن اِن",
-    "signInSubtitle": "خوردہ و تھوک انوینٹری اور بلنگ",
+    "signInSubtitle": "پوائنٹ آف سیل، اسٹاک اور بلنگ — taplite.store",
     "signUpTitle": "اکاؤنٹ بنائیں",
     "signUpSubtitle": "14 دن ٹرائل (پھر 500 PKR/مہینہ)",
     "email": "ای میل",

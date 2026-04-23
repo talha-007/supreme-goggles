@@ -4,8 +4,10 @@ import { AppSidebarDesktop, NavLinkItem, SidebarNav } from "@/components/app-sid
 import type { BusinessCapabilities } from "@/lib/business/capabilities";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
+import { BRAND_LOGO } from "@/lib/brand";
 import type { AppLocale } from "@/i18n/routing";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -155,7 +157,23 @@ export function AppShell({
             aria-label={shellLabels.navigation}
           >
             <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-4 dark:border-zinc-800">
-              <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{brandTitle}</span>
+              <Link href="/dashboard" className="flex min-w-0 items-center gap-2" onClick={() => setMobileOpen(false)}>
+                <Image
+                  src={BRAND_LOGO.light}
+                  alt=""
+                  width={28}
+                  height={28}
+                  className="h-7 w-7 shrink-0 object-contain dark:hidden"
+                />
+                <Image
+                  src={BRAND_LOGO.dark}
+                  alt=""
+                  width={28}
+                  height={28}
+                  className="hidden h-7 w-7 shrink-0 object-contain dark:block"
+                />
+                <span className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">{brandTitle}</span>
+              </Link>
               <button
                 type="button"
                 className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50"
@@ -186,6 +204,27 @@ export function AppShell({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
+          <Link
+            href="/dashboard"
+            className="shrink-0 lg:hidden"
+            aria-label={brandTitle}
+            title={brandTitle}
+          >
+            <Image
+              src={BRAND_LOGO.light}
+              alt=""
+              width={100}
+              height={28}
+              className="h-6 w-auto max-w-[100px] object-contain object-left dark:hidden"
+            />
+            <Image
+              src={BRAND_LOGO.dark}
+              alt=""
+              width={100}
+              height={28}
+              className="hidden h-6 w-auto max-w-[100px] object-contain object-left dark:block"
+            />
+          </Link>
           <div className="flex min-w-0 flex-1 items-center gap-2">
             {businessLogoUrl ? (
               <Image

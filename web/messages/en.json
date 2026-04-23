@@ -1,6 +1,6 @@
 {
   "common": {
-    "brand": "Retail SaaS",
+    "brand": "Taplite",
     "language": "Language",
     "required": "Required",
     "save": "Save",
@@ -283,7 +283,7 @@
   },
   "auth": {
     "signInTitle": "Sign in",
-    "signInSubtitle": "Retail & wholesale inventory and billing",
+    "signInSubtitle": "Point-of-sale, stock, and billing — taplite.store",
     "signUpTitle": "Create account",
     "signUpSubtitle": "Start your 14-day trial (500 PKR/month after)",
     "email": "Email",

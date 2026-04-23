@@ -1,3 +1,5 @@
+import { BRAND_LOGO } from "@/lib/brand";
+import Image from "next/image";
 import Link from "next/link";
 
 /** Translation keys under `nav` in messages. */
@@ -188,9 +190,50 @@ export function AppSidebarDesktop({
       }`}
     >
       <div className="flex items-center justify-between border-b border-zinc-200 px-3 py-3 dark:border-zinc-800">
-        <span className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-          {collapsed ? brandTitle.slice(0, 2).toUpperCase() : brandTitle}
-        </span>
+        <Link
+          href="/dashboard"
+          className="flex min-w-0 items-center gap-2"
+          title={brandTitle}
+        >
+          {collapsed ? (
+            <>
+              <Image
+                src={BRAND_LOGO.light}
+                alt=""
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain dark:hidden"
+              />
+              <Image
+                src={BRAND_LOGO.dark}
+                alt=""
+                width={32}
+                height={32}
+                className="hidden h-8 w-8 object-contain dark:block"
+              />
+            </>
+          ) : (
+            <>
+              <Image
+                src={BRAND_LOGO.light}
+                alt=""
+                width={32}
+                height={32}
+                className="h-8 w-8 shrink-0 object-contain dark:hidden"
+              />
+              <Image
+                src={BRAND_LOGO.dark}
+                alt=""
+                width={32}
+                height={32}
+                className="hidden h-8 w-8 shrink-0 object-contain dark:block"
+              />
+              <span className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                {brandTitle}
+              </span>
+            </>
+          )}
+        </Link>
         <button
           type="button"
           onClick={onToggleCollapsed}
