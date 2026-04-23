@@ -5,13 +5,11 @@ import { isAppLocale, type AppLocale } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
-export function LanguageSwitcher({
-  locale,
-  languageLabel,
-}: {
+type LanguageSwitcherProps = {
   locale: AppLocale;
   languageLabel: string;
-}) {
+};
+export function LanguageSwitcher({ locale, languageLabel }: LanguageSwitcherProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
