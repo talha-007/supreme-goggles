@@ -2,10 +2,10 @@ import { appNav } from "@/components/app-sidebar";
 import { AppShell } from "@/components/app-shell";
 import { requireBusinessContext, isRestrictedRestaurantStaff } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
-import { defaultLocale } from "@/i18n/routing";
 import { hasSubscriptionAccess, isSuperAdminByEnv } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
-import { getTranslations } from "next-intl/server";
+import { defaultLocale, isAppLocale, type AppLocale } from "@/i18n/routing";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -54,6 +54,8 @@ export default async function AppLayout({
     .maybeSingle();
   const capabilities = resolveBusinessCapabilities(businessType, rawBusinessSettings);
 
+  const rawLocale = await getLocale();
+  const locale: AppLocale = isAppLocale(rawLocale) ? rawLocale : defaultLocale;
   const tNav = await getTranslations("nav");
   const tCommon = await getTranslations("common");
   const tShell = await getTranslations("shell");
@@ -93,7 +95,7 @@ export default async function AppLayout({
         signOut: tSignOut("label"),
         signingOut: tSignOut("loading"),
       }}
-      locale={defaultLocale}
+      locale={locale}
       navLinks={navLinks}
     >
       {children}

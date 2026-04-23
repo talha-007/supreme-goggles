@@ -1,17 +1,22 @@
 import { BRAND_LOGO } from "@/lib/brand";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { defaultLocale, isAppLocale, type AppLocale } from "@/i18n/routing";
+import { getLocale, getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const rawLocale = await getLocale();
+  const locale: AppLocale = isAppLocale(rawLocale) ? rawLocale : defaultLocale;
+  const tCommon = await getTranslations("common");
   return (
     <div className="relative flex min-h-full flex-1 flex-col bg-zinc-50 dark:bg-zinc-950">
       <div className="absolute end-4 top-4 z-10">
-        <LanguageSwitcher locale="en" languageLabel="Language" />
+        <LanguageSwitcher locale={locale} languageLabel={tCommon("language")} />
       </div>
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-16">
         <div className="w-full max-w-sm">
