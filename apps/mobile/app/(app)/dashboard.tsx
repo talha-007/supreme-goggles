@@ -203,6 +203,18 @@ export default function DashboardScreen() {
       </ScrollView>
 
       <Pressable
+        onPress={() => router.push("/analysis")}
+        className="mt-4 rounded-xl border border-sky-600/40 bg-sky-950/25 px-4 py-3.5 active:opacity-90"
+        accessibilityRole="button"
+        accessibilityLabel="Open business insights"
+      >
+        <Text className="text-center text-base font-semibold text-sky-300">Business insights</Text>
+        <Text className="mt-1 text-center text-xs text-neutral-500">
+          Sales by day and top products — same metrics as the web dashboard charts.
+        </Text>
+      </Pressable>
+
+      <Pressable
         onPress={() => router.push("/quick-sale")}
         className="mt-6 rounded-2xl border border-emerald-600/40 bg-emerald-950/35 px-4 py-4 active:opacity-90"
         accessibilityRole="button"

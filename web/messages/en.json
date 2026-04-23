@@ -48,6 +48,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "analytics": "Insights",
     "menu": "Menu",
     "tables": "Tables",
     "waiterBoard": "Waiter board",
@@ -91,6 +92,23 @@
     "retail": "Retail",
     "wholesale": "Wholesale",
     "walkin": "Walk-in"
+  },
+  "analytics": {
+    "openInsights": "View insights & charts",
+    "title": "Business insights",
+    "description": "Sales trends and product performance for the selected period. Same period options as dashboard stats.",
+    "backToDashboard": "← Dashboard",
+    "totalSales": "Total sales",
+    "orders": "Orders (invoices)",
+    "avgOrder": "Average order value",
+    "excludingDrafts": "Counts paid, unpaid, and partial invoices only (excludes drafts and cancelled).",
+    "dailySales": "Sales by day",
+    "dailySalesHint": "Sum of invoice totals posted on each day.",
+    "topProducts": "Revenue mix (line items)",
+    "topProductsHint": "Each slice is a share of all line-item revenue in this period. Up to 8 top products are shown; the rest are combined as one slice so the chart always reflects the full product mix.",
+    "revenue": "Revenue",
+    "qty": "Qty",
+    "otherSlice": "All other products"
   },
   "dashboard": {
     "title": "Dashboard",

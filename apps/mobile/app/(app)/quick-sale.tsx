@@ -16,6 +16,7 @@ import { PrimaryButton } from "../../src/components/PrimaryButton";
 import { ProductThumbnail } from "../../src/components/ProductThumbnail";
 import { ReceiptShareSheet } from "../../src/components/ReceiptShareSheet";
 import { SearchBar } from "../../src/components/SearchBar";
+import { headerRightWithSupport } from "../../src/components/SupportHeaderButton";
 import { useAuth } from "../../src/contexts/auth-context";
 import { useRealtimeNotifications } from "../../src/contexts/realtime-notifications-context";
 import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
@@ -71,6 +72,18 @@ export default function QuickSaleScreen() {
           <Ionicons name="chevron-back" size={26} color="#fafafa" />
         </Pressable>
       ),
+      headerRight: () =>
+        headerRightWithSupport(
+          <Pressable
+            onPress={() => router.push("/analysis")}
+            hitSlop={10}
+            className="rounded-full bg-sky-500/12 p-2 active:opacity-80"
+            accessibilityRole="button"
+            accessibilityLabel="Business insights"
+          >
+            <Ionicons name="stats-chart" size={22} color="#38bdf8" />
+          </Pressable>,
+        ),
     });
   }, [navigation]);
 

@@ -30,7 +30,7 @@ import {
   type KeyboardEvent,
 } from "react";
 
-type Props = {
+export type PosSaleClientProps = {
   initialCatalogProducts: ProductRow[];
   customers: CustomerOption[];
   restaurantTables?: { id: string; name: string }[];
@@ -43,6 +43,8 @@ type Props = {
   firstDraftSaveBehavior: "navigate-to-edit" | "refresh-only";
   fullPageInvoiceHref: string;
 };
+
+type Props = PosSaleClientProps;
 
 async function fetchProductSearch(
   q: string,
@@ -773,6 +775,8 @@ export function PosSaleClient({
                           fill
                           className="object-cover"
                           sizes="(max-width: 640px) 45vw, (max-width: 1280px) 20vw, 14vw"
+                          quality={65}
+                          loading="lazy"
                         />
                       ) : (
                         <div className="flex h-full items-center justify-center text-lg font-semibold text-zinc-400">

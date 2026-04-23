@@ -69,10 +69,11 @@ export async function getNewInvoiceEditorData(): Promise<NewInvoiceEditorData> {
   };
 }
 
-/** Full product rows for POS grid (images, categories). */
-export async function getPosCatalogProducts(options?: { menuOnly?: boolean }): Promise<ProductRow[]> {
+/** Full product rows for POS grid (images, categories). Use a lower `limit` on the home dashboard; full page invoice can pass a higher cap. */
+export async function getPosCatalogProducts(options?: { menuOnly?: boolean; limit?: number }): Promise<ProductRow[]> {
   const ctx = await requireBusinessContext();
   const supabase = await createClient();
+  const cap = options?.limit ?? 200;
   let q = supabase
     .from("products")
     .select(
@@ -83,7 +84,7 @@ export async function getPosCatalogProducts(options?: { menuOnly?: boolean }): P
   if (options?.menuOnly) {
     q = q.eq("is_menu_item", true);
   }
-  const { data, error } = await q.order("name").limit(500);
+  const { data, error } = await q.order("name").limit(Math.min(500, Math.max(1, cap)));
 
   if (error) return [];
   return (data ?? []) as ProductRow[];

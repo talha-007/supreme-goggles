@@ -66,7 +66,7 @@ export default async function WaiterBoardPage() {
       .in("status", ["unpaid", "partial", "paid"])
       .limit(500),
     getNewInvoiceEditorData(),
-    getPosCatalogProducts({ menuOnly: true }),
+    getPosCatalogProducts({ menuOnly: true, limit: 250 }),
   ]);
 
   const caps = resolveBusinessCapabilities(

@@ -100,6 +100,7 @@ export default function AppGroupLayout() {
       <Tabs.Screen name="products" options={{ title: "Products", tabBarLabel: "Stock" }} />
       <Tabs.Screen name="customers" options={{ title: "Customers", tabBarLabel: "People" }} />
       <Tabs.Screen name="settings" options={{ title: "Settings", tabBarLabel: "More" }} />
+      <Tabs.Screen name="analysis" options={{ href: null, title: "Insights" }} />
       <Tabs.Screen name="quick-sale" options={{ href: null, title: "Quick sale" }} />
       <Tabs.Screen name="suppliers" options={{ href: null, title: "Suppliers" }} />
       <Tabs.Screen name="purchase-orders" options={{ href: null, title: "Purchase orders" }} />

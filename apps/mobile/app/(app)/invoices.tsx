@@ -34,8 +34,8 @@ import {
   type DraftLineInput,
 } from "../../src/lib/invoice-workflow";
 import {
+  getRangeStartForPreset,
   INVOICE_DATE_FILTER_OPTIONS,
-  isInvoiceCreatedInPreset,
   type DateRangePreset,
 } from "../../src/lib/date-range-presets";
 import { formatPkr } from "../../src/lib/format-money";
@@ -90,6 +90,8 @@ type LineDraft = {
 
 type CatalogPickRow = { id: string; name: string; unit: string; sale_price: number; image_url: string | null };
 
+const INVOICE_FETCH_LIMIT = 500;
+
 function newLine(): LineDraft {
   return {
     key: `${Date.now()}-${Math.random()}`,
@@ -127,10 +129,6 @@ function matchesQuery(row: InvoiceListRow, q: string): boolean {
     row.invoice_number.toLowerCase().includes(s) ||
     (row.customer?.name?.toLowerCase().includes(s) ?? false)
   );
-}
-
-function matchesDatePreset(row: InvoiceListRow, preset: DateRangePreset): boolean {
-  return isInvoiceCreatedInPreset(row.created_at, preset);
 }
 
 function normalizePickRow(row: Record<string, unknown>): CatalogPickRow {
@@ -212,13 +210,8 @@ export default function InvoicesScreen() {
   const [detailLineImages, setDetailLineImages] = useState<Record<string, string | null>>({});
 
   const filtered = useMemo(() => {
-    return rows.filter(
-      (r) =>
-        matchesBillFilter(r.status, filter) &&
-        matchesQuery(r, query) &&
-        matchesDatePreset(r, datePreset),
-    );
-  }, [rows, filter, query, datePreset]);
+    return rows.filter((r) => matchesBillFilter(r.status, filter) && matchesQuery(r, query));
+  }, [rows, filter, query]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -282,7 +275,7 @@ export default function InvoicesScreen() {
       return;
     }
     setError(null);
-    const { data, error: fetchErr } = await supabase
+    let invQuery = supabase
       .from("invoices")
       .select(
         `
@@ -290,9 +283,16 @@ export default function InvoicesScreen() {
         customer:customers(name)
       `,
       )
-      .eq("business_id", businessId)
+      .eq("business_id", businessId);
+    if (datePreset !== "all") {
+      const rangeStart = getRangeStartForPreset(new Date(), datePreset);
+      if (rangeStart) {
+        invQuery = invQuery.gte("created_at", rangeStart.toISOString());
+      }
+    }
+    const { data, error: fetchErr } = await invQuery
       .order("created_at", { ascending: false })
-      .limit(200);
+      .limit(INVOICE_FETCH_LIMIT);
 
     if (fetchErr) {
       setError(fetchErr.message);
@@ -310,7 +310,7 @@ export default function InvoicesScreen() {
     }
     setLoading(false);
     setRefreshing(false);
-  }, [businessId, user]);
+  }, [businessId, user, datePreset]);
 
   useEffect(() => {
     void load();
@@ -824,6 +824,11 @@ export default function InvoicesScreen() {
                 );
               })}
             </ScrollView>
+            <Text className="mt-2 text-[11px] leading-4 text-neutral-600">
+              {datePreset === "all"
+                ? `Loads up to ${INVOICE_FETCH_LIMIT} most recent.`
+                : "Date filter is applied on the server for this list."}
+            </Text>
             <Text className="mt-3 text-xs text-neutral-500">
               {filtered.length === rows.length
                 ? `${rows.length} bill${rows.length === 1 ? "" : "s"}`
@@ -835,14 +840,20 @@ export default function InvoicesScreen() {
           <View className="items-center px-4 py-12">
             <Ionicons name="document-text-outline" size={48} color="#525252" />
             <Text className="mt-4 text-center text-base font-medium text-neutral-300">
-              {query.trim() || filter !== "all" || datePreset !== "all"
-                ? "No bills match"
-                : "No bills yet"}
+              {rows.length === 0 &&
+              !query.trim() &&
+              filter === "all" &&
+              datePreset === "all"
+                ? "No bills yet"
+                : "No bills match"}
             </Text>
             <Text className="mt-2 text-center text-sm leading-5 text-neutral-500">
-              {query.trim() || filter !== "all" || datePreset !== "all"
-                ? "Adjust search, status, or date filters."
-                : "Tap New to create a draft, then finalize when the customer pays cash."}
+              {rows.length === 0 &&
+              !query.trim() &&
+              filter === "all" &&
+              datePreset === "all"
+                ? "Tap New to create a draft, then finalize when the customer pays cash."
+                : "Adjust search, status, or date — then pull to refresh the list."}
             </Text>
           </View>
         }

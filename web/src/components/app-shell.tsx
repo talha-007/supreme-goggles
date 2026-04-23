@@ -84,6 +84,7 @@ export function AppShell({
           : navLinks.filter((item) =>
               [
                 "dashboard",
+                "analytics",
                 "menu",
                 "tables",
                 "waiterBoard",
@@ -193,6 +194,8 @@ export function AppShell({
                 width={24}
                 height={24}
                 className="h-6 w-6 shrink-0 rounded object-contain"
+                priority
+                sizes="24px"
               />
             ) : (
               <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-zinc-200 text-[10px] font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">

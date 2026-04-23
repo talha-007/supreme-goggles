@@ -1,5 +1,11 @@
 require("dotenv").config({ path: ".env" });
 
+/**
+ * Store / production (EAS):
+ * - Set EXPO_PUBLIC_PRIVACY_POLICY_URL to your public policy page (https://…).
+ * - Do NOT set EXPO_PUBLIC_DANGER_* overrides in App Store / Play production builds.
+ * - EXPO_PUBLIC_SUBSCRIPTION_BYPASS / superadmin lists only apply in __DEV__ unless a DANGER override is set.
+ */
 module.exports = ({ config }) => ({
   ...config,
   plugins: [
@@ -25,5 +31,7 @@ module.exports = ({ config }) => ({
       process.env.NEXT_PUBLIC_SITE_URL ??
       process.env.EXPO_PUBLIC_SITE_URL ??
       "http://localhost:3000",
+    /** Public https URL for App Store / Play “Privacy policy” and in-app link; optional. */
+    privacyPolicyUrl: process.env.EXPO_PUBLIC_PRIVACY_POLICY_URL ?? "",
   },
 });

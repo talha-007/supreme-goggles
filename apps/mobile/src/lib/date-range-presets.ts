@@ -51,3 +51,28 @@ export function isInvoiceCreatedInPreset(createdAtIso: string, preset: DateRange
   if (Number.isNaN(t)) return true;
   return t >= start.getTime();
 }
+
+/** Insights / analytics (aligned with web dashboard periods). */
+export type InsightsPeriod = "today" | "week" | "month" | "30d" | "year";
+
+export const INSIGHTS_PERIOD_OPTIONS: { key: InsightsPeriod; short: string }[] = [
+  { key: "today", short: "Today" },
+  { key: "week", short: "Week" },
+  { key: "month", short: "Month" },
+  { key: "30d", short: "30d" },
+  { key: "year", short: "Year" },
+];
+
+export function getInsightsRangeStart(now: Date, period: InsightsPeriod): Date {
+  if (period === "today") return startOfLocalDay(now);
+  if (period === "week") return startOfLocalWeek(now);
+  if (period === "month") return new Date(now.getFullYear(), now.getMonth(), 1);
+  if (period === "30d") {
+    const t = startOfLocalDay(now);
+    t.setDate(t.getDate() - 29);
+    return t;
+  }
+  const y = new Date(now.getFullYear(), 0, 1);
+  y.setHours(0, 0, 0, 0);
+  return y;
+}

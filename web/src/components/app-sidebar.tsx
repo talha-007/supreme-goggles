@@ -3,6 +3,7 @@ import Link from "next/link";
 /** Translation keys under `nav` in messages. */
 export const appNav = [
   { href: "/dashboard", key: "dashboard" },
+  { href: "/dashboard/analytics", key: "analytics" },
   { href: "/dashboard/menu", key: "menu" },
   { href: "/dashboard/restaurant/tables", key: "tables" },
   { href: "/dashboard/restaurant/waiter-board", key: "waiterBoard" },
@@ -29,6 +30,12 @@ function NavIcon({ navKey }: { navKey: NavLinkKey }) {
       return (
         <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
           <path d="M10 2a1 1 0 0 1 .707.293l6 6A1 1 0 0 1 17 9v8a1 1 0 0 1-1 1h-4v-5H8v5H4a1 1 0 0 1-1-1V9a1 1 0 0 1 .293-.707l6-6A1 1 0 0 1 10 2Z" />
+        </svg>
+      );
+    case "analytics":
+      return (
+        <svg className={cls} viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+          <path d="M2 16h2v-4H2v4zm4 0h2V8H6v8zm4 0h2v-6h-2v6zm4-10v10h2V6h-2zM2 2v2h16V2H2z" />
         </svg>
       );
     case "products":

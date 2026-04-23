@@ -1,5 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import {
+  allowSubscriptionBypassFromEnvInThisBuild,
+  allowSuperadminBypassFromEnvInThisBuild,
+} from "./billing-release-gate";
+
 function truthyEnv(v: string | undefined): boolean {
   if (!v?.trim()) return false;
   const s = v.trim().toLowerCase();
@@ -15,11 +20,14 @@ function parseCsvEnv(raw: string | undefined): string[] {
 }
 
 /**
- * Billing is enforced by default.
- * Set `EXPO_PUBLIC_SUBSCRIPTION_BYPASS=true` only for local/manual testing.
+ * Billing is enforced by default. `EXPO_PUBLIC_SUBSCRIPTION_BYPASS` only takes effect
+ * in development builds, or in release if `EXPO_PUBLIC_DANGER_ALLOW_SUBSCRIPTION_BYPASS_IN_RELEASE` is set.
  */
 export function subscriptionGateSkippedByEnv(): boolean {
-  return truthyEnv(process.env.EXPO_PUBLIC_SUBSCRIPTION_BYPASS);
+  if (!truthyEnv(process.env.EXPO_PUBLIC_SUBSCRIPTION_BYPASS)) {
+    return false;
+  }
+  return allowSubscriptionBypassFromEnvInThisBuild();
 }
 
 /**
@@ -78,11 +86,17 @@ export async function hasSubscriptionAccess(
   return false;
 }
 
-/** Optional dev bypass: `EXPO_PUBLIC_SUPERADMIN_USER_IDS` / `EXPO_PUBLIC_SUPERADMIN_EMAILS` (comma-separated). */
+/**
+ * Optional bypass: `EXPO_PUBLIC_SUPERADMIN_USER_IDS` / `EXPO_PUBLIC_SUPERADMIN_EMAILS` (comma-separated).
+ * Honored in dev by default; in store builds only if `EXPO_PUBLIC_DANGER_ALLOW_SUPERADMIN_BYPASS_IN_RELEASE` is set.
+ */
 export function isSuperAdminBypassMobile(
   userId: string,
   email: string | null | undefined,
 ): boolean {
+  if (!allowSuperadminBypassFromEnvInThisBuild()) {
+    return false;
+  }
   const idList = parseCsvEnv(process.env.EXPO_PUBLIC_SUPERADMIN_USER_IDS);
   if (idList.includes(userId)) return true;
 

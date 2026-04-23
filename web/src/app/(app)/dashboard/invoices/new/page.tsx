@@ -14,7 +14,7 @@ export default async function NewInvoicePage() {
 
   const [{ customers, products, invoiceDefaults }, catalogRows] = await Promise.all([
     getNewInvoiceEditorData(),
-    getPosCatalogProducts(),
+    getPosCatalogProducts({ limit: 500 }),
   ]);
 
   return (

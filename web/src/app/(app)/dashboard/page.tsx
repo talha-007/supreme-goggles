@@ -1,8 +1,8 @@
+import { DashboardPosDeferred } from "@/components/dashboard/dashboard-pos-deferred";
 import { DashboardStatsPeriodTabs } from "@/components/dashboard/dashboard-stats-period-tabs";
 import { LowStockPanel } from "@/components/dashboard/low-stock-panel";
 import { OpenPosPanel } from "@/components/dashboard/open-pos-panel";
 import { StatCard } from "@/components/dashboard/stat-card";
-import { PosSaleClient } from "@/components/dashboard/pos-sale-client";
 import { resolveInventoryCost } from "@/lib/dashboard/inventory-cost";
 import { getStatsPeriodRange, parseStatsPeriod } from "@/lib/dashboard/stats-period";
 import { getNewInvoiceEditorData, getPosCatalogProducts } from "@/lib/invoices/new-invoice-data";
@@ -19,8 +19,21 @@ import type { InvoiceRow, InvoiceStatus } from "@/types/invoice";
 import type { ProductRow } from "@/types/product";
 import type { PurchaseOrderStatus } from "@/types/purchase-order";
 import { getLocale, getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("dashboard");
+  const title = t("title");
+  const description = t("subtitle");
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website" },
+    twitter: { title, description },
+  };
+}
 
 const statusStyle: Record<string, string> = {
   draft: "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200",
@@ -74,6 +87,7 @@ export default async function DashboardPage({
     maximumFractionDigits: 2,
   });
   const t = await getTranslations("dashboard");
+  const tAnalytics = await getTranslations("analytics");
   const tCommon = await getTranslations("common");
   const tInv = await getTranslations("invoiceStatus");
   const [{ data: businessRow }, { data: settingsRow }] = await Promise.all([
@@ -182,7 +196,7 @@ export default async function DashboardPage({
       .order("updated_at", { ascending: false })
       .limit(8),
     canEdit ? getNewInvoiceEditorData() : Promise.resolve(null),
-    canEdit ? getPosCatalogProducts() : Promise.resolve([]),
+    canEdit ? getPosCatalogProducts({ limit: 120 }) : Promise.resolve([]),
   ]);
 
   const productsCount = productsCountRes.count ?? 0;
@@ -270,39 +284,15 @@ export default async function DashboardPage({
         ) : null}
       </div> */}
 
-      {canEdit && invoiceEditorData ? (
-        <section id="dashboard-new-invoice" className="mt-2 scroll-mt-24">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-                {t("invoiceSection")}
-              </h2>
-              {/* <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("invoiceSectionDesc")}</p> */}
-            </div>
-            <Link
-              href="/dashboard/invoices/new"
-              className="shrink-0 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
-            >
-              {t("fullPageInvoice")}
-            </Link>
-          </div>
-          <div className="mt-4">
-            <PosSaleClient
-              initialCatalogProducts={catalogRows}
-              customers={invoiceEditorData.customers}
-              restaurantTables={invoiceEditorData.restaurantTables}
-              restaurantWaiters={invoiceEditorData.restaurantWaiters}
-              forceRestaurantMode={isRestaurant}
-              invoiceDefaults={invoiceEditorData.invoiceDefaults}
-              cancelHref="/dashboard"
-              firstDraftSaveBehavior="refresh-only"
-              fullPageInvoiceHref="/dashboard/invoices/new"
-            />
-          </div>
-        </section>
-      ) : null}
-
-      <div className="mt-8">
+      <div className="mt-2">
+        <div className="mb-1 flex flex-wrap items-center justify-end gap-3">
+          <Link
+            href={`/dashboard/analytics?period=${statsPeriod}`}
+            className="text-sm font-medium text-emerald-700 underline decoration-emerald-400/50 underline-offset-2 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+          >
+            {tAnalytics("openInsights")} →
+          </Link>
+        </div>
         <DashboardStatsPeriodTabs current={statsPeriod} />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
@@ -337,6 +327,37 @@ export default async function DashboardPage({
           href="/dashboard/purchase-orders"
         />
       </div>
+
+      {canEdit && invoiceEditorData ? (
+        <section id="dashboard-new-invoice" className="mt-10 scroll-mt-24">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+                {t("invoiceSection")}
+              </h2>
+            </div>
+            <Link
+              href="/dashboard/invoices/new"
+              className="shrink-0 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
+            >
+              {t("fullPageInvoice")}
+            </Link>
+          </div>
+          <div className="mt-4">
+            <DashboardPosDeferred
+              initialCatalogProducts={catalogRows}
+              customers={invoiceEditorData.customers}
+              restaurantTables={invoiceEditorData.restaurantTables}
+              restaurantWaiters={invoiceEditorData.restaurantWaiters}
+              forceRestaurantMode={isRestaurant}
+              invoiceDefaults={invoiceEditorData.invoiceDefaults}
+              cancelHref="/dashboard"
+              firstDraftSaveBehavior="refresh-only"
+              fullPageInvoiceHref="/dashboard/invoices/new"
+            />
+          </div>
+        </section>
+      ) : null}
 
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         <LowStockPanel

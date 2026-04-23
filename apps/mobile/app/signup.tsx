@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -15,6 +16,7 @@ import { FormField } from "../src/components/FormField";
 import { PrimaryButton } from "../src/components/PrimaryButton";
 import { useAuth } from "../src/contexts/auth-context";
 import { getEmailRedirectUrl } from "../src/lib/auth-redirect";
+import { getPrivacyPolicyUrl } from "../src/lib/privacy-config";
 import { supabase } from "../src/lib/supabase";
 
 export default function SignupScreen() {
@@ -139,6 +141,16 @@ export default function SignupScreen() {
               </Pressable>
             </Link>
           </View>
+          {getPrivacyPolicyUrl() ? (
+            <Pressable
+              onPress={() => void Linking.openURL(getPrivacyPolicyUrl())}
+              className="mt-8 self-center py-2 active:opacity-80"
+              accessibilityRole="link"
+              accessibilityLabel="Privacy policy"
+            >
+              <Text className="text-center text-xs text-neutral-500 underline">Privacy policy</Text>
+            </Pressable>
+          ) : null}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
