@@ -5,10 +5,10 @@ import Animated, { FadeIn } from "react-native-reanimated";
 
 const SLIDES = [
   {
-    title: "Retail SaaS",
+    title: "Taplite",
     body:
-      "Sales, stock, and purchasing in one place — built for shops and retail counters.",
-    accent: "POS",
+      "Point-of-sale, stock, and billing for shops and counters — built for taplite.store.",
+    accent: "App",
   },
   {
     title: "Sell & track inventory",

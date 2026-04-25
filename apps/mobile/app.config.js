@@ -13,8 +13,8 @@ module.exports = ({ config }) => ({
     [
       "expo-image-picker",
       {
-        photosPermission: "Allow POS Mobile to access your photos for product images.",
-        cameraPermission: "Allow POS Mobile to take photos for product images.",
+        photosPermission: "Allow Taplite to access your photos for product images.",
+        cameraPermission: "Allow Taplite to take photos for product images.",
       },
     ],
   ],

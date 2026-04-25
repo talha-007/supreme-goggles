@@ -48,7 +48,7 @@ export default function SubscriptionExpiredScreen() {
           label="Message support (WhatsApp)"
           onPress={() =>
             void openSupportWhatsApp(
-              "Hi — our shop account subscription shows expired in the POS app. Can you help us renew or fix access?",
+              "Hi — our shop account subscription shows expired in the Taplite app. Can you help us renew or fix access?",
             )
           }
         />

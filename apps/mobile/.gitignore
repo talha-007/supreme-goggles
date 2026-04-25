@@ -13,6 +13,16 @@ web-build/
 # macOS
 .DS_Store
 
+# Android Studio / IntelliJ (if the repo is opened at apps/mobile)
+.idea/
+
+# Local Gradle / native build (prebuild; rebuild with expo prebuild / Android Studio)
+android/.gradle/
+android/**/build/
+android/local.properties
+*.hprof
+.cxx/
+
 # local env
 .env
 .env.local
