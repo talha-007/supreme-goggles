@@ -57,6 +57,11 @@ const getBusinessContextCached = cache(async (): Promise<BusinessContext | null>
   };
 });
 
+/** Signed-in user with a business, or `null` if signed out or no `business_members` row. */
+export async function getOptionalBusinessContext(): Promise<BusinessContext | null> {
+  return getBusinessContextCached();
+}
+
 export async function requireBusinessContext(): Promise<BusinessContext> {
   const ctx = await getBusinessContextCached();
   if (!ctx) {

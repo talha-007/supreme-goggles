@@ -24,3 +24,21 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Landing: city name ticker */
+@keyframes land-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+.land-marquee-track {
+  animation: land-marquee 38s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .land-marquee-track {
+    animation: none;
+  }
+}

@@ -15,6 +15,23 @@ function supabaseImageHostname(): string | null {
 
 const host = supabaseImageHostname();
 
+const imageRemotePatterns: Array<{
+  protocol: "https";
+  hostname: string;
+  pathname: string;
+}> = [
+  { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
+  ...(host
+    ? [
+        {
+          protocol: "https" as const,
+          hostname: host,
+          pathname: "/storage/v1/object/public/**",
+        },
+      ]
+    : []),
+];
+
 const allowedDevOrigins = [
   "localhost",
   "127.0.0.1",
@@ -34,19 +51,14 @@ const nextConfig: NextConfig = {
     },
   },
 
-  ...(host
-    ? {
-        images: {
-          remotePatterns: [
-            {
-              protocol: "https" as const,
-              hostname: host,
-              pathname: "/storage/v1/object/public/**",
-            },
-          ],
-        },
-      }
-    : {}),
+  /**
+   * Unsplash (and Supabase) for any remote `next/image` src.
+   * The marketing landing also uses static files in `public/landing/*.jpg`.
+   */
+  images: {
+    remotePatterns: imageRemotePatterns,
+  },
 };
 
+// next-intl preserves the full `nextConfig` object, including `images`.
 export default withNextIntl(nextConfig);

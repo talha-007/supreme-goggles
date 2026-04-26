@@ -15,3 +15,12 @@ export const BRAND_LOGO = {
 } as const;
 
 export const BRAND_FAVICON = "/favicon.png";
+
+/**
+ * Public URL for the Android app (Google Play, internal APK page, etc.).
+ * Set `NEXT_PUBLIC_ANDROID_APP_URL` in the web app environment.
+ */
+export function getAndroidAppUrl(): string {
+  const u = process.env.NEXT_PUBLIC_ANDROID_APP_URL?.trim();
+  return u && u.length > 0 ? u : "";
+}
