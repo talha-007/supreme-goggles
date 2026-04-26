@@ -28,6 +28,19 @@
       "bundler": "metro",
       "favicon": "./assets/app-logo.png"
     },
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "supabaseUrl": "",
+      "supabaseAnonKey": "",
+      "siteUrl": "http://localhost:3000",
+      "privacyPolicyUrl": "",
+      "router": {},
+      "eas": {
+        "projectId": "3a8e0b3a-cbfa-4ab6-9957-865d3ffa0736"
+      }
+    },
+    "owner": "kakarot_7"
   }
 }
