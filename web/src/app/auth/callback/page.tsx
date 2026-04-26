@@ -9,7 +9,22 @@ function safeNextPath(next: string | null): string {
   if (!next || !next.startsWith("/") || next.startsWith("//")) {
     return "/";
   }
+  // Legacy: forgot password used a non-existent /auth/* path; real route is /update-password.
+  if (next === "/auth/update-password") {
+    return "/update-password";
+  }
   return next;
+}
+
+function recoveryDefaultPath(url: URL): string | null {
+  const t = url.searchParams.get("type");
+  if (t === "recovery") return "/update-password";
+  const hash = url.hash?.replace(/^#/, "") ?? "";
+  if (hash) {
+    const h = new URLSearchParams(hash);
+    if (h.get("type") === "recovery") return "/update-password";
+  }
+  return null;
 }
 
 function tryHashSession(url: URL) {
@@ -68,7 +83,11 @@ export default function AuthCallbackPage() {
         return;
       }
 
-      const nextPath = safeNextPath(url.searchParams.get("next"));
+      const nextRaw = url.searchParams.get("next");
+      const nextPath =
+        nextRaw != null && nextRaw !== ""
+          ? safeNextPath(nextRaw)
+          : recoveryDefaultPath(url) ?? safeNextPath(null);
       const code = url.searchParams.get("code");
       const token_hash = url.searchParams.get("token_hash");
       const otpType = url.searchParams.get("type");

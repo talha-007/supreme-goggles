@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
+import { createPasswordResetRequestClient } from "@/lib/supabase/email-auth-client";
 import { isValidEmailFormat } from "@/lib/auth/credential-validation";
 import { getLoginErrorTranslationId } from "@/lib/auth/map-login-error";
 import { useTranslations } from "next-intl";
@@ -28,9 +28,9 @@ export function ForgotPasswordForm() {
     setError(null);
     if (!isValidEmailFormat(email) || email.trim() === "") return;
     setLoading(true);
-    const supabase = createClient();
+    const supabase = createPasswordResetRequestClient();
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
-    const next = encodeURIComponent("/auth/update-password");
+    const next = encodeURIComponent("/update-password");
     const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${origin.replace(/\/$/, "")}/auth/callback?next=${next}`,
     });

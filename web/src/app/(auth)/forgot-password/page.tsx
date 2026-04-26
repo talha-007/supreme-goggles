@@ -23,11 +23,7 @@ export default async function ForgotPasswordPage() {
       <div className="mt-6">
         <ForgotPasswordForm />
       </div>
-      <p className="mt-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
-        <Link href="/login" className="font-medium text-zinc-900 underline dark:text-zinc-100">
-          {t("signIn")}
-        </Link>
-      </p>
+     
     </div>
   );
 }
