@@ -89,7 +89,7 @@ export function HeroMakaryoBlock() {
             </p>
             <div className="mx-auto mt-6 flex max-w-md flex-col gap-2.5 sm:mx-0 sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-3">
               <Link
-                className="inline-flex min-h-10 w-full min-w-0 items-center justify-center rounded-xl border-2 border-zinc-200 bg-white px-5 text-sm font-semibold text-zinc-800 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-500 sm:w-[min(12rem,100%)]"
+                className="inline-flex min-h-10 w-full min-w-0 items-center justify-center rounded-xl border-2 border-zinc-200 bg-white px-5 text-sm font-semibold text-zinc-800 transition hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-500 sm:w-[min(12rem,100%)]"
                 href="/signup"
               >
                 {t("heroCtaWeb")}
