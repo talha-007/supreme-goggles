@@ -22,7 +22,7 @@ export const BRAND_FAVICON = "/favicon.png";
  * Resolution order:
  * 1. `NEXT_PUBLIC_ANDROID_APP_URL` if set (Play Store or any full URL).
  * 2. `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_ANDROID_APK_STORAGE_PATH` (defaults to
- *    `app-downloads/android/app-release.apk` in the public Storage bucket from migration
+ *    `app-downloads/taplite.apk` in the public Storage bucket from migration
  *    `20260508120000_app_downloads_storage.sql`). Upload the APK in Supabase Dashboard → Storage.
  */
 export function getAndroidAppUrl(): string {
@@ -38,7 +38,7 @@ export function getAndroidAppUrl(): string {
 
   const path =
     process.env.NEXT_PUBLIC_ANDROID_APK_STORAGE_PATH?.trim() ||
-    "app-downloads/android/app-release.apk";
+    "app-downloads/taplite.apk";
 
   const normalized = path.replace(/^\/+/, "");
   return `${base}/storage/v1/object/public/${normalized}`;
