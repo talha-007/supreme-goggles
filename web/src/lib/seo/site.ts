@@ -26,7 +26,7 @@ export function getDefaultDescription(): string {
 export function buildRootMetadata(): Metadata {
   const siteUrl = getSiteUrl();
   const base = new URL(siteUrl);
-  /** OG previews are usually on light surfaces — use the dark-theme (black) mark. */
+  /** OG previews are usually on light surfaces; use the dark-theme (black) mark. */
   const ogImage = new URL(BRAND_LOGO.dark, base).toString();
 
   const verification: Metadata["verification"] = process.env.GOOGLE_SITE_VERIFICATION
@@ -36,7 +36,7 @@ export function buildRootMetadata(): Metadata {
   return {
     metadataBase: base,
     title: {
-      default: `${BRAND_NAME} — ${BRAND_DOMAIN}`,
+      default: `${BRAND_NAME} | ${BRAND_DOMAIN}`,
       template: `%s | ${BRAND_NAME}`,
     },
     description: defaultDescription,
@@ -57,13 +57,13 @@ export function buildRootMetadata(): Metadata {
       locale: "en_US",
       url: base,
       siteName: `${BRAND_NAME} (${BRAND_DOMAIN})`,
-      title: `${BRAND_NAME} — ${BRAND_DOMAIN}`,
+      title: `${BRAND_NAME} | ${BRAND_DOMAIN}`,
       description: defaultDescription,
       images: [{ url: ogImage, alt: `${BRAND_NAME} logo` }],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${BRAND_NAME} — ${BRAND_DOMAIN}`,
+      title: `${BRAND_NAME} | ${BRAND_DOMAIN}`,
       description: defaultDescription,
       images: [ogImage],
     },

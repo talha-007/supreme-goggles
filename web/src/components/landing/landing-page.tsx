@@ -1,8 +1,9 @@
 "use client";
 
 import { defaultLocale, isAppLocale, type AppLocale } from "@/i18n/routing";
+import { AndroidAppDownloadLink } from "@/components/android-app-download-link";
 import { HeroMakaryoBlock } from "@/components/landing/hero-makaryo-block";
-import { BRAND_DOMAIN, BRAND_LOGO, BRAND_NAME } from "@/lib/brand";
+import { BRAND_DOMAIN, BRAND_LOGO, BRAND_NAME, getAndroidAppUrl } from "@/lib/brand";
 import { Noto_Naskh_Arabic, Plus_Jakarta_Sans } from "next/font/google";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
@@ -24,6 +25,7 @@ export function LandingPage() {
   const rawLoc = useLocale();
   const locale: AppLocale = isAppLocale(rawLoc) ? rawLoc : defaultLocale;
   const rootFont = locale === "ur" ? naskhUrdu.className : plusJakarta.className;
+  const androidAppUrl = getAndroidAppUrl();
 
   return (
     <div
@@ -45,18 +47,25 @@ export function LandingPage() {
       </main>
 
       <footer className="border-t border-zinc-200 bg-white py-4 dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 px-3 text-center sm:flex-row sm:text-start sm:px-6">
-          <div className="flex items-center justify-center gap-2 sm:justify-start">
-            <Image
-              src={BRAND_LOGO.dark}
-              alt=""
-              width={100}
-              height={32}
-              className="h-6 w-auto opacity-80"
-            />
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              {t("footer", { year: new Date().getFullYear(), domain: BRAND_DOMAIN })}
-            </p>
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-3 text-center sm:flex-row sm:text-start sm:px-6">
+          <div className="flex flex-col items-center gap-2 sm:items-start">
+            <div className="flex items-center justify-center gap-2 sm:justify-start">
+              <Image
+                src={BRAND_LOGO.dark}
+                alt=""
+                width={100}
+                height={32}
+                className="h-6 w-auto opacity-80"
+              />
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                {t("footer", { year: new Date().getFullYear(), domain: BRAND_DOMAIN })}
+              </p>
+            </div>
+            {androidAppUrl ? (
+              <AndroidAppDownloadLink className="text-xs font-semibold text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400">
+                {t("footerDownloadAndroid")}
+              </AndroidAppDownloadLink>
+            ) : null}
           </div>
           <p className="text-xs text-zinc-400">
             {BRAND_NAME} · {BRAND_DOMAIN}

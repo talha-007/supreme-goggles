@@ -2,6 +2,7 @@
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { defaultLocale, isAppLocale, type AppLocale } from "@/i18n/routing";
+import { AndroidAppDownloadLink } from "@/components/android-app-download-link";
 import { BRAND_DOMAIN, BRAND_LOGO, BRAND_NAME, getAndroidAppUrl } from "@/lib/brand";
 import Image from "next/image";
 import Link from "next/link";
@@ -95,15 +96,10 @@ export function HeroMakaryoBlock() {
                 {t("heroCtaWeb")}
               </Link>
               {androidUrl ? (
-                <a
-                  href={androidUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-10 w-full min-w-0 items-center justify-center gap-1.5 rounded-xl bg-zinc-900 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 sm:w-[min(12rem,100%)] dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
-                >
+                <AndroidAppDownloadLink className="inline-flex min-h-10 w-full min-w-0 items-center justify-center gap-1.5 rounded-xl bg-zinc-900 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 sm:w-[min(12rem,100%)] dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100">
                   <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   {t("heroCtaAndroid")}
-                </a>
+                </AndroidAppDownloadLink>
               ) : (
                 <p className="flex min-h-10 w-full items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-zinc-100/50 px-4 text-center text-xs text-zinc-600 dark:border-zinc-600 dark:bg-zinc-800/50 dark:text-zinc-400 sm:w-[min(100%,20rem)]">
                   {t("androidNoUrl")}
