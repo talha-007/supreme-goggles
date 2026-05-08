@@ -2,7 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Linking, Pressable, ScrollView, Switch, Text, View } from "react-native";
+import { router } from "expo-router";
+import { ActivityIndicator, Pressable, ScrollView, Switch, Text, View } from "react-native";
 
 import { ConfirmDialog } from "../../src/components/ConfirmDialog";
 import { ErrorBannerWithSupport } from "../../src/components/ErrorBannerWithSupport";
@@ -16,7 +17,7 @@ import {
   deleteBusinessLogoByUrl,
   uploadBusinessLogoFromUri,
 } from "../../src/lib/business-logo";
-import { getPrivacyPolicyUrl, IN_APP_DATA_PROCESSING_SUMMARY } from "../../src/lib/privacy-config";
+import { IN_APP_DATA_PROCESSING_SUMMARY } from "../../src/lib/privacy-config";
 import { openSupportWhatsApp, SUPPORT_PHONE_DISPLAY } from "../../src/lib/support-contact";
 import { supabase } from "../../src/lib/supabase";
 
@@ -486,33 +487,26 @@ export default function SettingsScreen() {
           Privacy and data
         </Text>
         <Text className="mt-2 text-sm leading-5 text-neutral-400">{IN_APP_DATA_PROCESSING_SUMMARY}</Text>
-        {getPrivacyPolicyUrl() ? (
-          <Pressable
-            onPress={() => void Linking.openURL(getPrivacyPolicyUrl())}
-            accessibilityRole="link"
-            accessibilityLabel="Open privacy policy in browser"
-            className="mt-4 flex-row items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900/80 px-4 py-3.5 active:opacity-90"
-          >
-            <View className="min-w-0 flex-1">
-              <Text className="text-base font-semibold text-sky-400">Privacy policy</Text>
-              <Text className="mt-0.5 text-xs text-neutral-500" numberOfLines={1}>
-                {getPrivacyPolicyUrl()}
-              </Text>
-            </View>
-            <Ionicons name="open-outline" size={22} color="#38bdf8" />
-          </Pressable>
-        ) : (
-          <Text className="mt-3 text-xs text-amber-600/90">
-            Set EXPO_PUBLIC_PRIVACY_POLICY_URL for your build to show a full policy link here (required for most app
-            stores).
-          </Text>
-        )}
+        <Pressable
+          onPress={() => router.push("/privacy-policy")}
+          accessibilityRole="button"
+          accessibilityLabel="Open privacy policy"
+          className="mt-4 flex-row items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900/80 px-4 py-3.5 active:opacity-90"
+        >
+          <View className="min-w-0 flex-1">
+            <Text className="text-base font-semibold text-sky-400">Privacy policy</Text>
+            <Text className="mt-0.5 text-xs text-neutral-500">
+              Standard POS disclosure - collection, use, sharing, retention, and your rights
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={22} color="#737373" />
+        </Pressable>
 
         <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">
           Help and support
         </Text>
         <Text className="mt-1 text-xs text-neutral-600">
-          Problems with the app, billing, or sign-in — contact your shop admin first, then message app support if you
+          Problems with the app, billing, or sign-in - contact your shop admin first, then message app support if you
           still need help.
         </Text>
         <Pressable
