@@ -24,7 +24,7 @@ export function AndroidAppDownloadLink({ className, children }: Props) {
       target="_blank"
       rel="noopener noreferrer"
       className={className}
-      {...(isDirectApk ? { download: "taplite.apk" as const } : {})}
+      {...(isDirectApk ? { download: "Taplite.apk" as const } : {})}
     >
       {children}
     </a>
