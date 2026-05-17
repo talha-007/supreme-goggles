@@ -42,7 +42,7 @@ export default async function InvoicesPage() {
   if (error) {
     return (
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{t("title")}</h1>
+        <h1 className="text-2xl font-semibold text-zinc-900">{t("title")}</h1>
         <p className="mt-2 text-sm text-red-600">{error.message}</p>
       </div>
     );

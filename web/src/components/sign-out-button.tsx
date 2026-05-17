@@ -27,7 +27,7 @@ export function SignOutButton({
       type="button"
       onClick={signOut}
       disabled={loading}
-      className="text-sm text-zinc-600 hover:text-zinc-900 disabled:opacity-50 dark:text-zinc-400 dark:hover:text-zinc-100"
+      className="text-sm text-zinc-600 hover:text-zinc-900 disabled:opacity-50"
     >
       {loading ? loadingLabel : label}
     </button>

@@ -17,8 +17,8 @@ export function PasswordRuleChecklist({ status }: Props) {
   ];
 
   return (
-    <ul className="mt-2 space-y-1.5 text-xs text-zinc-600 dark:text-zinc-400" aria-live="polite">
-      <li className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-500">
+    <ul className="mt-2 space-y-1.5 text-xs text-zinc-600" aria-live="polite">
+      <li className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
         {t("passwordRulesTitle")}
       </li>
       {items.map((row) => (
@@ -26,12 +26,12 @@ export function PasswordRuleChecklist({ status }: Props) {
           key={row.label}
           className={
             row.ok
-              ? "text-emerald-700 dark:text-emerald-400"
-              : "text-zinc-500 dark:text-zinc-500"
+              ? "text-brand-700"
+              : "text-zinc-500"
           }
         >
           <span className="me-1.5" aria-hidden>
-            {row.ok ? "✓" : "○"}
+            {row.ok ? "âœ“" : "â—‹"}
           </span>
           {row.label}
         </li>

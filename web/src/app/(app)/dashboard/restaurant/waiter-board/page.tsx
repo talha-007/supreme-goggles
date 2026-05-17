@@ -125,10 +125,10 @@ export default async function WaiterBoardPage() {
       {/* Page header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
             Waiter board
           </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-1 text-sm text-zinc-500">
             Take orders, track kitchen progress, and serve customers.
           </p>
         </div>
@@ -139,13 +139,13 @@ export default async function WaiterBoardPage() {
       </div>
 
       {kpiErr && (
-        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{kpiErr.message}</p>
+        <p className="mt-2 text-sm text-red-600">{kpiErr.message}</p>
       )}
       {activeErr && (
-        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{activeErr.message}</p>
+        <p className="mt-2 text-sm text-red-600">{activeErr.message}</p>
       )}
       {servedErr && (
-        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{servedErr.message}</p>
+        <p className="mt-2 text-sm text-red-600">{servedErr.message}</p>
       )}
 
       {/* KPI stats */}

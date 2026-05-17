@@ -44,7 +44,7 @@ export function HeroMobileAppMock() {
           <div className="border-b border-zinc-200 bg-white px-3 py-2.5">
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-zinc-900">{BRAND_NAME}</span>
-              <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[0.6rem] font-semibold text-emerald-800">
+              <span className="rounded bg-brand-100 px-1.5 py-0.5 text-[0.6rem] font-semibold text-brand-800">
                 {t("mobileMockAppBadge")}
               </span>
             </div>
@@ -61,7 +61,7 @@ export function HeroMobileAppMock() {
               {(
                 [
                   { label: t("mockItem1"), v: m.item1, sw: "bg-amber-100" },
-                  { label: t("mockItem2"), v: m.item2, sw: "bg-emerald-100" },
+                  { label: t("mockItem2"), v: m.item2, sw: "bg-brand-100" },
                   { label: t("mockItem3"), v: m.item3, sw: "bg-sky-100" },
                 ] as const
               ).map((row) => (
@@ -78,7 +78,7 @@ export function HeroMobileAppMock() {
               ))}
             </ul>
             <div className="pt-0.5">
-              <div className="flex h-9 w-full items-center justify-center rounded-xl bg-emerald-600 text-xs font-bold text-white">
+              <div className="flex h-9 w-full items-center justify-center rounded-xl bg-brand-600 text-xs font-bold text-white">
                 {t("mobileMockPosCta")}
               </div>
             </div>

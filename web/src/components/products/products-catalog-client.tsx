@@ -91,7 +91,7 @@ export function ProductsCatalogClient({
   const skippedSsrDuplicate = useRef(false);
   const initialRowsRef = useRef(initialProducts);
 
-  /** Debounced server search — no full-page navigation. */
+  /** Debounced server search â€” no full-page navigation. */
   useEffect(() => {
     const ac = new AbortController();
     const debounceTimer = window.setTimeout(async () => {
@@ -178,15 +178,15 @@ export function ProductsCatalogClient({
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
             {tp("title")}
           </h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{tp("subtitle")}</p>
+          <p className="mt-1 text-sm text-zinc-600">{tp("subtitle")}</p>
         </div>
         {canEdit ? (
           <Link
             href="/dashboard/products/new"
-            className="min-w-50 inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+            className="min-w-50 inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800"
           >
             {tp("addProduct")}
           </Link>
@@ -216,10 +216,10 @@ export function ProductsCatalogClient({
             onKeyDown={onSearchKeyDown}
             placeholder={tp("searchPlaceholder")}
             aria-busy={loading}
-            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
           />
           {loading ? (
-            <span className="shrink-0 text-xs text-zinc-500 dark:text-zinc-400" aria-hidden>
+            <span className="shrink-0 text-xs text-zinc-500" aria-hidden>
               {tp("searching")}
             </span>
           ) : null}
@@ -227,7 +227,7 @@ export function ProductsCatalogClient({
             <button
               type="button"
               onClick={clearSearch}
-              className="shrink-0 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              className="shrink-0 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
             >
               {tc("clear")}
             </button>
@@ -238,7 +238,7 @@ export function ProductsCatalogClient({
             <button
               type="button"
               onClick={() => setScanMode(false)}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"
+              className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
             >
               {tp("exitScanMode")}
             </button>
@@ -246,7 +246,7 @@ export function ProductsCatalogClient({
             <button
               type="button"
               onClick={() => setScanMode(true)}
-              className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-950 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-100 dark:hover:bg-emerald-950"
+              className="rounded-lg border border-brand-300 bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-950 hover:bg-brand-100"
             >
               {tp("scanMode")}
             </button>
@@ -255,7 +255,7 @@ export function ProductsCatalogClient({
             <button
               type="button"
               onClick={() => setLowStockOnly(false)}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"
+              className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 hover:bg-zinc-50"
             >
               {tp("clearLowStockFilter")}
             </button>
@@ -263,7 +263,7 @@ export function ProductsCatalogClient({
             <button
               type="button"
               onClick={() => setLowStockOnly(true)}
-              className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-950 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-100 dark:hover:bg-amber-950"
+              className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-950 hover:bg-amber-100"
             >
               {tp("lowStockOnly")}
             </button>
@@ -272,25 +272,25 @@ export function ProductsCatalogClient({
       </div>
 
       {loadError ? (
-        <p className="mt-3 text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="mt-3 text-sm text-red-600" role="alert">
           {loadError}
         </p>
       ) : null}
 
       {scanMode ? (
-        <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-950 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-100">
+        <p className="mt-3 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-950">
           {tp("scanModeHelp")}
         </p>
       ) : null}
 
       {lowStockOnly ? (
-        <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
+        <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
           {tp("lowStockFilterHelp")}
         </p>
       ) : null}
 
       {unknownBarcode ? (
-        <p className="mt-3 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-950 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-100">
+        <p className="mt-3 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-950">
           {tp("unknownBarcode")}{" "}
           <Link
             href={`/dashboard/products/new?barcode=${encodeURIComponent(safeQ.trim())}&scan=1`}
@@ -301,15 +301,15 @@ export function ProductsCatalogClient({
         </p>
       ) : null}
 
-      <div className="relative mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="relative mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white">
         {loading ? (
           <div
-            className="pointer-events-none absolute inset-0 z-10 bg-white/40 dark:bg-zinc-950/40"
+            className="pointer-events-none absolute inset-0 z-10 bg-white/40"
             aria-hidden
           />
         ) : null}
         <table className="w-full min-w-[880px] text-left text-sm">
-          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600">
             <tr>
               <th className="w-14 px-4 py-3">{tp("colPhoto")}</th>
               <th className="px-4 py-3">{tp("colName")}</th>
@@ -324,12 +324,12 @@ export function ProductsCatalogClient({
               {canEdit ? <th className="px-4 py-3 text-right">{tc("actions")}</th> : null}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tbody className="divide-y divide-zinc-200">
             {loading && products.length === 0 ? (
               <tr>
                 <td
                   colSpan={canEdit ? 11 : 10}
-                  className="px-4 py-10 text-center text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-10 text-center text-zinc-500"
                 >
                   {tp("loadingRows")}
                 </td>
@@ -338,7 +338,7 @@ export function ProductsCatalogClient({
               <tr>
                 <td
                   colSpan={canEdit ? 11 : 10}
-                  className="px-4 py-10 text-center text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-10 text-center text-zinc-500"
                 >
                   {lowStockOnly
                     ? safeQ
@@ -353,10 +353,10 @@ export function ProductsCatalogClient({
               products.map((p) => {
                 const low = p.current_stock <= p.reorder_level && p.reorder_level > 0;
                 return (
-                  <tr key={p.id} className="text-zinc-800 dark:text-zinc-200">
+                  <tr key={p.id} className="text-zinc-800">
                     <td className="px-4 py-3">
                       {p.image_url ? (
-                        <div className="relative h-10 w-10 overflow-hidden rounded-md border border-zinc-200 dark:border-zinc-700">
+                        <div className="relative h-10 w-10 overflow-hidden rounded-md border border-zinc-200">
                           <Image
                             src={p.image_url}
                             alt=""
@@ -366,37 +366,37 @@ export function ProductsCatalogClient({
                           />
                         </div>
                       ) : (
-                        <span className="text-zinc-400 dark:text-zinc-500">{tc("dash")}</span>
+                        <span className="text-zinc-400">{tc("dash")}</span>
                       )}
                     </td>
                     <td className="px-4 py-3 font-medium">{p.name}</td>
-                    <td className="max-w-[8rem] truncate px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                    <td className="max-w-[8rem] truncate px-4 py-3 text-zinc-600">
                       {p.category?.trim() ? p.category : tc("dash")}
                     </td>
-                    <td className="max-w-[8rem] truncate px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                    <td className="max-w-[8rem] truncate px-4 py-3 text-zinc-600">
                       {p.brand?.trim() ? p.brand : tc("dash")}
                     </td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{p.sku ?? tc("dash")}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-600 dark:text-zinc-400">
+                    <td className="px-4 py-3 text-zinc-600">{p.sku ?? tc("dash")}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-zinc-600">
                       {p.barcode ?? tc("dash")}
                     </td>
                     <td className="px-4 py-3">{p.unit}</td>
                     <td className="px-4 py-3 text-right tabular-nums">{pkr.format(p.sale_price)}</td>
                     <td className="px-4 py-3 text-right tabular-nums">
-                      <span className={low ? "font-medium text-amber-700 dark:text-amber-400" : ""}>
+                      <span className={low ? "font-medium text-amber-700" : ""}>
                         {p.current_stock}
                       </span>
                       {low ? (
-                        <span className="ml-1 text-xs text-amber-600 dark:text-amber-500">{tc("low")}</span>
+                        <span className="ml-1 text-xs text-amber-600">{tc("low")}</span>
                       ) : null}
                     </td>
                     <td className="px-4 py-3">
                       {p.is_active ? (
-                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                        <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs text-brand-800">
                           {tc("active")}
                         </span>
                       ) : (
-                        <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-xs text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                        <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-xs text-zinc-700">
                           {tc("inactive")}
                         </span>
                       )}
@@ -405,7 +405,7 @@ export function ProductsCatalogClient({
                       <td className="px-4 py-3 text-right">
                         <Link
                           href={`/dashboard/products/${p.id}/edit`}
-                          className="text-sm font-medium text-zinc-900 underline hover:no-underline dark:text-zinc-100"
+                          className="text-sm font-medium text-zinc-900 underline hover:no-underline"
                         >
                           {tc("edit")}
                         </Link>
@@ -420,7 +420,7 @@ export function ProductsCatalogClient({
       </div>
 
       {!safeQ && !lowStockOnly ? (
-        <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">{tp("browseHint")}</p>
+        <p className="mt-2 text-xs text-zinc-500">{tp("browseHint")}</p>
       ) : null}
     </div>
   );

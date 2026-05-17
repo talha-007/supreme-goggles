@@ -59,25 +59,25 @@ function OrderCard({ o, now }: { o: KitchenOrder; now: number }) {
 
   return (
     <div
-      className={`flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-zinc-950 ${
+      className={`flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm ${
         urgent
-          ? "border-red-200 dark:border-red-900/60"
-          : "border-zinc-200 dark:border-zinc-800"
+          ? "border-red-200"
+          : "border-zinc-200"
       }`}
     >
       {/* Header */}
       <div
         className={`flex items-center justify-between border-b px-4 py-3 ${
           urgent
-            ? "border-red-100 dark:border-red-900/40"
-            : "border-zinc-100 dark:border-zinc-800"
+            ? "border-red-100"
+            : "border-zinc-100"
         }`}
       >
         <div className="min-w-0">
-          <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+          <p className="text-base font-semibold text-zinc-900">
             Table {table}
           </p>
-          <p className={`mt-0.5 text-xs ${urgent ? "font-semibold text-red-600 dark:text-red-400" : "text-zinc-400 dark:text-zinc-500"}`}>
+          <p className={`mt-0.5 text-xs ${urgent ? "font-semibold text-red-600" : "text-zinc-400"}`}>
             {inv?.invoice_number} · {elapsed(o.created_at, now)} ago
           </p>
         </div>
@@ -89,16 +89,16 @@ function OrderCard({ o, now }: { o: KitchenOrder; now: number }) {
       </div>
 
       {/* Items */}
-      <div className="flex-1 divide-y divide-zinc-100 px-4 dark:divide-zinc-800/60">
+      <div className="flex-1 divide-y divide-zinc-100 px-4">
         {items.length === 0 ? (
-          <p className="py-4 text-sm text-zinc-400 dark:text-zinc-500">No items</p>
+          <p className="py-4 text-sm text-zinc-400">No items</p>
         ) : (
           items.map((it) => (
             <div key={it.id} className="flex items-center justify-between gap-3 py-3">
-              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+              <span className="text-sm font-medium text-zinc-800">
                 {it.product_name}
               </span>
-              <span className="shrink-0 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-0.5 text-sm font-bold tabular-nums text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">
+              <span className="shrink-0 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-0.5 text-sm font-bold tabular-nums text-zinc-900">
                 ×{Number(it.quantity).toLocaleString("en-PK", { maximumFractionDigits: 2 })}
               </span>
             </div>
@@ -107,7 +107,7 @@ function OrderCard({ o, now }: { o: KitchenOrder; now: number }) {
       </div>
 
       {/* Action */}
-      <div className="border-t border-zinc-100 p-4 dark:border-zinc-800">
+      <div className="border-t border-zinc-100 p-4">
         <QuickStatusButton
           invoiceId={o.invoice_id}
           nextStatus={isNew ? "preparing" : "ready"}
@@ -122,8 +122,8 @@ function OrderCard({ o, now }: { o: KitchenOrder; now: number }) {
 
 function EmptyColumn({ message }: { message: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-zinc-200 px-4 py-8 text-center dark:border-zinc-800">
-      <p className="text-sm text-zinc-400 dark:text-zinc-500">{message}</p>
+    <div className="rounded-2xl border border-dashed border-zinc-200 px-4 py-8 text-center">
+      <p className="text-sm text-zinc-400">{message}</p>
     </div>
   );
 }
@@ -149,11 +149,11 @@ export function KitchenBoardClient({ orders }: { orders: KitchenOrder[] }) {
   const preparingOrders = filtered.filter((o) => o.status === "preparing");
 
   const inputCls =
-    "rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50";
+    "rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:ring-2";
 
   const pillBase = "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors";
-  const pillActive = "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900";
-  const pillInactive = "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800";
+  const pillActive = "bg-zinc-900 text-white";
+  const pillInactive = "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50";
 
   const hasFilter = tableQ !== "" || statusF !== "all" || minAge > 0;
 
@@ -214,19 +214,19 @@ export function KitchenBoardClient({ orders }: { orders: KitchenOrder[] }) {
         )}
 
         {/* Count */}
-        <span className="ml-auto text-xs tabular-nums text-zinc-400 dark:text-zinc-500">
+        <span className="ml-auto text-xs tabular-nums text-zinc-400">
           {filtered.length} / {orders.length} orders
         </span>
       </div>
 
       {/* Board */}
       {filtered.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-zinc-200 py-14 text-center dark:border-zinc-800">
-          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+        <div className="mt-6 rounded-2xl border border-dashed border-zinc-200 py-14 text-center">
+          <p className="text-sm font-medium text-zinc-500">
             {orders.length === 0 ? "All clear — no orders in the kitchen." : "No orders match your filters."}
           </p>
           {orders.length === 0 && (
-            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+            <p className="mt-1 text-xs text-zinc-400">
               New orders will appear here automatically.
             </p>
           )}
@@ -237,11 +237,11 @@ export function KitchenBoardClient({ orders }: { orders: KitchenOrder[] }) {
           {statusF !== "preparing" && (
             <div className="space-y-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
                   New orders
                 </span>
                 {newOrders.length > 0 && (
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">
                     {newOrders.length}
                   </span>
                 )}
@@ -258,11 +258,11 @@ export function KitchenBoardClient({ orders }: { orders: KitchenOrder[] }) {
           {statusF !== "new" && (
             <div className="space-y-2.5">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+                <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
                   Preparing
                 </span>
                 {preparingOrders.length > 0 && (
-                  <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-800 dark:bg-sky-950 dark:text-sky-200">
+                  <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-800">
                     {preparingOrders.length}
                   </span>
                 )}

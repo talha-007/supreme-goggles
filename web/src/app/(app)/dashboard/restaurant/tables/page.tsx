@@ -32,37 +32,37 @@ export default async function RestaurantTablesPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Table management</h1>
-      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Create and manage dine-in tables.</p>
+      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Table management</h1>
+      <p className="mt-1 text-sm text-zinc-600">Create and manage dine-in tables.</p>
 
-      <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-4">
         <RestaurantTableCreateForm />
       </div>
 
-      {error ? <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error.message}</p> : null}
+      {error ? <p className="mt-4 text-sm text-red-600">{error.message}</p> : null}
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-600">
             <tr>
               <th className="px-4 py-3">Table</th>
               <th className="px-4 py-3">Seats</th>
               <th className="px-4 py-3">Active</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tbody className="divide-y divide-zinc-200">
             {tables.length === 0 ? (
               <tr>
-                <td colSpan={3} className="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">
+                <td colSpan={3} className="px-4 py-8 text-center text-zinc-500">
                   No tables yet.
                 </td>
               </tr>
             ) : (
               tables.map((t) => (
                 <tr key={t.id}>
-                  <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-50">{t.name}</td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{t.seats}</td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{t.is_active ? "Yes" : "No"}</td>
+                  <td className="px-4 py-3 font-medium text-zinc-900">{t.name}</td>
+                  <td className="px-4 py-3 text-zinc-700">{t.seats}</td>
+                  <td className="px-4 py-3 text-zinc-700">{t.is_active ? "Yes" : "No"}</td>
                 </tr>
               ))
             )}

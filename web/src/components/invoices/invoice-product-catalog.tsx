@@ -16,11 +16,11 @@ function categoryLabel(key: string, t: (k: string) => string) {
 
 function tagClassForCategory(name: string): string {
   const palette = [
-    "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-    "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
-    "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-    "bg-rose-100 text-rose-900 dark:bg-rose-950 dark:text-rose-200",
-    "bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200",
+    "bg-brand-100 text-brand-900",
+    "bg-sky-100 text-sky-900",
+    "bg-amber-100 text-amber-900",
+    "bg-rose-100 text-rose-900",
+    "bg-violet-100 text-violet-900",
   ];
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h + name.charCodeAt(i) * (i + 1)) % palette.length;
@@ -125,13 +125,13 @@ export function InvoiceProductCatalog({ products, onPick }: Props) {
   }, [products, categoryKey, brandKey, q]);
 
   return (
-    <div className="overflow-visible rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950 sm:p-5">
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
+    <div className="overflow-visible rounded-xl border border-zinc-200 bg-white p-4 sm:p-5">
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-2 border-b border-zinc-100 pb-3">
         <div>
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{tp("catalogTitle")}</h2>
-          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{tp("posTopSearchHint")}</p>
+          <h2 className="text-sm font-semibold text-zinc-900">{tp("catalogTitle")}</h2>
+          <p className="mt-0.5 text-xs text-zinc-500">{tp("posTopSearchHint")}</p>
         </div>
-        <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-800 dark:bg-blue-950/50 dark:text-blue-200">
+        <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-800">
           {tp("openSale")}
         </span>
       </div>
@@ -174,7 +174,7 @@ export function InvoiceProductCatalog({ products, onPick }: Props) {
           onChange={(e) => setQ(e.target.value)}
           placeholder={tp("searchPlaceholder")}
           autoComplete="off"
-          className="min-h-[40px] w-full rounded-xl border border-zinc-200 bg-zinc-50/80 py-2 pl-9 pr-3 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:bg-white focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:bg-zinc-950"
+          className="min-h-[40px] w-full rounded-xl border border-zinc-200 bg-zinc-50/80 py-2 pl-9 pr-3 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:bg-white focus:ring-2"
         />
       </div>
 
@@ -192,11 +192,11 @@ export function InvoiceProductCatalog({ products, onPick }: Props) {
                 onClick={() => onPick(p)}
                 className={`group flex touch-manipulation flex-col overflow-hidden rounded-2xl border text-left transition active:scale-[0.98] ${
                   out
-                    ? "cursor-not-allowed border-zinc-200 opacity-60 dark:border-zinc-800"
-                    : "border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700"
+                    ? "cursor-not-allowed border-zinc-200 opacity-60"
+                    : "border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md"
                 }`}
               >
-                <div className="relative aspect-[4/3] w-full bg-zinc-100 dark:bg-zinc-800">
+                <div className="relative aspect-[4/3] w-full bg-zinc-100">
                   {p.image_url ? (
                     <Image
                       src={p.image_url}
@@ -212,7 +212,7 @@ export function InvoiceProductCatalog({ products, onPick }: Props) {
                   )}
                 </div>
                 <div className="flex flex-1 flex-col gap-0.5 p-2">
-                  <span className="line-clamp-2 text-xs font-medium leading-snug text-zinc-900 dark:text-zinc-50">
+                  <span className="line-clamp-2 text-xs font-medium leading-snug text-zinc-900">
                     {p.name}
                   </span>
                   <div className="flex flex-wrap gap-1">
@@ -222,15 +222,15 @@ export function InvoiceProductCatalog({ products, onPick }: Props) {
                       {cat}
                     </span>
                     {br ? (
-                      <span className="inline-flex w-fit rounded border border-zinc-200 bg-zinc-100 px-1 py-0.5 text-[9px] font-medium text-zinc-700 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                      <span className="inline-flex w-fit rounded border border-zinc-200 bg-zinc-100 px-1 py-0.5 text-[9px] font-medium text-zinc-700">
                         {br}
                       </span>
                     ) : null}
                   </div>
-                  <span className="mt-auto pt-0.5 text-right text-xs font-semibold tabular-nums text-blue-700 dark:text-blue-300">
+                  <span className="mt-auto pt-0.5 text-right text-xs font-semibold tabular-nums text-blue-700">
                     {pkr.format(p.sale_price)}
                   </span>
-                  <span className="text-[9px] leading-tight text-zinc-500 dark:text-zinc-400">
+                  <span className="text-[9px] leading-tight text-zinc-500">
                     {tp("stockLine", {
                       qty: p.current_stock.toLocaleString(intlLocaleTag(locale), {
                         minimumFractionDigits: 0,
@@ -245,7 +245,7 @@ export function InvoiceProductCatalog({ products, onPick }: Props) {
           })}
         </div>
         {filteredGrid.length === 0 ? (
-          <p className="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">{tp("noProducts")}</p>
+          <p className="py-8 text-center text-sm text-zinc-500">{tp("noProducts")}</p>
         ) : null}
       </div>
     </div>

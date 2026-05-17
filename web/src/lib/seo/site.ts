@@ -1,4 +1,11 @@
-import { BRAND_DOMAIN, BRAND_FAVICON, BRAND_LOGO, BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
+import {
+  BRAND_DOMAIN,
+  BRAND_FAVICON,
+  BRAND_LOGO,
+  BRAND_NAME,
+  BRAND_PRIMARY_HEX,
+  BRAND_TAGLINE,
+} from "@/lib/brand";
 import type { Metadata } from "next";
 
 /**
@@ -71,6 +78,7 @@ export function buildRootMetadata(): Metadata {
       index: true,
       follow: true,
     },
+    themeColor: BRAND_PRIMARY_HEX,
     ...(verification ? { verification } : {}),
   };
 }

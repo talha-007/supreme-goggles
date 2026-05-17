@@ -97,14 +97,14 @@ export function AdminSubscriptionTable({ initialRows }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <label className="text-sm text-zinc-600 dark:text-zinc-400">
+        <label className="text-sm text-zinc-600">
           <span className="sr-only">{t("searchLabel")}</span>
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="w-full max-w-md rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-900"
+            className="w-full max-w-md rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm"
           />
         </label>
         <p className="text-sm text-zinc-500">
@@ -113,14 +113,14 @@ export function AdminSubscriptionTable({ initialRows }: Props) {
       </div>
 
       {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {error}
         </p>
       ) : null}
 
-      <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
         <table className="w-full min-w-[880px] text-left text-sm">
-          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600">
             <tr>
               <th className="px-4 py-3">{t("colBusiness")}</th>
               <th className="px-4 py-3">{t("colType")}</th>
@@ -129,20 +129,20 @@ export function AdminSubscriptionTable({ initialRows }: Props) {
               <th className="px-4 py-3">{t("colCreated")}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tbody className="divide-y divide-zinc-200">
             {filtered.map((row) => (
               <tr key={row.id}>
                 <td className="px-4 py-3">
-                  <span className="font-medium text-zinc-900 dark:text-zinc-50">{row.name}</span>
+                  <span className="font-medium text-zinc-900">{row.name}</span>
                   <p className="mt-0.5 font-mono text-xs text-zinc-500">{row.id}</p>
                 </td>
-                <td className="px-4 py-3 capitalize text-zinc-700 dark:text-zinc-300">{row.type}</td>
+                <td className="px-4 py-3 capitalize text-zinc-700">{row.type}</td>
                 <td className="px-4 py-3">
                   <select
                     value={canonicalSubscriptionStatus(row.subscription_status)}
                     disabled={pending}
                     onChange={(e) => onStatusChange(row.id, e.target.value)}
-                    className="w-full max-w-[11rem] rounded-lg border border-zinc-300 bg-white px-2 py-1.5 text-sm dark:border-zinc-600 dark:bg-zinc-900"
+                    className="w-full max-w-[11rem] rounded-lg border border-zinc-300 bg-white px-2 py-1.5 text-sm"
                     aria-label={t("colSubscription")}
                   >
                     {SUBSCRIPTION_STATUSES.map((s) => (
@@ -153,7 +153,7 @@ export function AdminSubscriptionTable({ initialRows }: Props) {
                   </select>
                 </td>
                 <td className="px-4 py-3 align-top">
-                  <p className="tabular-nums text-zinc-700 dark:text-zinc-300">
+                  <p className="tabular-nums text-zinc-700">
                     {formatEnds(row.subscription_ends_at)}
                   </p>
                   <div className="mt-2 flex max-w-[14rem] flex-col gap-1 sm:flex-row sm:items-center">
@@ -164,20 +164,20 @@ export function AdminSubscriptionTable({ initialRows }: Props) {
                       onChange={(e) =>
                         setEndInputs((prev) => ({ ...prev, [row.id]: e.target.value }))
                       }
-                      className="w-full rounded-lg border border-zinc-300 bg-white px-2 py-1.5 text-xs dark:border-zinc-600 dark:bg-zinc-900"
+                      className="w-full rounded-lg border border-zinc-300 bg-white px-2 py-1.5 text-xs"
                       aria-label={t("colSubscriptionEnds")}
                     />
                     <button
                       type="button"
                       disabled={pending}
                       onClick={() => saveEndDate(row.id)}
-                      className="shrink-0 rounded-lg border border-zinc-300 px-2 py-1.5 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-600 dark:hover:bg-zinc-800"
+                      className="shrink-0 rounded-lg border border-zinc-300 px-2 py-1.5 text-xs font-medium hover:bg-zinc-50"
                     >
                       {tc("save")}
                     </button>
                   </div>
                 </td>
-                <td className="px-4 py-3 tabular-nums text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-3 tabular-nums text-zinc-600">
                   {new Date(row.created_at).toLocaleString()}
                 </td>
               </tr>

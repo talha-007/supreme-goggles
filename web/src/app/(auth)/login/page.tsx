@@ -34,25 +34,25 @@ export default async function LoginPage({
   const androidAppUrl = getAndroidAppUrl();
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
+      <h1 className="text-xl font-semibold tracking-tight text-zinc-900">
         {t("signInTitle")}
       </h1>
-      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("signInSubtitle")}</p>
+      <p className="mt-1 text-sm text-zinc-600">{t("signInSubtitle")}</p>
       {params.error === "auth" ? (
-        <p className="mt-4 text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="mt-4 text-sm text-red-600" role="alert">
           {params.reason === "crossdevice"
             ? t("pkceError")
             : t("authError", { callback: t("callbackPath") })}
         </p>
       ) : null}
       {params.error === "oauth" && params.details ? (
-        <p className="mt-4 text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="mt-4 text-sm text-red-600" role="alert">
           {params.details}
         </p>
       ) : null}
       {params.reset === "1" || params.reset === "success" ? (
-        <p className="mt-4 text-sm text-emerald-700 dark:text-emerald-400" role="status">
+        <p className="mt-4 text-sm text-brand-700" role="status">
           {t("loginAfterReset")}
         </p>
       ) : null}
@@ -60,9 +60,9 @@ export default async function LoginPage({
         <LoginForm />
       </div>
       {androidAppUrl ? (
-        <div className="mt-6 border-t border-zinc-200 pt-5 text-center dark:border-zinc-700">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            <AndroidAppDownloadLink className="font-semibold text-emerald-700 decoration-emerald-600/30 hover:underline dark:text-emerald-400">
+        <div className="mt-6 border-t border-zinc-200 pt-5 text-center">
+          <p className="text-xs text-zinc-500">
+            <AndroidAppDownloadLink className="font-semibold text-brand-700 decoration-brand-600/30 hover:underline">
               {t("downloadAndroidApp")}
             </AndroidAppDownloadLink>
           </p>

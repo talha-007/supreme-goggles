@@ -116,12 +116,12 @@ export function SignupForm() {
             setMessage(null);
           }}
         />
-        <p className="text-center text-xs text-zinc-500 dark:text-zinc-400" aria-hidden>
+        <p className="text-center text-xs text-zinc-500" aria-hidden>
           {t("continueWithEmail")}
         </p>
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="email" className="text-sm font-medium text-zinc-700">
           {t("email")}
         </label>
         <input
@@ -135,20 +135,20 @@ export function SignupForm() {
             setFieldStarted((f) => ({ ...f, email: true }));
           }}
           onBlur={() => setFieldStarted((f) => ({ ...f, email: true }))}
-          className={`rounded-lg border bg-white px-3 py-2 text-zinc-900 outline-none focus:ring-2 dark:bg-zinc-900 dark:text-zinc-50 ${
+          className={`rounded-lg border bg-white px-3 py-2 text-zinc-900 outline-none focus:ring-2 ${
             emailFieldError
-              ? "border-red-500 focus:ring-red-400/40 dark:border-red-500/80"
-              : "border-zinc-200 dark:border-zinc-700"
+              ? "border-red-500 focus:ring-red-400/40"
+              : "border-zinc-200"
           }`}
         />
         {emailFieldError ? (
-          <p className="text-sm text-red-600 dark:text-red-400" role="status" aria-live="polite">
+          <p className="text-sm text-red-600" role="status" aria-live="polite">
             {emailFieldError}
           </p>
         ) : null}
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="password" className="text-sm font-medium text-zinc-700">
           {t("password")}
         </label>
         <AuthPasswordField
@@ -168,31 +168,31 @@ export function SignupForm() {
         />
         <PasswordRuleChecklist status={rules} />
         {passwordFieldError ? (
-          <p className="text-sm text-red-600 dark:text-red-400" role="status" aria-live="polite">
+          <p className="text-sm text-red-600" role="status" aria-live="polite">
             {passwordFieldError}
           </p>
         ) : null}
       </div>
       {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {error}
         </p>
       ) : null}
       {message ? (
-        <p className="text-sm text-emerald-700 dark:text-emerald-400" role="status">
+        <p className="text-sm text-brand-700" role="status">
           {message}
         </p>
       ) : null}
       <button
         type="submit"
         disabled={loading}
-        className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+        className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
       >
         {loading ? t("creatingAccount") : t("createAccount")}
       </button>
-      <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-center text-sm text-zinc-600">
         {t("hasAccount")}{" "}
-        <Link href="/login" className="font-medium text-zinc-900 underline dark:text-zinc-100">
+        <Link href="/login" className="font-medium text-zinc-900 underline">
           {t("signIn")}
         </Link>
       </p>

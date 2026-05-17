@@ -83,15 +83,15 @@ export default async function ExpensesPage({
     <div className="mx-auto max-w-6xl">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
             {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("subtitle")}</p>
+          <p className="mt-1 text-sm text-zinc-600">{t("subtitle")}</p>
         </div>
         {canEdit ? (
           <Link
             href="/dashboard/expenses/new"
-            className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+            className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800"
           >
             {t("addExpense")}
           </Link>
@@ -112,8 +112,8 @@ export default async function ExpensesPage({
                 scroll={false}
                 className={
                   active
-                    ? "rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
-                    : "rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                    ? "rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white"
+                    : "rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
                 }
               >
                 {tDashboard(periodLabelKey(p))}
@@ -124,38 +124,38 @@ export default async function ExpensesPage({
       </div>
 
       {error || salesError ? (
-        <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error?.message ?? salesError?.message}</p>
+        <p className="mt-4 text-sm text-red-600">{error?.message ?? salesError?.message}</p>
       ) : null}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{t("statSales")}</p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{pkr.format(periodSalesTotal)}</p>
+        <div className="rounded-xl border border-zinc-200 bg-white p-4">
+          <p className="text-xs uppercase tracking-wide text-zinc-500">{t("statSales")}</p>
+          <p className="mt-1 text-2xl font-semibold text-zinc-900">{pkr.format(periodSalesTotal)}</p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{t("statExpenses")}</p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{pkr.format(periodExpenseTotal)}</p>
+        <div className="rounded-xl border border-zinc-200 bg-white p-4">
+          <p className="text-xs uppercase tracking-wide text-zinc-500">{t("statExpenses")}</p>
+          <p className="mt-1 text-2xl font-semibold text-zinc-900">{pkr.format(periodExpenseTotal)}</p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{t("statNet")}</p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{pkr.format(periodNet)}</p>
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{t("statNetHint", { margin: margin.toFixed(1) })}</p>
+        <div className="rounded-xl border border-zinc-200 bg-white p-4">
+          <p className="text-xs uppercase tracking-wide text-zinc-500">{t("statNet")}</p>
+          <p className="mt-1 text-2xl font-semibold text-zinc-900">{pkr.format(periodNet)}</p>
+          <p className="mt-1 text-xs text-zinc-500">{t("statNetHint", { margin: margin.toFixed(1) })}</p>
         </div>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white">
         {expenses.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="px-4 py-8 text-center text-sm text-zinc-500">
             {t("empty")}{" "}
             {canEdit ? (
-              <Link href="/dashboard/expenses/new" className="font-medium text-zinc-900 underline dark:text-zinc-100">
+              <Link href="/dashboard/expenses/new" className="font-medium text-zinc-900 underline">
                 {t("addOne")}
               </Link>
             ) : null}
           </p>
         ) : (
           <table className="w-full min-w-[760px] text-left text-sm">
-            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600">
               <tr>
                 <th className="px-4 py-3">{t("colDate")}</th>
                 <th className="px-4 py-3">{t("colCategory")}</th>
@@ -165,15 +165,15 @@ export default async function ExpensesPage({
                 <th className="px-4 py-3 text-right">{tc("total")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            <tbody className="divide-y divide-zinc-200">
               {expenses.map((row) => (
-                <tr key={row.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{row.expense_date}</td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{row.category}</td>
-                  <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-50">{row.description}</td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{row.vendor_name ?? tc("dash")}</td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{row.payment_method ?? tc("dash")}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-zinc-900 dark:text-zinc-50">
+                <tr key={row.id} className="hover:bg-zinc-50">
+                  <td className="px-4 py-3 text-zinc-700">{row.expense_date}</td>
+                  <td className="px-4 py-3 text-zinc-700">{row.category}</td>
+                  <td className="px-4 py-3 font-medium text-zinc-900">{row.description}</td>
+                  <td className="px-4 py-3 text-zinc-700">{row.vendor_name ?? tc("dash")}</td>
+                  <td className="px-4 py-3 text-zinc-700">{row.payment_method ?? tc("dash")}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-zinc-900">
                     {pkr.format(Number(row.amount || 0))}
                   </td>
                 </tr>

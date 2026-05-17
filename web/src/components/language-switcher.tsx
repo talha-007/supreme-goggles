@@ -23,13 +23,13 @@ export function LanguageSwitcher({ locale, languageLabel }: LanguageSwitcherProp
   }
 
   return (
-    <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+    <label className="flex items-center gap-2 text-sm text-zinc-600">
       <span className="hidden sm:inline">{languageLabel}</span>
       <select
         value={locale}
         onChange={onChange}
         disabled={pending}
-        className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+        className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
         aria-label={languageLabel}
       >
         <option value="en">English</option>

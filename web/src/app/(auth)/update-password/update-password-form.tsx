@@ -69,17 +69,17 @@ export function UpdatePasswordForm() {
   }
 
   if (ready === "check") {
-    return <p className="text-sm text-zinc-600 dark:text-zinc-400">Loading…</p>;
+    return <p className="text-sm text-zinc-600">Loadingâ€¦</p>;
   }
 
   if (ready === "no") {
     return (
-      <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+      <p className="text-sm text-red-600" role="alert">
         {t("updatePasswordNoSession")}{" "}
         <Link href="/forgot-password" className="font-medium underline">
           {t("forgotPasswordTitle")}
         </Link>
-        {" · "}
+        {" Â· "}
         <Link href="/login" className="font-medium underline">
           {t("signIn")}
         </Link>
@@ -90,12 +90,12 @@ export function UpdatePasswordForm() {
   if (success) {
     return (
       <div className="flex flex-col gap-4">
-        <p className="text-sm text-emerald-700 dark:text-emerald-400" role="status">
+        <p className="text-sm text-brand-700" role="status">
           {t("updatePasswordSuccess")}
         </p>
         <Link
           href="/login?reset=1"
-          className="rounded-lg bg-zinc-900 px-4 py-2.5 text-center text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+          className="rounded-lg bg-zinc-900 px-4 py-2.5 text-center text-sm font-medium text-white"
         >
           {t("updatePasswordGoToLogin")}
         </Link>
@@ -105,11 +105,11 @@ export function UpdatePasswordForm() {
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">{t("updatePasswordSubtitle")}</p>
+      <p className="text-sm text-zinc-600">{t("updatePasswordSubtitle")}</p>
       <div>
         <label
           htmlFor="new-password"
-          className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+          className="text-sm font-medium text-zinc-700"
         >
           {t("password")}
         </label>
@@ -132,20 +132,20 @@ export function UpdatePasswordForm() {
         </div>
         <PasswordRuleChecklist status={rules} />
         {passwordError ? (
-          <p id="new-pw-err" className="mt-2 text-sm text-red-600 dark:text-red-400" role="status">
+          <p id="new-pw-err" className="mt-2 text-sm text-red-600" role="status">
             {passwordError}
           </p>
         ) : null}
       </div>
       {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {error}
         </p>
       ) : null}
       <button
         type="submit"
         disabled={loading}
-        className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+        className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
       >
         {loading ? t("updatePasswordSaving") : t("updatePasswordSave")}
       </button>

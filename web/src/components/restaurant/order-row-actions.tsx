@@ -30,7 +30,7 @@ export function WaiterAssignSelect({
           router.refresh();
         })
       }
-      className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+      className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-xs"
     >
       <option value="">Unassigned</option>
       {waiters.map((w) => (
@@ -44,12 +44,12 @@ export function WaiterAssignSelect({
 
 const variantClasses: Record<string, string> = {
   default:
-    "border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200",
+    "border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50",
   amber:
-    "border-0 bg-amber-400 text-amber-950 hover:bg-amber-500 dark:bg-amber-500 dark:text-amber-950 dark:hover:bg-amber-400",
+    "border-0 bg-amber-400 text-amber-950 hover:bg-amber-500",
   green:
-    "border-0 bg-emerald-500 text-white hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500",
-  blue: "border-0 bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500",
+    "border-0 bg-brand-500 text-white hover:bg-brand-600",
+  blue: "border-0 bg-blue-500 text-white hover:bg-blue-600",
 };
 
 export function QuickStatusButton({
@@ -93,7 +93,7 @@ export function QuickStatusButton({
         .filter(Boolean)
         .join(" ")}
     >
-      {pending ? "Updating…" : label}
+      {pending ? "Updatingâ€¦" : label}
     </button>
   );
 }

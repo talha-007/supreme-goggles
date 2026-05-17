@@ -40,7 +40,7 @@ export function InvoiceReverseButton({ invoiceId, compact = false, className }: 
   }
 
   const baseBtn =
-    "rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-100 disabled:opacity-50 dark:border-red-800 dark:bg-red-950/40 dark:text-red-100 dark:hover:bg-red-950/70";
+    "rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-100 disabled:opacity-50";
 
   const button = (
     <button
@@ -74,7 +74,7 @@ export function InvoiceReverseButton({ invoiceId, compact = false, className }: 
         {button}
         {dialog}
         {error ? (
-          <p className="max-w-xs text-xs text-red-600 dark:text-red-400" role="alert">
+          <p className="max-w-xs text-xs text-red-600" role="alert">
             {error}
           </p>
         ) : null}
@@ -86,9 +86,9 @@ export function InvoiceReverseButton({ invoiceId, compact = false, className }: 
     <div className="flex flex-col gap-2">
       {button}
       {dialog}
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">{t("reverseHelp")}</p>
+      <p className="text-xs text-zinc-500">{t("reverseHelp")}</p>
       {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {error}
         </p>
       ) : null}

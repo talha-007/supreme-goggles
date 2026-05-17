@@ -15,18 +15,18 @@ export default async function NewExpensePage() {
       <div className="mb-6">
         <Link
           href="/dashboard/expenses"
-          className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+          className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
         >
           ← Expenses
         </Link>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900">
           Add expense
         </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-1 text-sm text-zinc-600">
           Track daily operating costs for this business.
         </p>
       </div>
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="rounded-xl border border-zinc-200 bg-white p-6">
         <ExpenseCreateForm />
       </div>
     </div>

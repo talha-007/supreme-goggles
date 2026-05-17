@@ -21,8 +21,8 @@ export function OrderAlertToggle({
         className={[
           "flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
           soundOn
-            ? "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-            : "border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500",
+            ? "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
+            : "border-zinc-200 bg-zinc-100 text-zinc-400",
         ].join(" ")}
       >
         {soundOn ? (
@@ -44,7 +44,7 @@ export function OrderAlertToggle({
           type="button"
           onClick={testSound}
           title="Play test sound"
-          className="rounded-lg border border-zinc-200 bg-white p-2 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+          className="rounded-lg border border-zinc-200 bg-white p-2 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800"
         >
           <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
             <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM9.555 7.168A1 1 0 0 0 8 8v4a1 1 0 0 0 1.555.832l3-2a1 1 0 0 0 0-1.664l-3-2Z" clipRule="evenodd" />

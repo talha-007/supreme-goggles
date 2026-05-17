@@ -30,7 +30,7 @@ const PIE_COLORS = [
 
 type Props = {
   snapshot: SalesSnapshot;
-  /** BCP 47 tag (same as server `intlLocaleTag`) — used to build currency formatters on the client. */
+  /** BCP 47 tag (same as server `intlLocaleTag`) â€” used to build currency formatters on the client. */
   intlLocale: string;
   labels: {
     dailyTitle: string;
@@ -66,7 +66,7 @@ export function SalesAnalyticsCharts({ snapshot, intlLocale, labels }: Props) {
         const displayName = p.isOther
           ? labels.otherSlice
           : p.name.length > 32
-            ? `${p.name.slice(0, 30)}…`
+            ? `${p.name.slice(0, 30)}â€¦`
             : p.name;
         return {
           key: p.isOther ? "__other__" : `p-${i}-${p.name}`,
@@ -81,13 +81,13 @@ export function SalesAnalyticsCharts({ snapshot, intlLocale, labels }: Props) {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{labels.dailyTitle}</h2>
-        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{labels.dailySubtitle}</p>
+      <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+        <h2 className="text-sm font-semibold text-zinc-900">{labels.dailyTitle}</h2>
+        <p className="mt-1 text-xs text-zinc-500">{labels.dailySubtitle}</p>
         <div className="mt-4 h-[280px] w-full min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={lineData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-200 dark:stroke-zinc-800" />
+              <CartesianGrid strokeDasharray="3 3" className="stroke-zinc-200" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} className="text-zinc-500" interval="preserveStartEnd" />
               <YAxis
                 tick={{ fontSize: 11 }}
@@ -118,9 +118,9 @@ export function SalesAnalyticsCharts({ snapshot, intlLocale, labels }: Props) {
       </div>
 
       {pieData.length > 0 ? (
-        <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{labels.topProductsTitle}</h2>
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{labels.topProductsSubtitle}</p>
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+          <h2 className="text-sm font-semibold text-zinc-900">{labels.topProductsTitle}</h2>
+          <p className="mt-1 text-xs text-zinc-500">{labels.topProductsSubtitle}</p>
           <div className="mt-4 h-[min(420px,70vh)] w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
@@ -157,7 +157,7 @@ export function SalesAnalyticsCharts({ snapshot, intlLocale, labels }: Props) {
                         <p className="font-medium text-zinc-50">{p.name}</p>
                         <p className="mt-0.5 text-zinc-300">
                           {labels.revenue}{" "}
-                          <span className="text-emerald-400">{formatMoney(v)}</span> (
+                          <span className="text-brand-400">{formatMoney(v)}</span> (
                           {pct.toFixed(1)}% of line revenue)
                         </p>
                         <p className="text-zinc-500">
@@ -174,7 +174,7 @@ export function SalesAnalyticsCharts({ snapshot, intlLocale, labels }: Props) {
                   verticalAlign="bottom"
                   wrapperStyle={{ fontSize: 10, lineHeight: 1.3 }}
                   formatter={(value) => (
-                    <span className="text-zinc-700 dark:text-zinc-300">{String(value)}</span>
+                    <span className="text-zinc-700">{String(value)}</span>
                   )}
                 />
               </PieChart>

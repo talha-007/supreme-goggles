@@ -20,7 +20,7 @@ export function WhatsappSettingsForm({ initial, canEdit }: Props) {
   return (
     <form action={action} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <label htmlFor="whatsapp_phone_e164" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="whatsapp_phone_e164" className="text-sm font-medium text-zinc-700">
           {t("phoneLabel")}
         </label>
         <input
@@ -30,14 +30,14 @@ export function WhatsappSettingsForm({ initial, canEdit }: Props) {
           placeholder={t("phonePlaceholder")}
           defaultValue={initial.whatsapp_phone_e164 ?? ""}
           disabled={!canEdit}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60"
         />
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">{t("phoneHint")}</p>
+        <p className="text-xs text-zinc-500">{t("phoneHint")}</p>
       </div>
 
       <fieldset disabled={!canEdit} className="flex flex-col gap-3">
-        <legend className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t("whatToSend")}</legend>
-        <label className="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200">
+        <legend className="text-sm font-medium text-zinc-700">{t("whatToSend")}</legend>
+        <label className="flex items-center gap-2 text-sm text-zinc-800">
           <input
             type="checkbox"
             name="whatsapp_notify_daily"
@@ -46,7 +46,7 @@ export function WhatsappSettingsForm({ initial, canEdit }: Props) {
           />
           {t("notifyDaily")}
         </label>
-        <label className="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200">
+        <label className="flex items-center gap-2 text-sm text-zinc-800">
           <input
             type="checkbox"
             name="whatsapp_notify_low_stock"
@@ -55,7 +55,7 @@ export function WhatsappSettingsForm({ initial, canEdit }: Props) {
           />
           {t("notifyLowStock")}
         </label>
-        <label className="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200">
+        <label className="flex items-center gap-2 text-sm text-zinc-800">
           <input
             type="checkbox"
             name="whatsapp_notify_po"
@@ -64,7 +64,7 @@ export function WhatsappSettingsForm({ initial, canEdit }: Props) {
           />
           {t("notifyPo")}
         </label>
-        <label className="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200">
+        <label className="flex items-center gap-2 text-sm text-zinc-800">
           <input
             type="checkbox"
             name="whatsapp_notify_receive"
@@ -79,16 +79,16 @@ export function WhatsappSettingsForm({ initial, canEdit }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="w-fit rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+          className="w-fit rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
         >
           {pending ? tc("saving") : t("saveButton")}
         </button>
       ) : (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">{tc("onlyOwnersManagers")}</p>
+        <p className="text-sm text-zinc-500">{tc("onlyOwnersManagers")}</p>
       )}
 
       {state.error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {state.error}
         </p>
       ) : null}

@@ -30,23 +30,23 @@ export default async function NewPurchaseOrderPage() {
       <div className="mb-6">
         <Link
           href="/dashboard/purchase-orders"
-          className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+          className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
         >
           {t("backLink")}
         </Link>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900">
           {t("pageNewTitle")}
         </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("newSubtitle")}</p>
+        <p className="mt-1 text-sm text-zinc-600">{t("newSubtitle")}</p>
       </div>
 
       {error ? (
-        <p className="mb-4 text-sm text-amber-700 dark:text-amber-300">
+        <p className="mb-4 text-sm text-amber-700">
           {t("loadSuppliersError", { error })}
         </p>
       ) : null}
 
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="rounded-xl border border-zinc-200 bg-white p-6">
         <PoEditor
           products={(products ?? []).map((p) => ({
             id: p.id,

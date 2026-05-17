@@ -44,13 +44,13 @@ export default async function RestaurantStaffPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Restaurant staff</h1>
-      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Add staff and create login accounts with role-based access.</p>
+      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Restaurant staff</h1>
+      <p className="mt-1 text-sm text-zinc-600">Add staff and create login accounts with role-based access.</p>
       <StaffAccountCreateForm />
-      {error ? <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error.message}</p> : null}
-      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      {error ? <p className="mt-4 text-sm text-red-600">{error.message}</p> : null}
+      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-600">
             <tr>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Role</th>
@@ -61,20 +61,20 @@ export default async function RestaurantStaffPage() {
               <th className="px-4 py-3 text-right">Security</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tbody className="divide-y divide-zinc-200">
             {staff.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">No staff yet.</td>
+                <td colSpan={7} className="px-4 py-8 text-center text-zinc-500">No staff yet.</td>
               </tr>
             ) : (
               staff.map((s) => (
                 <tr key={s.id}>
-                  <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-50">{s.name}</td>
-                  <td className="px-4 py-3 capitalize text-zinc-700 dark:text-zinc-300">{s.role}</td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{s.phone ?? "—"}</td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{s.user_id ? (emailByUserId.get(s.user_id) ?? "—") : "—"}</td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{s.user_id ? "Linked" : "Not linked"}</td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{s.is_active ? "Yes" : "No"}</td>
+                  <td className="px-4 py-3 font-medium text-zinc-900">{s.name}</td>
+                  <td className="px-4 py-3 capitalize text-zinc-700">{s.role}</td>
+                  <td className="px-4 py-3 text-zinc-700">{s.phone ?? "—"}</td>
+                  <td className="px-4 py-3 text-zinc-700">{s.user_id ? (emailByUserId.get(s.user_id) ?? "—") : "—"}</td>
+                  <td className="px-4 py-3 text-zinc-700">{s.user_id ? "Linked" : "Not linked"}</td>
+                  <td className="px-4 py-3 text-zinc-700">{s.is_active ? "Yes" : "No"}</td>
                   <td className="px-4 py-3 text-right">
                     <StaffPasswordResetForm staffId={s.id} disabled={!s.user_id} />
                   </td>

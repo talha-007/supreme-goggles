@@ -158,7 +158,7 @@ export default function AuthCallbackPage() {
 
   return (
     <div className="flex min-h-[40vh] flex-col items-center justify-center px-4">
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">Signing you in…</p>
+      <p className="text-sm text-zinc-600">Signing you in…</p>
     </div>
   );
 }

@@ -43,19 +43,19 @@ export default async function NewProductPage({
       <div className="mb-6">
         <Link
           href="/dashboard/products"
-          className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+          className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
         >
           ← Back to products
         </Link>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-zinc-900">
           {menuMode ? "Add menu item" : "Add product"}
         </h1>
         {menuMode ? (
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-1 text-sm text-zinc-600">
             Create restaurant menu items with only menu-relevant fields.
           </p>
         ) : (
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-1 text-sm text-zinc-600">
             Stock can also be adjusted later from invoices and purchase orders. Use a barcode scanner on
             the barcode field, or open{" "}
             <Link href="/dashboard/products?scan=1" className="font-medium underline">
@@ -65,7 +65,7 @@ export default async function NewProductPage({
           </p>
         )}
       </div>
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="rounded-xl border border-zinc-200 bg-white p-6">
         <ProductCreateForm
           barcodeFromUrl={barcodeFromUrl}
           scanMode={scanMode}

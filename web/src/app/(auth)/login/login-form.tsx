@@ -134,12 +134,12 @@ export function LoginForm() {
             setServerError(msg);
           }}
         />
-        <p className="text-center text-xs text-zinc-500 dark:text-zinc-400" aria-hidden>
+        <p className="text-center text-xs text-zinc-500" aria-hidden>
           {t("continueWithEmail")}
         </p>
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="email" className="text-sm font-medium text-zinc-700">
           {t("email")}
         </label>
         <input
@@ -152,16 +152,16 @@ export function LoginForm() {
           onBlur={() => setFieldStarted((f) => ({ ...f, email: true }))}
           aria-invalid={hasEmailFormatError}
           aria-describedby={emailDescribedBy || undefined}
-          className={`rounded-lg border bg-white px-3 py-2 text-zinc-900 outline-none focus:ring-2 dark:bg-zinc-900 dark:text-zinc-50 ${
+          className={`rounded-lg border bg-white px-3 py-2 text-zinc-900 outline-none focus:ring-2 ${
             hasEmailFormatError
-              ? "border-red-500 focus:ring-red-400/40 dark:border-red-500/80"
-              : "border-zinc-200 dark:border-zinc-700"
+              ? "border-red-500 focus:ring-red-400/40"
+              : "border-zinc-200"
           }`}
         />
         {emailFieldError ? (
           <p
             id={emailErrorId}
-            className="text-sm text-red-600 dark:text-red-400"
+            className="text-sm text-red-600"
             role="status"
             aria-live="polite"
           >
@@ -170,7 +170,7 @@ export function LoginForm() {
         ) : null}
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="password" className="text-sm font-medium text-zinc-700">
           {t("password")}
         </label>
         <AuthPasswordField
@@ -191,7 +191,7 @@ export function LoginForm() {
         {passwordFieldError ? (
           <p
             id={passwordErrorId}
-            className="text-sm text-red-600 dark:text-red-400"
+            className="text-sm text-red-600"
             role="status"
             aria-live="polite"
           >
@@ -201,7 +201,7 @@ export function LoginForm() {
         <div className="flex justify-end">
           <Link
             href="/forgot-password"
-            className="text-sm font-medium text-zinc-600 underline dark:text-zinc-400"
+            className="text-sm font-medium text-zinc-600 underline"
           >
             {t("forgotPasswordLink")}
           </Link>
@@ -210,7 +210,7 @@ export function LoginForm() {
       {credentialsRejected ? (
         <p
           id={credentialsFailId}
-          className="text-sm text-amber-800 dark:text-amber-200/90"
+          className="text-sm text-amber-800"
           role="status"
           aria-live="polite"
         >
@@ -218,20 +218,20 @@ export function LoginForm() {
         </p>
       ) : null}
       {serverError ? (
-        <p id={serverErrorId} className="text-sm text-red-600 dark:text-red-400" role="alert" aria-live="assertive">
+        <p id={serverErrorId} className="text-sm text-red-600" role="alert" aria-live="assertive">
           {serverError}
         </p>
       ) : null}
       <button
         type="submit"
         disabled={loading}
-        className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+        className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
       >
         {loading ? t("signingIn") : t("signIn")}
       </button>
-      <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-center text-sm text-zinc-600">
         {t("noAccount")}{" "}
-        <Link href="/signup" className="font-medium text-zinc-900 underline dark:text-zinc-100">
+        <Link href="/signup" className="font-medium text-zinc-900 underline">
           {t("signUp")}
         </Link>
       </p>

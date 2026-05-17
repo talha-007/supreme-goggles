@@ -28,17 +28,17 @@ export function StaffPasswordResetForm({
         required
         disabled={disabled || pending}
         placeholder="New password"
-        className="w-44 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+        className="w-44 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs"
       />
       <button
         type="submit"
         disabled={disabled || pending}
-        className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-medium hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+        className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-medium hover:bg-zinc-50 disabled:opacity-50"
       >
-        {pending ? "Updating…" : "Reset password"}
+        {pending ? "Updatingâ€¦" : "Reset password"}
       </button>
-      {state.error ? <span className="w-full text-right text-xs text-red-600 dark:text-red-400">{state.error}</span> : null}
-      {state.success ? <span className="w-full text-right text-xs text-emerald-700 dark:text-emerald-300">{state.success}</span> : null}
+      {state.error ? <span className="w-full text-right text-xs text-red-600">{state.error}</span> : null}
+      {state.success ? <span className="w-full text-right text-xs text-brand-700">{state.success}</span> : null}
     </form>
   );
 }

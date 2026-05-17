@@ -1,6 +1,5 @@
-import { InvoicePdfDocument } from "@/components/invoices/invoice-pdf-document";
+import { buildInvoiceReceiptPrintHtml } from "@/lib/invoices/invoice-receipt-print-html";
 import { loadInvoicePrintPayload } from "@/lib/invoices/load-invoice-print-payload";
-import { renderToBuffer } from "@react-pdf/renderer";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -20,27 +19,12 @@ export async function GET(
     return new NextResponse(text, { status: result.status });
   }
 
-  const { invoice, business, customer, items, labels, locale, copyLabel } = result.data;
-
-  const buffer = await renderToBuffer(
-    <InvoicePdfDocument
-      invoice={invoice}
-      business={business}
-      customer={customer}
-      items={items}
-      labels={labels}
-      locale={locale}
-      copyLabel={copyLabel}
-    />,
-  );
-
-  const filename = `${invoice.invoice_number.replace(/[^\w.-]+/g, "_")}.pdf`;
-
-  return new NextResponse(new Uint8Array(buffer), {
+  const html = buildInvoiceReceiptPrintHtml(result.data);
+  return new NextResponse(html, {
     status: 200,
     headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="${filename}"`,
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
     },
   });
 }

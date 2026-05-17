@@ -87,23 +87,23 @@ export function AuthPasswordField({
         onBlur={onBlur}
         aria-invalid={ariaInvalid}
         aria-describedby={ariaDescribedBy}
-        className={`w-full rounded-lg border bg-white py-2 pl-3 pr-12 text-zinc-900 outline-none focus:ring-2 dark:bg-zinc-900 dark:text-zinc-50 ${
+        className={`w-full rounded-lg border bg-white py-2 pl-3 pr-12 text-zinc-900 outline-none focus:ring-2 ${
           hasError
-            ? "border-red-500 focus:ring-red-400/40 dark:border-red-500/80"
-            : "border-zinc-200 ring-zinc-400 focus:ring-2 dark:border-zinc-700"
+            ? "border-red-500 focus:ring-red-400/40"
+            : "border-zinc-200 ring-zinc-400 focus:ring-2"
         }`}
       />
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        className="absolute right-0 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded text-zinc-500 transition hover:text-zinc-800 focus-visible:outline focus-visible:ring-2 focus-visible:ring-zinc-400 dark:text-zinc-400 dark:hover:text-zinc-200"
+        className="absolute right-0 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded text-zinc-500 transition hover:text-zinc-800 focus-visible:outline focus-visible:ring-2 focus-visible:ring-zinc-400"
         aria-label={visible ? hideLabel : showLabel}
         aria-pressed={visible}
       >
         {visible ? (
-          <EyeSlashIcon className="text-zinc-600 dark:text-zinc-300" />
+          <EyeSlashIcon className="text-zinc-600" />
         ) : (
-          <EyeIcon className="text-zinc-600 dark:text-zinc-300" />
+          <EyeIcon className="text-zinc-600" />
         )}
       </button>
     </div>

@@ -20,7 +20,7 @@ export function PoLineQuickAdd({ poItemId, unitCost, show }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   if (!show) {
-    return <span className="text-zinc-400">—</span>;
+    return <span className="text-zinc-400">â€”</span>;
   }
 
   function submit() {
@@ -41,7 +41,7 @@ export function PoLineQuickAdd({ poItemId, unitCost, show }: Props) {
 
   return (
     <div className="flex max-w-[280px] flex-col gap-2">
-      <p className="text-[11px] leading-snug text-zinc-500 dark:text-zinc-400">
+      <p className="text-[11px] leading-snug text-zinc-500">
         New SKU: creates the product, links this line, then inventory can be received.
       </p>
       <div className="flex flex-wrap items-end gap-2">
@@ -53,7 +53,7 @@ export function PoLineQuickAdd({ poItemId, unitCost, show }: Props) {
             step="0.01"
             value={salePrice}
             onChange={(e) => setSalePrice(e.target.value)}
-            className="w-24 rounded border border-zinc-200 px-1.5 py-1 text-xs dark:border-zinc-600 dark:bg-zinc-900"
+            className="w-24 rounded border border-zinc-200 px-1.5 py-1 text-xs"
           />
         </div>
         <div className="flex flex-col gap-0.5">
@@ -61,7 +61,7 @@ export function PoLineQuickAdd({ poItemId, unitCost, show }: Props) {
           <select
             value={unit}
             onChange={(e) => setUnit(e.target.value as ProductUnit)}
-            className="rounded border border-zinc-200 px-1.5 py-1 text-xs dark:border-zinc-600 dark:bg-zinc-900"
+            className="rounded border border-zinc-200 px-1.5 py-1 text-xs"
           >
             {PRODUCT_UNITS.map((u) => (
               <option key={u} value={u}>
@@ -74,13 +74,13 @@ export function PoLineQuickAdd({ poItemId, unitCost, show }: Props) {
           type="button"
           disabled={pending}
           onClick={submit}
-          className="rounded bg-emerald-700 px-2 py-1 text-[11px] font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
+          className="rounded bg-brand-700 px-2 py-1 text-[11px] font-semibold text-white hover:bg-brand-800 disabled:opacity-50"
         >
-          {pending ? "…" : "Quick add"}
+          {pending ? "â€¦" : "Quick add"}
         </button>
       </div>
       {error ? (
-        <p className="text-[11px] text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-[11px] text-red-600">{error}</p>
       ) : null}
     </div>
   );

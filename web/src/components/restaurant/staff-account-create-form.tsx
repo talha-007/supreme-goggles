@@ -13,17 +13,17 @@ export function StaffAccountCreateForm() {
   );
 
   return (
-    <form action={action} className="mt-6 grid gap-3 rounded-xl border border-zinc-200 bg-white p-4 sm:grid-cols-5 dark:border-zinc-800 dark:bg-zinc-950">
+    <form action={action} className="mt-6 grid gap-3 rounded-xl border border-zinc-200 bg-white p-4 sm:grid-cols-5">
       <input
         name="name"
         required
         placeholder="Name"
-        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
       />
       <select
         name="role"
         defaultValue="waiter"
-        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
       >
         <option value="waiter">Waiter</option>
         <option value="chef">Chef</option>
@@ -32,14 +32,14 @@ export function StaffAccountCreateForm() {
       <input
         name="phone"
         placeholder="Phone (optional)"
-        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
       />
       <input
         name="email"
         type="email"
         required
         placeholder="staff@example.com"
-        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
       />
       <input
         name="password"
@@ -47,17 +47,17 @@ export function StaffAccountCreateForm() {
         minLength={8}
         required
         placeholder="Temporary password"
-        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
       />
       <button
         type="submit"
         disabled={pending}
-        className="sm:col-span-5 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+        className="sm:col-span-5 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
       >
-        {pending ? "Creating account…" : "Create staff login"}
+        {pending ? "Creating accountâ€¦" : "Create staff login"}
       </button>
-      {state.error ? <p className="sm:col-span-5 text-sm text-red-600 dark:text-red-400">{state.error}</p> : null}
-      {state.success ? <p className="sm:col-span-5 text-sm text-emerald-700 dark:text-emerald-300">{state.success}</p> : null}
+      {state.error ? <p className="sm:col-span-5 text-sm text-red-600">{state.error}</p> : null}
+      {state.success ? <p className="sm:col-span-5 text-sm text-brand-700">{state.success}</p> : null}
     </form>
   );
 }

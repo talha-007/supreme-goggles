@@ -8,10 +8,10 @@ export default async function AdminOverviewPage() {
 
   if (!result.ok) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-100">
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-900">
         <p className="font-medium">{t("loadError")}</p>
         <p className="mt-2 text-sm">{result.error}</p>
-        <p className="mt-4 text-sm text-red-800/90 dark:text-red-200/80">{t("overviewHint")}</p>
+        <p className="mt-4 text-sm text-red-800/90">{t("overviewHint")}</p>
       </div>
     );
   }
@@ -47,25 +47,25 @@ export default async function AdminOverviewPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
         {t("overviewTitle")}
       </h1>
-      <p className="mt-2 max-w-3xl text-sm text-zinc-600 dark:text-zinc-400">{t("overviewIntro")}</p>
+      <p className="mt-2 max-w-3xl text-sm text-zinc-600">{t("overviewIntro")}</p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((c) => (
           <Link
             key={c.label}
             href={c.href}
-            className="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-violet-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-violet-700"
+            className="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-violet-300 hover:shadow-md"
           >
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
               {c.label}
             </p>
-            <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
+            <p className="mt-2 text-3xl font-semibold tabular-nums text-zinc-900">
               {c.value}
             </p>
-            <p className="mt-2 text-xs text-zinc-500 group-hover:text-violet-700 dark:text-zinc-400 dark:group-hover:text-violet-300">
+            <p className="mt-2 text-xs text-zinc-500 group-hover:text-violet-700">
               {c.desc} →
             </p>
           </Link>
@@ -81,7 +81,7 @@ export default async function AdminOverviewPage() {
         </Link>
         <Link
           href="/admin/businesses"
-          className="rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          className="rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 hover:bg-zinc-50"
         >
           {t("ctaBusinesses")}
         </Link>

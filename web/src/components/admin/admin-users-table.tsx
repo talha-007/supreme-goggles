@@ -36,14 +36,14 @@ export function AdminUsersTable({ initialRows }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <label className="text-sm text-zinc-600 dark:text-zinc-400">
+        <label className="text-sm text-zinc-600">
           <span className="sr-only">{t("searchLabel")}</span>
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("usersSearchPlaceholder")}
-            className="w-full max-w-md rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-900"
+            className="w-full max-w-md rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm"
           />
         </label>
         <p className="text-sm text-zinc-500">
@@ -51,9 +51,9 @@ export function AdminUsersTable({ initialRows }: Props) {
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
         <table className="w-full min-w-[1024px] text-left text-sm">
-          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600">
             <tr>
               <th className="px-4 py-3">{t("colEmail")}</th>
               <th className="px-4 py-3">{t("colSignedUp")}</th>
@@ -65,45 +65,45 @@ export function AdminUsersTable({ initialRows }: Props) {
               <th className="px-4 py-3">{t("colSubscriptionEnds")}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tbody className="divide-y divide-zinc-200">
             {filtered.map((row) => (
               <tr key={row.id}>
                 <td className="px-4 py-3">
-                  <span className="font-medium text-zinc-900 dark:text-zinc-50">
+                  <span className="font-medium text-zinc-900">
                     {row.email ?? "—"}
                   </span>
                   <p className="mt-0.5 font-mono text-xs text-zinc-500">{row.id}</p>
                 </td>
-                <td className="px-4 py-3 tabular-nums text-zinc-700 dark:text-zinc-300">
+                <td className="px-4 py-3 tabular-nums text-zinc-700">
                   {formatDate(row.created_at)}
                 </td>
-                <td className="px-4 py-3 tabular-nums text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-3 tabular-nums text-zinc-600">
                   {row.last_sign_in_at ? formatDate(row.last_sign_in_at) : "—"}
                 </td>
-                <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-3 text-zinc-600">
                   {row.email_confirmed_at ? t("yes") : t("no")}
                 </td>
                 <td className="px-4 py-3">
                   {row.business_name ? (
                     <>
-                      <span className="text-zinc-900 dark:text-zinc-50">{row.business_name}</span>
+                      <span className="text-zinc-900">{row.business_name}</span>
                       {row.business_id ? (
                         <p className="mt-0.5 font-mono text-xs text-zinc-500">{row.business_id}</p>
                       ) : null}
                     </>
                   ) : (
-                    <span className="text-amber-700 dark:text-amber-300">{t("noBusinessYet")}</span>
+                    <span className="text-amber-700">{t("noBusinessYet")}</span>
                   )}
                 </td>
-                <td className="px-4 py-3 capitalize text-zinc-700 dark:text-zinc-300">
+                <td className="px-4 py-3 capitalize text-zinc-700">
                   {row.member_role ?? "—"}
                 </td>
-                <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
+                <td className="px-4 py-3 text-zinc-700">
                   {row.business_id
                     ? subscriptionLabel(canonicalSubscriptionStatus(row.business_subscription), t)
                     : (row.business_subscription ?? "—")}
                 </td>
-                <td className="px-4 py-3 tabular-nums text-zinc-600 dark:text-zinc-400">
+                <td className="px-4 py-3 tabular-nums text-zinc-600">
                   {row.business_subscription_ends_at ? formatDate(row.business_subscription_ends_at) : "—"}
                 </td>
               </tr>

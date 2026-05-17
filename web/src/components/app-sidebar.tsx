@@ -49,13 +49,13 @@ function isSidebarNavItemActive(
 
 const navLinkClass = {
   baseCollapsed:
-    "flex items-center justify-center rounded-lg px-2 py-2 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900",
+    "flex items-center justify-center rounded-lg px-2 py-2 text-zinc-700 hover:bg-zinc-100",
   baseExpanded:
-    "flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900",
+    "flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100",
   activeCollapsed:
-    "bg-emerald-100 font-medium text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100",
+    "bg-brand-100 font-medium text-brand-900",
   activeExpanded:
-    "bg-emerald-100 font-medium text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100",
+    "bg-brand-100 font-medium text-brand-900",
 } as const;
 
 function NavIcon({ navKey }: { navKey: NavLinkKey }) {
@@ -164,8 +164,8 @@ function NavIcon({ navKey }: { navKey: NavLinkKey }) {
 
 export function SidebarBrand({ title }: { title: string }) {
   return (
-    <div className="border-b border-zinc-200 px-4 py-4 dark:border-zinc-800">
-      <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{title}</span>
+    <div className="border-b border-zinc-200 px-4 py-4">
+      <span className="text-sm font-semibold text-zinc-900">{title}</span>
     </div>
   );
 }
@@ -249,50 +249,34 @@ export function AppSidebarDesktop({
 }) {
   return (
     <aside
-      className={`hidden shrink-0 flex-col border-r border-zinc-200 bg-white transition-[width] duration-200 dark:border-zinc-800 dark:bg-zinc-950 lg:sticky lg:top-0 lg:flex lg:h-screen lg:max-h-screen lg:overflow-y-auto lg:self-start ${
+      className={`hidden shrink-0 flex-col border-r border-zinc-200 bg-white transition-[width] duration-200 lg:sticky lg:top-0 lg:flex lg:h-screen lg:max-h-screen lg:overflow-y-auto lg:self-start ${
         collapsed ? "w-20" : "w-56"
       }`}
     >
-      <div className="flex items-center justify-between border-b border-zinc-200 px-3 py-3 dark:border-zinc-800">
+      <div className="flex items-center justify-between border-b border-zinc-200 px-3 py-3">
         <Link
           href="/dashboard"
           className="flex min-w-0 items-center gap-2"
           title={brandTitle}
         >
           {collapsed ? (
-            <>
-              <Image
-                src={BRAND_LOGO.light}
-                alt=""
-                width={32}
-                height={32}
-                className="h-8 w-8 object-contain dark:hidden"
-              />
-              <Image
-                src={BRAND_LOGO.dark}
-                alt=""
-                width={32}
-                height={32}
-                className="hidden h-8 w-8 object-contain dark:block"
-              />
-            </>
+            <Image
+              src={BRAND_LOGO.dark}
+              alt=""
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
+            />
           ) : (
             <>
               <Image
-                src={BRAND_LOGO.light}
-                alt=""
-                width={32}
-                height={32}
-                className="h-8 w-8 shrink-0 object-contain dark:hidden"
-              />
-              <Image
                 src={BRAND_LOGO.dark}
                 alt=""
                 width={32}
                 height={32}
-                className="hidden h-8 w-8 shrink-0 object-contain dark:block"
+                className="h-8 w-8 shrink-0 object-contain"
               />
-              <span className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+              <span className="truncate text-sm font-semibold text-zinc-900">
                 {brandTitle}
               </span>
             </>
@@ -302,7 +286,7 @@ export function AppSidebarDesktop({
           type="button"
           onClick={onToggleCollapsed}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="rounded-md p-1.5 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50"
+          className="rounded-md p-1.5 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
         >
           <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
             {collapsed ? (

@@ -301,13 +301,13 @@ export function InvoiceEditor({
     <div className="flex flex-col gap-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label className="text-sm font-medium text-zinc-700">
             {ti("customer")}
           </label>
           <select
             value={customerId}
             onChange={(e) => setCustomerId(e.target.value)}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
           >
             <option value="">{ti("walkInOption")}</option>
             {customers.map((c) => (
@@ -318,18 +318,18 @@ export function InvoiceEditor({
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label className="text-sm font-medium text-zinc-700">
             {ti("dueDate")}
           </label>
           <input
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label className="text-sm font-medium text-zinc-700">
             {ti("invoiceDiscount")}
           </label>
           <input
@@ -338,11 +338,11 @@ export function InvoiceEditor({
             step="0.01"
             value={discountAmount}
             onChange={(e) => setDiscountAmount(e.target.value)}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label className="text-sm font-medium text-zinc-700">
             {ti("taxRate")}
           </label>
           <input
@@ -352,18 +352,18 @@ export function InvoiceEditor({
             step="0.01"
             value={taxRate}
             onChange={(e) => setTaxRate(e.target.value)}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
           />
         </div>
         <div className="sm:col-span-2 flex flex-col gap-1">
-          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label className="text-sm font-medium text-zinc-700">
             {ti("notes")}
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
           />
         </div>
       </div>
@@ -374,20 +374,20 @@ export function InvoiceEditor({
 
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <h2 className="text-sm font-semibold text-zinc-900">
             {ti("linesTitle")}
           </h2>
           <button
             type="button"
             onClick={addRow}
-            className="text-sm font-medium text-zinc-900 underline dark:text-zinc-100"
+            className="text-sm font-medium text-zinc-900 underline"
           >
             {ti("addRow")}
           </button>
         </div>
-        <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
           <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600">
               <tr>
                 <th className="px-3 py-2">{ti("colProduct")}</th>
                 <th className="px-3 py-2">{ti("colName")}</th>
@@ -399,14 +399,14 @@ export function InvoiceEditor({
                 <th className="w-10 px-3 py-2" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            <tbody className="divide-y divide-zinc-200">
               {lines.map((line, i) => (
                 <tr key={i}>
                   <td className="px-3 py-2">
                     <select
                       value={line.product_id ?? ""}
                       onChange={(e) => onProductPick(i, e.target.value)}
-                      className="w-full max-w-[180px] rounded border border-zinc-200 bg-white px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+                      className="w-full max-w-[180px] rounded border border-zinc-200 bg-white px-2 py-1 text-xs"
                     >
                       <option value="">{ti("customManual")}</option>
                       {productListForSelect.map((p) => (
@@ -420,14 +420,14 @@ export function InvoiceEditor({
                     <input
                       value={line.product_name}
                       onChange={(e) => updateLine(i, { product_name: e.target.value })}
-                      className="w-full min-w-[120px] rounded border border-zinc-200 px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900"
+                      className="w-full min-w-[120px] rounded border border-zinc-200 px-2 py-1"
                     />
                   </td>
                   <td className="px-3 py-2">
                     <input
                       value={line.unit}
                       onChange={(e) => updateLine(i, { unit: e.target.value })}
-                      className="w-full rounded border border-zinc-200 px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900"
+                      className="w-full rounded border border-zinc-200 px-2 py-1"
                     />
                   </td>
                   <td className="px-3 py-2">
@@ -439,7 +439,7 @@ export function InvoiceEditor({
                       onChange={(e) =>
                         updateLine(i, { quantity: Number(e.target.value) || 0 })
                       }
-                      className="w-full rounded border border-zinc-200 px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900"
+                      className="w-full rounded border border-zinc-200 px-2 py-1"
                     />
                   </td>
                   <td className="px-3 py-2">
@@ -451,7 +451,7 @@ export function InvoiceEditor({
                       onChange={(e) =>
                         updateLine(i, { unit_price: Number(e.target.value) || 0 })
                       }
-                      className="w-full rounded border border-zinc-200 px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900"
+                      className="w-full rounded border border-zinc-200 px-2 py-1"
                     />
                   </td>
                   <td className="px-3 py-2">
@@ -464,10 +464,10 @@ export function InvoiceEditor({
                       onChange={(e) =>
                         updateLine(i, { discount_pct: Number(e.target.value) || 0 })
                       }
-                      className="w-full rounded border border-zinc-200 px-2 py-1 dark:border-zinc-700 dark:bg-zinc-900"
+                      className="w-full rounded border border-zinc-200 px-2 py-1"
                     />
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums text-zinc-700 dark:text-zinc-300">
+                  <td className="px-3 py-2 text-right tabular-nums text-zinc-700">
                     {lineTotal(
                       line.quantity,
                       line.unit_price,
@@ -478,9 +478,9 @@ export function InvoiceEditor({
                     <button
                       type="button"
                       onClick={() => removeRow(i)}
-                      className="text-xs text-red-600 hover:underline dark:text-red-400"
+                      className="text-xs text-red-600 hover:underline"
                     >
-                      ✕
+                      âœ•
                     </button>
                   </td>
                 </tr>
@@ -490,21 +490,21 @@ export function InvoiceEditor({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950">
-        <div className="text-sm text-zinc-600 dark:text-zinc-400">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+        <div className="text-sm text-zinc-600">
           <span className="mr-4">
             {ti("subtotalPreview")} {previewTotals.subtotal.toFixed(2)}
           </span>
           <span className="mr-4">
             {ti("taxPreview")} {previewTotals.tax.toFixed(2)}
           </span>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+          <span className="font-semibold text-zinc-900">
             {ti("totalWithCurrency", { amount: previewTotals.total.toFixed(2) })}
           </span>
         </div>
         <div className="flex w-full flex-col gap-3 sm:max-w-md sm:items-end sm:ml-auto">
-          <div className="w-full rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-            <label className="text-xs font-medium text-emerald-900 dark:text-emerald-200">
+          <div className="w-full rounded-lg border border-brand-200 bg-brand-50/80 px-3 py-2">
+            <label className="text-xs font-medium text-brand-900">
               {ti("cashReceived")}
             </label>
             <input
@@ -513,10 +513,10 @@ export function InvoiceEditor({
               step="0.01"
               value={cashReceived}
               onChange={(e) => setCashReceived(e.target.value)}
-              className="mt-1 w-full rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm tabular-nums text-zinc-900 dark:border-emerald-800 dark:bg-zinc-900 dark:text-zinc-50"
+              className="mt-1 w-full rounded-md border border-brand-200 bg-white px-3 py-2 text-sm tabular-nums text-zinc-900"
             />
             {cashChange != null && cashChange > 0.005 ? (
-              <p className="mt-2 text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+              <p className="mt-2 text-sm font-semibold text-brand-800">
                 {ti("changeDue")}{" "}
                 {cashChange.toLocaleString(intlLocaleTag(locale), {
                   minimumFractionDigits: 2,
@@ -525,7 +525,7 @@ export function InvoiceEditor({
                 PKR
               </p>
             ) : (
-              <p className="mt-1 text-xs text-emerald-800/80 dark:text-emerald-300/80">
+              <p className="mt-1 text-xs text-brand-800/80">
                 {ti("cashTenderHint")}
               </p>
             )}
@@ -535,7 +535,7 @@ export function InvoiceEditor({
               type="button"
               onClick={chargeCash}
               disabled={pending}
-              className="rounded-lg bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
+              className="rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-800 disabled:opacity-50"
             >
               {pending ? tc("working") : ti("cashPaid")}
             </button>
@@ -543,15 +543,15 @@ export function InvoiceEditor({
               type="button"
               onClick={chargeCredit}
               disabled={pending}
-              className="rounded-lg border border-amber-600 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-950 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100 dark:hover:bg-amber-900/50"
+              className="rounded-lg border border-amber-600 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-950 hover:bg-amber-100 disabled:opacity-50"
             >
               {pending ? tc("working") : ti("creditLater")}
             </button>
           </div>
-          <div className="flex flex-wrap justify-end gap-2 border-t border-zinc-200 pt-3 dark:border-zinc-700">
+          <div className="flex flex-wrap justify-end gap-2 border-t border-zinc-200 pt-3">
             <Link
               href={cancelHref}
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-900"
+              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
             >
               {ti("cancel")}
             </Link>
@@ -559,19 +559,19 @@ export function InvoiceEditor({
               type="button"
               onClick={save}
               disabled={pending}
-              className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-50"
             >
               {pending ? tc("saving") : ti("saveDraft")}
             </button>
           </div>
-          <p className="max-w-md text-right text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="max-w-md text-right text-xs text-zinc-500">
             {ti("helpCashCreditLong")}
           </p>
         </div>
       </div>
 
       {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {error}
         </p>
       ) : null}

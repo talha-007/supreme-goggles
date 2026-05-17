@@ -85,17 +85,17 @@ export function SearchableFilterList({
 
   const ring =
     variant === "blue"
-      ? "border-blue-400/80 bg-blue-50/90 text-blue-950 dark:border-blue-600 dark:bg-blue-950/50 dark:text-blue-50"
-      : "border-violet-400/80 bg-violet-50/90 text-violet-950 dark:border-violet-600 dark:bg-violet-950/50 dark:text-violet-50";
+      ? "border-blue-400/80 bg-blue-50/90 text-blue-950"
+      : "border-violet-400/80 bg-violet-50/90 text-violet-950";
   const idle =
     variant === "blue"
-      ? "border-zinc-200 bg-white text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-      : "border-zinc-200 bg-white text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-50";
+      ? "border-zinc-200 bg-white text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50"
+      : "border-zinc-200 bg-white text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50";
 
   const activeRow =
     variant === "blue"
-      ? "bg-blue-50 text-blue-950 dark:bg-blue-950/45 dark:text-blue-50"
-      : "bg-violet-50 text-violet-950 dark:bg-violet-950/45 dark:text-violet-50";
+      ? "bg-blue-50 text-blue-950"
+      : "bg-violet-50 text-violet-950";
 
   const isInline = layout === "inline";
   const popoverPosition =
@@ -114,7 +114,7 @@ export function SearchableFilterList({
             : "flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-2"
         }
       >
-        <span className={isInline ? "sr-only" : "shrink-0 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400"}>
+        <span className={isInline ? "sr-only" : "shrink-0 text-[10px] font-semibold uppercase tracking-wide text-zinc-500"}>
           {groupLabel}
         </span>
         <button
@@ -148,11 +148,11 @@ export function SearchableFilterList({
 
       {open ? (
         <div
-          className={`absolute top-full z-[60] mt-1.5 flex max-h-[min(70vh,22rem)] flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-950 ${popoverPosition}`}
+          className={`absolute top-full z-[60] mt-1.5 flex max-h-[min(70vh,22rem)] flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-xl ${popoverPosition}`}
           role="listbox"
           id={searchId}
         >
-          <div className="shrink-0 border-b border-zinc-100 p-2 dark:border-zinc-800">
+          <div className="shrink-0 border-b border-zinc-100 p-2">
             <input
               type="search"
               value={q}
@@ -160,12 +160,12 @@ export function SearchableFilterList({
               placeholder={searchPlaceholder}
               autoComplete="off"
               autoFocus
-              className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-2 text-xs text-zinc-900 outline-none ring-zinc-400/30 placeholder:text-zinc-400 focus:border-blue-400 focus:bg-white focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-blue-600"
+              className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-2 text-xs text-zinc-900 outline-none ring-zinc-400/30 placeholder:text-zinc-400 focus:border-blue-400 focus:bg-white focus:ring-2"
             />
           </div>
           <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-1">
             {filtered.length === 0 ? (
-              <li className="px-3 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">{noMatchesLabel}</li>
+              <li className="px-3 py-4 text-center text-xs text-zinc-500">{noMatchesLabel}</li>
             ) : (
               filtered.map((item) => {
                 const isActive = value === item.key;
@@ -183,11 +183,11 @@ export function SearchableFilterList({
                       className={`flex w-full min-h-[40px] items-center justify-between gap-2 px-3 py-2 text-left text-xs font-medium transition ${
                         isActive
                           ? activeRow
-                          : "text-zinc-800 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                          : "text-zinc-800 hover:bg-zinc-100"
                       }`}
                     >
                       <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                      <span className="shrink-0 tabular-nums text-[11px] text-zinc-500 dark:text-zinc-400">
+                      <span className="shrink-0 tabular-nums text-[11px] text-zinc-500">
                         {item.count}
                       </span>
                     </button>

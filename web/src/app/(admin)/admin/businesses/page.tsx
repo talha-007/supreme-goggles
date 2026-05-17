@@ -8,17 +8,17 @@ export default async function AdminBusinessesPage() {
 
   if (!result.ok) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-100">
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-900">
         <p className="font-medium">{t("loadError")}</p>
         <p className="mt-2 text-sm">{result.error}</p>
-        <p className="mt-4 text-sm text-red-800/90 dark:text-red-200/80">{t("businessesHint")}</p>
+        <p className="mt-4 text-sm text-red-800/90">{t("businessesHint")}</p>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
         {t("subscriptionsTitle")}
       </h1>
 

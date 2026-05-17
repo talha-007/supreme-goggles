@@ -20,22 +20,22 @@ type Tab = "new-order" | "in-kitchen" | "ready" | "history";
 
 function getTableName(o: WaiterOrder) {
   return Array.isArray(o.restaurant_tables)
-    ? (o.restaurant_tables[0]?.name ?? "—")
-    : (o.restaurant_tables?.name ?? "—");
+    ? (o.restaurant_tables[0]?.name ?? "â€”")
+    : (o.restaurant_tables?.name ?? "â€”");
 }
 function getInv(o: WaiterOrder) {
   return Array.isArray(o.invoices) ? (o.invoices[0] ?? null) : o.invoices;
 }
 function getInvNumber(o: WaiterOrder) {
-  return getInv(o)?.invoice_number ?? "—";
+  return getInv(o)?.invoice_number ?? "â€”";
 }
 
 const invoiceStatusStyle: Record<string, string> = {
-  paid:     "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200",
-  unpaid:   "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200",
-  partial:  "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200",
-  draft:    "bg-zinc-200 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300",
-  cancelled:"bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200",
+  paid:     "bg-brand-100 text-brand-800",
+  unpaid:   "bg-amber-100 text-amber-800",
+  partial:  "bg-sky-100 text-sky-800",
+  draft:    "bg-zinc-200 text-zinc-700",
+  cancelled:"bg-red-100 text-red-800",
 };
 
 function OrderCard({
@@ -46,12 +46,12 @@ function OrderCard({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-base font-semibold text-zinc-900 dark:text-zinc-50">
+        <p className="truncate text-base font-semibold text-zinc-900">
           Table {getTableName(o)}
         </p>
-        <p className="mt-0.5 font-mono text-xs text-zinc-400 dark:text-zinc-500">
+        <p className="mt-0.5 font-mono text-xs text-zinc-400">
           {getInvNumber(o)}
         </p>
       </div>
@@ -69,8 +69,8 @@ function OrderCard({
 
 function EmptyLane({ message }: { message: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-zinc-200 px-4 py-14 text-center dark:border-zinc-800">
-      <p className="text-sm text-zinc-400 dark:text-zinc-500">{message}</p>
+    <div className="rounded-2xl border border-dashed border-zinc-200 px-4 py-14 text-center">
+      <p className="text-sm text-zinc-400">{message}</p>
     </div>
   );
 }
@@ -118,8 +118,8 @@ export function WaiterBoardTabs({
 
   const tabs: { id: Tab; label: string; shortLabel: string; count: number | null; countColor?: string }[] = [
     { id: "new-order",   label: "New order",      shortLabel: "New",     count: null },
-    { id: "in-kitchen",  label: "In kitchen",     shortLabel: "Kitchen", count: inKitchenOrders.length,   countColor: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200" },
-    { id: "ready",       label: "Ready to serve", shortLabel: "Ready",   count: readyToServeOrders.length, countColor: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200" },
+    { id: "in-kitchen",  label: "In kitchen",     shortLabel: "Kitchen", count: inKitchenOrders.length,   countColor: "bg-amber-100 text-amber-800" },
+    { id: "ready",       label: "Ready to serve", shortLabel: "Ready",   count: readyToServeOrders.length, countColor: "bg-brand-100 text-brand-800" },
     { id: "history",     label: "History",        shortLabel: "History", count: null },
   ];
 
@@ -129,7 +129,7 @@ export function WaiterBoardTabs({
       <div
         role="tablist"
         aria-label="Order sections"
-        className="flex gap-1 rounded-xl border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-900"
+        className="flex gap-1 rounded-xl border border-zinc-200 bg-zinc-50 p-1"
       >
         {tabs.map((t) => (
           <button
@@ -141,8 +141,8 @@ export function WaiterBoardTabs({
             className={[
               "relative flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs font-semibold transition-colors sm:text-sm",
               tab === t.id
-                ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-50"
-                : "text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200",
+                ? "bg-white text-zinc-900 shadow-sm"
+                : "text-zinc-500 hover:text-zinc-700",
             ].join(" ")}
           >
             <span className="hidden sm:inline">{t.label}</span>
@@ -182,8 +182,8 @@ export function WaiterBoardTabs({
                     type="search"
                     value={kitchenTableQ}
                     onChange={(e) => setKitchenTableQ(e.target.value)}
-                    placeholder="Table…"
-                    className="w-32 rounded-lg border border-zinc-200 bg-white py-1.5 pl-8 pr-2 text-xs text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+                    placeholder="Tableâ€¦"
+                    className="w-32 rounded-lg border border-zinc-200 bg-white py-1.5 pl-8 pr-2 text-xs text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:ring-2"
                   />
                 </div>
 
@@ -197,8 +197,8 @@ export function WaiterBoardTabs({
                       className={[
                         "rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors",
                         kitchenStatusF === val
-                          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                          : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800",
+                          ? "bg-zinc-900 text-white"
+                          : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50",
                       ].join(" ")}
                     >
                       {lbl}
@@ -211,13 +211,13 @@ export function WaiterBoardTabs({
                   <button
                     type="button"
                     onClick={() => { setKitchenTableQ(""); setKitchenStatusF(""); }}
-                    className="rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-500 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+                    className="rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-500 hover:bg-zinc-50"
                   >
                     Clear
                   </button>
                 )}
 
-                <span className="ml-auto text-xs tabular-nums text-zinc-400 dark:text-zinc-500">
+                <span className="ml-auto text-xs tabular-nums text-zinc-400">
                   {filteredKitchen.length} / {inKitchenOrders.length}
                 </span>
               </div>
@@ -232,7 +232,7 @@ export function WaiterBoardTabs({
                     action={
                       <Link
                         href={`/dashboard/invoices/${o.invoice_id}`}
-                        className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                        className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
                       >
                         View
                       </Link>
@@ -276,7 +276,7 @@ export function WaiterBoardTabs({
             <div className="space-y-2.5">
               {/* Filter row */}
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                <span className="text-xs font-medium text-zinc-500">
                   Payment:
                 </span>
                 <div className="flex gap-1">
@@ -288,15 +288,15 @@ export function WaiterBoardTabs({
                       className={[
                         "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
                         historyFilter === opt.value
-                          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                          : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800",
+                          ? "bg-zinc-900 text-white"
+                          : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50",
                       ].join(" ")}
                     >
                       {opt.label}
                     </button>
                   ))}
                 </div>
-                <span className="ml-auto text-xs tabular-nums text-zinc-400 dark:text-zinc-500">
+                <span className="ml-auto text-xs tabular-nums text-zinc-400">
                   {filteredHistory.length} / {servedOrders.length}
                 </span>
               </div>
@@ -321,7 +321,7 @@ export function WaiterBoardTabs({
                           )}
                           <Link
                             href={`/dashboard/invoices/${o.invoice_id}`}
-                            className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                            className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
                           >
                             View
                           </Link>

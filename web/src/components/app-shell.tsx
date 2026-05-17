@@ -155,32 +155,25 @@ export function AppShell({
           />
           <aside
             id="mobile-nav"
-            className="fixed inset-y-0 start-0 z-50 flex w-[min(100%,16rem)] flex-col border-e border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-950 lg:hidden"
+            className="fixed inset-y-0 start-0 z-50 flex w-[min(100%,16rem)] flex-col border-e border-zinc-200 bg-white shadow-xl lg:hidden"
             aria-modal="true"
             role="dialog"
             aria-label={shellLabels.navigation}
           >
-            <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-4 dark:border-zinc-800">
+            <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-4">
               <Link href="/dashboard" className="flex min-w-0 items-center gap-2" onClick={() => setMobileOpen(false)}>
-                <Image
-                  src={BRAND_LOGO.light}
-                  alt=""
-                  width={28}
-                  height={28}
-                  className="h-7 w-7 shrink-0 object-contain dark:hidden"
-                />
                 <Image
                   src={BRAND_LOGO.dark}
                   alt=""
                   width={28}
                   height={28}
-                  className="hidden h-7 w-7 shrink-0 object-contain dark:block"
+                  className="h-7 w-7 shrink-0 object-contain"
                 />
-                <span className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">{brandTitle}</span>
+                <span className="truncate text-sm font-semibold text-zinc-900">{brandTitle}</span>
               </Link>
               <button
                 type="button"
-                className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50"
+                className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                 aria-label={shellLabels.closeMenu}
                 onClick={() => setMobileOpen(false)}
               >
@@ -195,10 +188,10 @@ export function AppShell({
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-zinc-200 bg-white px-4 dark:border-zinc-800 dark:bg-zinc-950 sm:px-6">
+        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-zinc-200 bg-white px-4 sm:px-6">
           <button
             type="button"
-            className="inline-flex shrink-0 items-center justify-center rounded-lg p-2 text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-900 lg:hidden"
+            className="inline-flex shrink-0 items-center justify-center rounded-lg p-2 text-zinc-700 hover:bg-zinc-100 lg:hidden"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             aria-label={shellLabels.openMenu}
@@ -215,18 +208,11 @@ export function AppShell({
             title={brandTitle}
           >
             <Image
-              src={BRAND_LOGO.light}
-              alt=""
-              width={100}
-              height={28}
-              className="h-6 w-auto max-w-[100px] object-contain object-left dark:hidden"
-            />
-            <Image
               src={BRAND_LOGO.dark}
               alt=""
               width={100}
               height={28}
-              className="hidden h-6 w-auto max-w-[100px] object-contain object-left dark:block"
+              className="h-6 w-auto max-w-[100px] object-contain object-left"
             />
           </Link>
           <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -241,18 +227,18 @@ export function AppShell({
                 sizes="24px"
               />
             ) : (
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-zinc-200 text-[10px] font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-zinc-200 text-[10px] font-semibold text-zinc-700">
                 {businessInitials(businessName)}
               </div>
             )}
-            <span className="min-w-0 truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <span className="min-w-0 truncate text-sm font-medium text-zinc-900">
               {businessName}
             </span>
           </div>
           <LanguageSwitcher locale={locale} languageLabel={shellLabels.language} />
           <SignOutButton label={shellLabels.signOut} loadingLabel={shellLabels.signingOut} />
         </header>
-        <main id="main-content" className="flex-1 bg-zinc-50 p-4 dark:bg-zinc-900 sm:p-6" tabIndex={-1}>
+        <main id="main-content" className="flex-1 bg-white p-4 sm:p-6" tabIndex={-1}>
           {children}
         </main>
       </div>

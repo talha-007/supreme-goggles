@@ -4,8 +4,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 /**
- * After cash finalization the server redirects with ?print=1. We load the PDF in a hidden
- * iframe and call print(); if that fails, open the PDF in a new tab.
+ * After cash finalization the server redirects with ?print=1. We load a thermal-width HTML
+ * receipt in a hidden iframe and call print(); if that fails, open the receipt in a new tab.
+ * (PDFs often open the browser print dialog with A4; HTML uses @page size for 80mm roll.)
  */
 export function InvoiceAutoPrint({ invoiceId }: { invoiceId: string }) {
   const searchParams = useSearchParams();
@@ -26,8 +27,8 @@ export function InvoiceAutoPrint({ invoiceId }: { invoiceId: string }) {
     }
 
     const printUrls = [
-      `/api/invoices/${invoiceId}/pdf?copy=customer`,
-      `/api/invoices/${invoiceId}/pdf?copy=restaurant`,
+      `/api/invoices/${invoiceId}/receipt-print?copy=customer`,
+      `/api/invoices/${invoiceId}/receipt-print?copy=restaurant`,
     ];
 
     const printOne = (pdfUrl: string) =>

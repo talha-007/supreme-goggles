@@ -27,7 +27,7 @@ export function BackfillPoStockButton({ poId }: { poId: string }) {
         {pending ? "Applying…" : "Apply received quantities to inventory"}
       </button>
       {err ? (
-        <p className="max-w-xl text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="max-w-xl text-sm text-red-600" role="alert">
           {err}
         </p>
       ) : null}

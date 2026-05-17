@@ -45,8 +45,8 @@ export function RestaurantOrderStatusButtons({
           }
           className={
             st === currentStatus
-              ? "rounded-md bg-zinc-900 px-2.5 py-1 text-xs font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
-              : "rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+              ? "rounded-md bg-zinc-900 px-2.5 py-1 text-xs font-medium text-white"
+              : "rounded-md border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
           }
         >
           {label(st)}

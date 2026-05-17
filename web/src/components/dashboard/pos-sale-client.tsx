@@ -74,11 +74,11 @@ function categoryLabel(key: string, t: (k: string) => string) {
 
 function tagClassForCategory(name: string): string {
   const palette = [
-    "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-    "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
-    "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-    "bg-rose-100 text-rose-900 dark:bg-rose-950 dark:text-rose-200",
-    "bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200",
+    "bg-brand-100 text-brand-900",
+    "bg-sky-100 text-sky-900",
+    "bg-amber-100 text-amber-900",
+    "bg-rose-100 text-rose-900",
+    "bg-violet-100 text-violet-900",
   ];
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h + name.charCodeAt(i) * (i + 1)) % palette.length;
@@ -493,12 +493,12 @@ export function PosSaleClient({
       day: "numeric",
       month: "short",
       year: "numeric",
-    }) ?? "—";
+    }) ?? "â€”";
   const timeStr =
     now?.toLocaleTimeString(intlLocaleTag(locale), {
       hour: "2-digit",
       minute: "2-digit",
-    }) ?? "—";
+    }) ?? "â€”";
 
   const showMobileCartBar = lines.length > 0 && mobileTab === "menu";
 
@@ -507,7 +507,7 @@ export function PosSaleClient({
       className={`relative flex flex-col gap-4 xl:pb-28 xl:pt-0 ${showMobileCartBar ? "max-xl:pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))]" : ""}`}
     >
       <div
-        className="sticky top-0 z-20 flex gap-1 rounded-2xl border border-zinc-200/90 bg-white/95 p-1 shadow-sm backdrop-blur-md dark:border-zinc-700 dark:bg-zinc-900/95 xl:hidden"
+        className="sticky top-0 z-20 flex gap-1 rounded-2xl border border-zinc-200/90 bg-white/95 p-1 shadow-sm backdrop-blur-md xl:hidden"
         role="tablist"
         aria-label={tp("browseTab")}
       >
@@ -519,7 +519,7 @@ export function PosSaleClient({
           className={`min-h-[44px] flex-1 touch-manipulation rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
             mobileTab === "menu"
               ? "bg-blue-600 text-white shadow-sm"
-              : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+              : "text-zinc-600 hover:bg-zinc-100"
           }`}
         >
           {tp("browseTab")}
@@ -532,14 +532,14 @@ export function PosSaleClient({
           className={`relative min-h-[44px] flex-1 touch-manipulation rounded-xl px-3 py-2.5 text-sm font-semibold transition ${
             mobileTab === "cart"
               ? "bg-blue-600 text-white shadow-sm"
-              : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+              : "text-zinc-600 hover:bg-zinc-100"
           }`}
         >
           {tp("cartTab")}
           {lines.length > 0 ? (
             <span
               className={`ms-1 inline-flex min-w-[1.25rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-bold ${
-                mobileTab === "cart" ? "bg-white/25 text-white" : "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200"
+                mobileTab === "cart" ? "bg-white/25 text-white" : "bg-blue-100 text-blue-800"
               }`}
             >
               {lines.length}
@@ -548,7 +548,7 @@ export function PosSaleClient({
         </button>
       </div>
 
-      <div className="mb-0 hidden gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-4 xl:flex xl:flex-wrap xl:items-end">
+      <div className="mb-0 hidden gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm sm:p-4 xl:flex xl:flex-wrap xl:items-end">
         <div className="flex min-w-0 items-center gap-2 xl:w-[min(100%,300px)]">
           <label htmlFor="pos-customer-top" className="sr-only">
             {ti("customer")}
@@ -557,7 +557,7 @@ export function PosSaleClient({
             id="pos-customer-top"
             value={customerId}
             onChange={(e) => setCustomerId(e.target.value)}
-            className="min-h-[44px] min-w-0 flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="min-h-[44px] min-w-0 flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900"
           >
             <option value="">{ti("walkInOption")}</option>
             {customers.map((c) => (
@@ -576,14 +576,14 @@ export function PosSaleClient({
         </div>
         {isRestaurantMode && restaurantWorkflowMode === "order-to-kitchen" ? (
           <div className="min-w-[220px] xl:w-[min(100%,260px)]">
-            <label htmlFor="pos-table-top" className="mb-1 block text-xs font-medium text-zinc-500 dark:text-zinc-400">
+            <label htmlFor="pos-table-top" className="mb-1 block text-xs font-medium text-zinc-500">
               Select table (required)
             </label>
             <select
               id="pos-table-top"
               value={restaurantTableId}
               onChange={(e) => setRestaurantTableId(e.target.value)}
-              className="min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+              className="min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900"
             >
               <option value="">Select table (required)</option>
               {restaurantTables.map((t) => (
@@ -614,14 +614,14 @@ export function PosSaleClient({
             autoComplete="off"
             enterKeyHint="search"
             aria-label={tp("posTopSearchHint")}
-            className="min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50/80 py-2.5 pl-11 pr-4 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:bg-white focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:bg-zinc-950"
+            className="min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50/80 py-2.5 pl-11 pr-4 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:bg-white focus:ring-2"
           />
           {loading ? (
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">{tp("searching")}</span>
           ) : null}
         </div>
-        <p className="hidden text-end text-xs text-zinc-500 dark:text-zinc-400 xl:ms-auto xl:block">
-          {dateStr} · {timeStr}
+        <p className="hidden text-end text-xs text-zinc-500 xl:ms-auto xl:block">
+          {dateStr} Â· {timeStr}
         </p>
       </div>
 
@@ -629,18 +629,18 @@ export function PosSaleClient({
       <div
         className={`min-h-0 min-w-0 flex-1 xl:order-2 xl:max-w-none ${mobileTab === "menu" ? "block" : "hidden xl:block"}`}
       >
-        <div className="flex h-full min-h-0 flex-col gap-3 overflow-visible rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-5 xl:min-h-[min(100vh-9rem,780px)]">
-          <div className="flex flex-col gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800 xl:hidden">
+        <div className="flex h-full min-h-0 flex-col gap-3 overflow-visible rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm sm:p-5 xl:min-h-[min(100vh-9rem,780px)]">
+          <div className="flex flex-col gap-2 border-b border-zinc-100 pb-3 xl:hidden">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
+                <p className="text-xs font-medium uppercase tracking-wide text-blue-600">
                   {tp("catalogTitle")}
                 </p>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {dateStr} · {timeStr}
+                <p className="text-sm text-zinc-500">
+                  {dateStr} Â· {timeStr}
                 </p>
               </div>
-              <span className="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-950/50 dark:text-blue-200">
+              <span className="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
                 {tp("openSale")}
               </span>
             </div>
@@ -670,8 +670,8 @@ export function PosSaleClient({
             </div>
           </div>
 
-          <div className="hidden items-center gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800 xl:flex">
-            <p className="shrink-0 text-sm font-semibold text-zinc-900 dark:text-zinc-50">{tp("catalogTitle")}</p>
+          <div className="hidden items-center gap-2 border-b border-zinc-100 pb-3 xl:flex">
+            <p className="shrink-0 text-sm font-semibold text-zinc-900">{tp("catalogTitle")}</p>
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 overflow-visible">
               <SearchableFilterList
                 layout="inline"
@@ -696,12 +696,12 @@ export function PosSaleClient({
                 variant="violet"
               />
             </div>
-            <span className="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-950/50 dark:text-blue-200">
+            <span className="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
               {tp("openSale")}
             </span>
           </div>
 
-          <div className="relative border-b border-zinc-100 pb-3 dark:border-zinc-800 xl:hidden">
+          <div className="relative border-b border-zinc-100 pb-3 xl:hidden">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                 <path
@@ -721,7 +721,7 @@ export function PosSaleClient({
               placeholder={tp("searchPlaceholder")}
               autoComplete="off"
               enterKeyHint="search"
-              className="min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50/80 py-2.5 pl-11 pr-4 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:bg-white focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:bg-zinc-950"
+              className="min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50/80 py-2.5 pl-11 pr-4 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:bg-white focus:ring-2"
             />
             {loading ? (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500">
@@ -731,13 +731,13 @@ export function PosSaleClient({
           </div>
 
           {loadError ? (
-            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+            <p className="text-sm text-red-600" role="alert">
               {loadError}
             </p>
           ) : null}
 
           {unknownBarcode ? (
-            <p className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-950 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-100">
+            <p className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-950">
               {tp("unknownBarcode")}{" "}
               <Link href={`/dashboard/products/new?barcode=${encodeURIComponent(safeQ.trim())}`} className="font-medium underline">
                 {tp("addProduct")}
@@ -747,7 +747,7 @@ export function PosSaleClient({
 
           <div className="relative min-h-[180px] flex-1 sm:min-h-[240px] xl:min-h-0">
             {loading ? (
-              <div className="pointer-events-none absolute inset-0 z-10 rounded-xl bg-white/50 dark:bg-zinc-950/50" />
+              <div className="pointer-events-none absolute inset-0 z-10 rounded-xl bg-white/50" />
             ) : null}
             <div className="grid max-h-[min(56vh,600px)] grid-cols-2 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:max-h-[min(calc(100vh-13rem),680px)] 2xl:grid-cols-5">
               {filteredGrid.map((p) => {
@@ -763,11 +763,11 @@ export function PosSaleClient({
                     onClick={() => addProduct(p)}
                     className={`group flex h-full touch-manipulation flex-col overflow-hidden rounded-2xl border text-left transition active:scale-[0.98] ${
                       out
-                        ? "cursor-not-allowed border-zinc-200 opacity-60 dark:border-zinc-800"
-                        : "border-zinc-200 bg-white shadow-sm hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-500 dark:hover:bg-zinc-800/90"
+                        ? "cursor-not-allowed border-zinc-200 opacity-60"
+                        : "border-zinc-200 bg-white shadow-sm hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
                     }`}
                   >
-                    <div className="relative h-[5.5rem] w-full shrink-0 bg-zinc-100 sm:h-[6.25rem] dark:bg-zinc-800">
+                    <div className="relative h-[5.5rem] w-full shrink-0 bg-zinc-100 sm:h-[6.25rem]">
                       {p.image_url ? (
                         <Image
                           src={p.image_url}
@@ -785,7 +785,7 @@ export function PosSaleClient({
                       )}
                     </div>
                     <div className="flex min-h-0 flex-1 flex-col gap-1.5 p-2.5">
-                      <span className="line-clamp-2 min-h-[2.4em] text-xs font-semibold leading-tight text-zinc-900 sm:text-sm dark:text-zinc-50">
+                      <span className="line-clamp-2 min-h-[2.4em] text-xs font-semibold leading-tight text-zinc-900 sm:text-sm">
                         {p.name}
                       </span>
                       <div className="flex flex-wrap gap-0.5">
@@ -795,15 +795,15 @@ export function PosSaleClient({
                           {cat}
                         </span>
                         {br ? (
-                          <span className="inline-flex max-w-full truncate rounded border border-zinc-200 bg-zinc-100 px-1 py-0.5 text-[9px] font-medium text-zinc-700 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                          <span className="inline-flex max-w-full truncate rounded border border-zinc-200 bg-zinc-100 px-1 py-0.5 text-[9px] font-medium text-zinc-700">
                             {br}
                           </span>
                         ) : null}
                       </div>
-                      <span className="mt-auto pt-0.5 text-right text-xs font-semibold tabular-nums text-blue-700 sm:text-sm dark:text-blue-300">
+                      <span className="mt-auto pt-0.5 text-right text-xs font-semibold tabular-nums text-blue-700 sm:text-sm">
                         {pkr.format(p.sale_price)}
                       </span>
-                      <span className="text-[9px] leading-tight text-zinc-500 dark:text-zinc-400">
+                      <span className="text-[9px] leading-tight text-zinc-500">
                         {tp("stockLine", {
                           qty: p.current_stock.toLocaleString(intlLocaleTag(locale), {
                             minimumFractionDigits: 0,
@@ -818,7 +818,7 @@ export function PosSaleClient({
               })}
             </div>
             {!loading && filteredGrid.length === 0 ? (
-              <p className="py-12 text-center text-sm text-zinc-500 dark:text-zinc-400">{tp("noProducts")}</p>
+              <p className="py-12 text-center text-sm text-zinc-500">{tp("noProducts")}</p>
             ) : null}
           </div>
         </div>
@@ -827,18 +827,18 @@ export function PosSaleClient({
       <aside
         className={`flex w-full shrink-0 flex-col xl:sticky xl:top-4 xl:order-1 xl:w-[min(100%,460px)] xl:self-start ${mobileTab === "cart" ? "block" : "hidden xl:block"}`}
       >
-        <div className="flex min-h-0 w-full max-w-full flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-lg shadow-zinc-200/50 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-black/40 max-xl:max-h-[min(92dvh,840px)] xl:min-h-[min(100vh-8rem,720px)]">
-          <div className="shrink-0 border-b border-zinc-100 px-3 py-3 sm:px-4 sm:py-3 dark:border-zinc-800">
+        <div className="flex min-h-0 w-full max-w-full flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-lg shadow-zinc-200/50 max-xl:max-h-[min(92dvh,840px)] xl:min-h-[min(100vh-8rem,720px)]">
+          <div className="shrink-0 border-b border-zinc-100 px-3 py-3 sm:px-4 sm:py-3">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{tp("cartTitle")}</p>
-                <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="text-sm font-semibold text-zinc-900">{tp("cartTitle")}</p>
+                <p className="mt-0.5 text-xs text-zinc-500">
                   {invoiceId ? tp("orderSaved") : tp("newOrder")}
                 </p>
               </div>
               <Link
                 href={fullPageInvoiceHref}
-                className="shrink-0 rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+                className="shrink-0 rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800"
                 title={tp("openFullEditor")}
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
@@ -853,16 +853,16 @@ export function PosSaleClient({
             </div>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col border-b border-dashed border-zinc-200 dark:border-zinc-700 max-xl:max-h-[min(36vh,280px)] xl:min-h-0 xl:max-h-none">
+          <div className="flex min-h-0 flex-1 flex-col border-b border-dashed border-zinc-200 max-xl:max-h-[min(36vh,280px)] xl:min-h-0 xl:max-h-none">
             <div className="flex items-center justify-between px-3 py-2 sm:px-4">
-              <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                 {ti("linesTitle")}
               </span>
               <span className="text-xs tabular-nums text-zinc-500">{lines.length}</span>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 pb-2 [-webkit-overflow-scrolling:touch] xl:px-3">
               {lines.length === 0 ? (
-                <p className="px-2 py-8 text-center text-sm text-zinc-400 dark:text-zinc-500">{tp("noItems")}</p>
+                <p className="px-2 py-8 text-center text-sm text-zinc-400">{tp("noItems")}</p>
               ) : (
                 <>
                   <table className="hidden w-full table-fixed border-collapse text-left text-sm xl:table">
@@ -874,7 +874,7 @@ export function PosSaleClient({
                       <col className="w-8" />
                     </colgroup>
                     <thead>
-                      <tr className="border-b border-zinc-200 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:border-zinc-700">
+                      <tr className="border-b border-zinc-200 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
                         <th className="min-w-0 py-2 pe-2">{ti("colProduct")}</th>
                         <th className="py-2 pe-1">{ti("colQty")}</th>
                         <th className="py-2 pe-1">{ti("colPrice")}</th>
@@ -889,11 +889,11 @@ export function PosSaleClient({
                         return (
                           <tr
                             key={`${line.product_id ?? "x"}-${i}`}
-                            className="border-b border-zinc-100 dark:border-zinc-800"
+                            className="border-b border-zinc-100"
                           >
                             <td className="min-w-0 overflow-hidden align-middle py-2 pe-2">
                               <div className="flex min-w-0 items-center gap-2">
-                                <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-md bg-zinc-200 dark:bg-zinc-800">
+                                <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-md bg-zinc-200">
                                   {img ? (
                                     <Image src={img} alt="" fill className="object-cover" sizes="36px" />
                                   ) : (
@@ -902,7 +902,7 @@ export function PosSaleClient({
                                     </div>
                                   )}
                                 </div>
-                                <span className="line-clamp-2 text-xs font-medium leading-snug text-zinc-900 dark:text-zinc-50">
+                                <span className="line-clamp-2 text-xs font-medium leading-snug text-zinc-900">
                                   {line.product_name}
                                 </span>
                               </div>
@@ -912,15 +912,15 @@ export function PosSaleClient({
                                 <button
                                   type="button"
                                   onClick={() => updateLineQty(i, -1)}
-                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-zinc-50"
+                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50"
                                 >
-                                  −
+                                  âˆ’
                                 </button>
                                 <span className="min-w-[1.25rem] shrink-0 text-center text-xs tabular-nums">{line.quantity}</span>
                                 <button
                                   type="button"
                                   onClick={() => updateLineQty(i, 1)}
-                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-zinc-50"
+                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-zinc-200 text-sm text-zinc-700 hover:bg-zinc-50"
                                 >
                                   +
                                 </button>
@@ -934,20 +934,20 @@ export function PosSaleClient({
                                 step="0.01"
                                 value={line.unit_price}
                                 onChange={(e) => updateLineUnitPrice(i, e.target.value)}
-                                className="box-border h-8 w-full min-w-0 max-w-full rounded-md border border-zinc-300 bg-zinc-50 px-1.5 py-0 text-end text-xs tabular-nums text-zinc-900 shadow-none outline-none ring-0 transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-blue-500 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield] [-moz-appearance:textfield]"
+                                className="box-border h-8 w-full min-w-0 max-w-full rounded-md border border-zinc-300 bg-zinc-50 px-1.5 py-0 text-end text-xs tabular-nums text-zinc-900 shadow-none outline-none ring-0 transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield] [-moz-appearance:textfield]"
                               />
                             </td>
-                            <td className="w-[4.75rem] min-w-[4.75rem] max-w-[4.75rem] overflow-hidden align-middle py-2 pe-1 text-xs font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
+                            <td className="w-[4.75rem] min-w-[4.75rem] max-w-[4.75rem] overflow-hidden align-middle py-2 pe-1 text-xs font-semibold tabular-nums text-zinc-900">
                               {lt.toFixed(2)}
                             </td>
                             <td className="w-8 min-w-8 max-w-8 overflow-hidden align-middle py-2 text-end">
                               <button
                                 type="button"
                                 onClick={() => removeLine(i)}
-                                className="rounded p-1 text-lg leading-none text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/50 dark:hover:text-red-200"
+                                className="rounded p-1 text-lg leading-none text-red-600 hover:bg-red-50"
                                 aria-label={tp("removeLine")}
                               >
-                                ×
+                                Ã—
                               </button>
                             </td>
                           </tr>
@@ -962,9 +962,9 @@ export function PosSaleClient({
                       return (
                         <li
                           key={`${line.product_id ?? "x"}-${i}`}
-                          className="flex items-center gap-2 rounded-xl border border-zinc-100 bg-zinc-50/80 px-2 py-2 dark:border-zinc-800 dark:bg-zinc-900/50"
+                          className="flex items-center gap-2 rounded-xl border border-zinc-100 bg-zinc-50/80 px-2 py-2"
                         >
-                          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
+                          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-zinc-200">
                             {img ? (
                               <Image src={img} alt="" fill className="object-cover" sizes="48px" />
                             ) : (
@@ -974,35 +974,35 @@ export function PosSaleClient({
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">{line.product_name}</p>
+                            <p className="truncate text-sm font-medium text-zinc-900">{line.product_name}</p>
                             <p className="text-xs text-zinc-500">
-                              {pkr.format(line.unit_price)} × {line.quantity}
+                              {pkr.format(line.unit_price)} Ã— {line.quantity}
                             </p>
                           </div>
                           <div className="flex items-center gap-0.5 sm:gap-1">
                             <button
                               type="button"
                               onClick={() => updateLineQty(i, -1)}
-                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-zinc-50 dark:active:bg-zinc-800"
+                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100"
                             >
-                              −
+                              âˆ’
                             </button>
                             <button
                               type="button"
                               onClick={() => updateLineQty(i, 1)}
-                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-zinc-50 dark:active:bg-zinc-800"
+                              className="flex h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-lg border border-zinc-200 text-lg leading-none text-zinc-700 hover:bg-white active:bg-zinc-100"
                             >
                               +
                             </button>
                           </div>
                           <div className="flex flex-col items-end gap-1">
-                            <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
+                            <span className="text-sm font-semibold tabular-nums text-zinc-900">
                               {lt.toFixed(2)}
                             </span>
                             <button
                               type="button"
                               onClick={() => removeLine(i)}
-                              className="text-[11px] text-red-600 hover:underline dark:text-red-400"
+                              className="text-[11px] text-red-600 hover:underline"
                             >
                               {tp("removeLine")}
                             </button>
@@ -1016,16 +1016,16 @@ export function PosSaleClient({
             </div>
           </div>
 
-          <div className="shrink-0 border-t border-zinc-200 bg-white shadow-[0_-6px_24px_rgba(0,0,0,0.04)] dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-[0_-6px_24px_rgba(0,0,0,0.25)]">
+          <div className="shrink-0 border-t border-zinc-200 bg-white shadow-[0_-6px_24px_rgba(0,0,0,0.04)]">
             <div className="space-y-2 px-3 py-3 sm:px-4 xl:hidden">
-              <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400" htmlFor="pos-customer">
+              <label className="block text-xs font-medium text-zinc-500" htmlFor="pos-customer">
                 {ti("customer")}
               </label>
               <select
                 id="pos-customer"
                 value={customerId}
                 onChange={(e) => setCustomerId(e.target.value)}
-                className="min-h-[48px] w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-base text-zinc-900 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+                className="min-h-[48px] w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-base text-zinc-900 sm:text-sm"
               >
                 <option value="">{ti("walkInOption")}</option>
                 {customers.map((c) => (
@@ -1039,7 +1039,7 @@ export function PosSaleClient({
                   <select
                     value={restaurantTableId}
                     onChange={(e) => setRestaurantTableId(e.target.value)}
-                    className="min-h-[44px] rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+                    className="min-h-[44px] rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900"
                   >
                     <option value="">
                       {restaurantWorkflowMode === "order-to-kitchen" ? "Select table (required)" : tp("tableOptional")}
@@ -1053,7 +1053,7 @@ export function PosSaleClient({
                   <select
                     value={waiterId}
                     onChange={(e) => setWaiterId(e.target.value)}
-                    className="min-h-[44px] rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+                    className="min-h-[44px] rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900"
                   >
                     <option value="">
                       {restaurantWorkflowMode === "order-to-kitchen" ? "Select waiter (required)" : tp("waiterOptional")}
@@ -1070,13 +1070,13 @@ export function PosSaleClient({
 
             <div className="space-y-2 px-3 pb-3 sm:px-4">
             <div className="flex justify-between text-sm">
-              <span className="text-zinc-500 dark:text-zinc-400">{tp("subtotal")}</span>
-              <span className="tabular-nums font-medium text-zinc-900 dark:text-zinc-50">
+              <span className="text-zinc-500">{tp("subtotal")}</span>
+              <span className="tabular-nums font-medium text-zinc-900">
                 {pkr.format(previewTotals.subtotal)}
               </span>
             </div>
             <div className="flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
-              <label className="text-zinc-500 dark:text-zinc-400" htmlFor="pos-tax">
+              <label className="text-zinc-500" htmlFor="pos-tax">
                 {ti("taxRate")}
               </label>
               <input
@@ -1088,23 +1088,23 @@ export function PosSaleClient({
                 step="0.01"
                 value={taxRate}
                 onChange={(e) => setTaxRate(e.target.value)}
-                className="min-h-[44px] w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-right text-base sm:min-h-0 sm:w-24 sm:py-1 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="min-h-[44px] w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-right text-base sm:min-h-0 sm:w-24 sm:py-1 sm:text-sm"
               />
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-zinc-500 dark:text-zinc-400">{tp("tax")}</span>
-              <span className="tabular-nums font-medium text-zinc-900 dark:text-zinc-50">
+              <span className="text-zinc-500">{tp("tax")}</span>
+              <span className="tabular-nums font-medium text-zinc-900">
                 {pkr.format(previewTotals.tax)}
               </span>
             </div>
-            <div className="flex justify-between border-t border-zinc-100 pt-2 text-base dark:border-zinc-800 xl:hidden">
-              <span className="font-semibold text-zinc-900 dark:text-zinc-50">{tp("total")}</span>
-              <span className="font-bold tabular-nums text-blue-700 dark:text-blue-300">
+            <div className="flex justify-between border-t border-zinc-100 pt-2 text-base xl:hidden">
+              <span className="font-semibold text-zinc-900">{tp("total")}</span>
+              <span className="font-bold tabular-nums text-blue-700">
                 {pkr.format(previewTotals.total)}
               </span>
             </div>
             <div className="pt-1">
-              <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400" htmlFor="pos-disc">
+              <label className="text-xs font-medium text-zinc-500" htmlFor="pos-disc">
                 {ti("invoiceDiscount")}
               </label>
               <input
@@ -1115,13 +1115,13 @@ export function PosSaleClient({
                 step="0.01"
                 value={discountAmount}
                 onChange={(e) => setDiscountAmount(e.target.value)}
-                className="mt-1 min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-base sm:min-h-0 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="mt-1 min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-base sm:min-h-0 sm:text-sm"
               />
             </div>
             </div>
 
-            <details className="mx-3 mb-3 rounded-xl border border-zinc-100 bg-zinc-50/50 px-3 py-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/30 sm:mx-4">
-              <summary className="cursor-pointer font-medium text-zinc-600 dark:text-zinc-400">{tp("moreOptions")}</summary>
+            <details className="mx-3 mb-3 rounded-xl border border-zinc-100 bg-zinc-50/50 px-3 py-2 text-xs sm:mx-4">
+              <summary className="cursor-pointer font-medium text-zinc-600">{tp("moreOptions")}</summary>
               <div className="mt-2 space-y-2">
                 <div>
                   <label className="text-zinc-500">{ti("dueDate")}</label>
@@ -1129,7 +1129,7 @@ export function PosSaleClient({
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-900"
+                    className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5"
                   />
                 </div>
                 <div>
@@ -1138,7 +1138,7 @@ export function PosSaleClient({
                     rows={2}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-900"
+                    className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5"
                   />
                 </div>
                 {isRestaurantMode ? (
@@ -1148,7 +1148,7 @@ export function PosSaleClient({
                       <select
                         value={serviceMode}
                         onChange={(e) => setServiceMode(e.target.value as typeof serviceMode)}
-                        className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-900"
+                        className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5"
                       >
                         <option value="counter">{tp("serviceCounter")}</option>
                         <option value="dine_in">{tp("serviceDineIn")}</option>
@@ -1163,7 +1163,7 @@ export function PosSaleClient({
                         onChange={(e) =>
                           setRestaurantOrderStatus(e.target.value as typeof restaurantOrderStatus)
                         }
-                        className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-900"
+                        className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5"
                       >
                         <option value="new">{tp("orderStatusNew")}</option>
                         <option value="preparing">{tp("orderStatusPreparing")}</option>
@@ -1176,19 +1176,19 @@ export function PosSaleClient({
               </div>
             </details>
 
-          <div className="space-y-3 border-t border-zinc-100 px-3 py-4 sm:px-4 dark:border-zinc-800 xl:hidden">
+          <div className="space-y-3 border-t border-zinc-100 px-3 py-4 sm:px-4 xl:hidden">
             {restaurantWorkflowMode === "order-to-kitchen" ? (
               <button
                 type="button"
                 onClick={sendToKitchen}
                 disabled={pending || lines.length === 0}
-                className="min-h-[52px] w-full touch-manipulation rounded-2xl bg-amber-600 py-3.5 text-base font-semibold text-white shadow-md shadow-amber-600/25 transition hover:bg-amber-700 active:bg-amber-800 disabled:opacity-50 sm:text-sm dark:shadow-amber-900/40"
+                className="min-h-[52px] w-full touch-manipulation rounded-2xl bg-amber-600 py-3.5 text-base font-semibold text-white shadow-md shadow-amber-600/25 transition hover:bg-amber-700 active:bg-amber-800 disabled:opacity-50 sm:text-sm"
               >
                 {pending ? tc("working") : "Send to kitchen"}
               </button>
             ) : null}
-            <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/90 px-3 py-2 dark:border-emerald-900/40 dark:bg-emerald-950/30">
-              <label className="text-xs font-medium text-emerald-900 dark:text-emerald-200">{ti("cashReceived")}</label>
+            <div className="rounded-xl border border-brand-200/80 bg-brand-50/90 px-3 py-2">
+              <label className="text-xs font-medium text-brand-900">{ti("cashReceived")}</label>
               <input
                 type="number"
                 inputMode="decimal"
@@ -1196,10 +1196,10 @@ export function PosSaleClient({
                 step="0.01"
                 value={cashReceived}
                 onChange={(e) => setCashReceived(e.target.value)}
-                className="mt-1 min-h-[48px] w-full rounded-lg border border-emerald-200 bg-white px-3 py-2.5 text-base tabular-nums sm:min-h-0 sm:py-2 sm:text-sm dark:border-emerald-800 dark:bg-zinc-900"
+                className="mt-1 min-h-[48px] w-full rounded-lg border border-brand-200 bg-white px-3 py-2.5 text-base tabular-nums sm:min-h-0 sm:py-2 sm:text-sm"
               />
               {cashChange != null && cashChange > 0.005 ? (
-                <p className="mt-1 text-xs font-semibold text-emerald-800 dark:text-emerald-200">
+                <p className="mt-1 text-xs font-semibold text-brand-800">
                   {ti("changeDue")}{" "}
                   {cashChange.toLocaleString(intlLocaleTag(locale), {
                     minimumFractionDigits: 2,
@@ -1208,7 +1208,7 @@ export function PosSaleClient({
                   PKR
                 </p>
               ) : (
-                <p className="mt-1 text-[11px] text-emerald-800/80 dark:text-emerald-300/80">{ti("cashTenderHint")}</p>
+                <p className="mt-1 text-[11px] text-brand-800/80">{ti("cashTenderHint")}</p>
               )}
             </div>
 
@@ -1218,7 +1218,7 @@ export function PosSaleClient({
                   type="button"
                   onClick={chargeCash}
                   disabled={pending || lines.length === 0}
-                  className="min-h-[52px] w-full touch-manipulation rounded-2xl bg-blue-600 py-3.5 text-base font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 sm:text-sm dark:shadow-blue-900/40"
+                  className="min-h-[52px] w-full touch-manipulation rounded-2xl bg-blue-600 py-3.5 text-base font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 sm:text-sm"
                 >
                   {pending ? tc("working") : tp("placeOrderCash")}
                 </button>
@@ -1226,7 +1226,7 @@ export function PosSaleClient({
                   type="button"
                   onClick={chargeCredit}
                   disabled={pending || lines.length === 0}
-                  className="min-h-[48px] w-full touch-manipulation rounded-2xl border-2 border-blue-200 bg-white py-3 text-base font-semibold text-blue-800 hover:bg-blue-50 active:bg-blue-100/80 disabled:opacity-50 sm:text-sm dark:border-blue-800 dark:bg-zinc-950 dark:text-blue-200 dark:hover:border-blue-600 dark:hover:bg-blue-950/40 dark:hover:text-blue-100 dark:active:bg-blue-950/60"
+                  className="min-h-[48px] w-full touch-manipulation rounded-2xl border-2 border-blue-200 bg-white py-3 text-base font-semibold text-blue-800 hover:bg-blue-50 active:bg-blue-100/80 disabled:opacity-50 sm:text-sm"
                 >
                   {pending ? tc("working") : ti("creditLater")}
                 </button>
@@ -1236,7 +1236,7 @@ export function PosSaleClient({
             <div className="flex flex-col gap-2 sm:flex-row">
               <Link
                 href={cancelHref}
-                className="flex min-h-[48px] flex-1 touch-manipulation items-center justify-center rounded-xl border border-zinc-300 py-3 text-center text-sm font-medium text-zinc-800 hover:bg-zinc-50 active:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 dark:active:bg-zinc-800"
+                className="flex min-h-[48px] flex-1 touch-manipulation items-center justify-center rounded-xl border border-zinc-300 py-3 text-center text-sm font-medium text-zinc-800 hover:bg-zinc-50 active:bg-zinc-100"
               >
                 {ti("cancel")}
               </Link>
@@ -1244,18 +1244,18 @@ export function PosSaleClient({
                 type="button"
                 onClick={save}
                 disabled={pending}
-                className="min-h-[48px] flex-1 touch-manipulation rounded-xl border border-zinc-300 bg-white py-3 text-sm font-medium text-zinc-800 hover:bg-zinc-50 active:bg-zinc-100 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 dark:active:bg-zinc-800"
+                className="min-h-[48px] flex-1 touch-manipulation rounded-xl border border-zinc-300 bg-white py-3 text-sm font-medium text-zinc-800 hover:bg-zinc-50 active:bg-zinc-100 disabled:opacity-50"
               >
                 {pending ? tc("saving") : ti("saveDraft")}
               </button>
             </div>
 
-            <p className="text-center text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">{tp("helpHint")}</p>
+            <p className="text-center text-[11px] leading-relaxed text-zinc-500">{tp("helpHint")}</p>
           </div>
           </div>
 
           {error ? (
-            <p className="border-t border-red-100 px-4 py-2 text-sm text-red-600 dark:border-red-900/50 dark:text-red-400" role="alert">
+            <p className="border-t border-red-100 px-4 py-2 text-sm text-red-600" role="alert">
               {error}
             </p>
           ) : null}
@@ -1264,7 +1264,7 @@ export function PosSaleClient({
       </div>
 
       <div
-        className="fixed bottom-0 left-0 right-0 z-40 hidden gap-3 border-t border-zinc-200 bg-white/95 px-4 py-3 shadow-[0_-8px_32px_rgba(0,0,0,0.1)] backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/95 xl:flex xl:flex-wrap xl:items-center xl:justify-between xl:gap-3 xl:pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:left-56"
+        className="fixed bottom-0 left-0 right-0 z-40 hidden gap-3 border-t border-zinc-200 bg-white/95 px-4 py-3 shadow-[0_-8px_32px_rgba(0,0,0,0.1)] backdrop-blur-md xl:flex xl:flex-wrap xl:items-center xl:justify-between xl:gap-3 xl:pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:left-56"
         role="region"
         aria-label={tp("cartTitle")}
       >
@@ -1273,7 +1273,7 @@ export function PosSaleClient({
             type="button"
             onClick={save}
             disabled={pending}
-            className="min-h-[40px] rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+            className="min-h-[40px] rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-50"
           >
             {pending ? tc("saving") : ti("saveDraft")}
           </button>
@@ -1282,7 +1282,7 @@ export function PosSaleClient({
               type="button"
               onClick={chargeCredit}
               disabled={pending || lines.length === 0}
-              className="min-h-[40px] rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-200 dark:hover:bg-sky-900/70 dark:hover:text-sky-50"
+              className="min-h-[40px] rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-900 hover:bg-sky-100 disabled:opacity-50"
             >
               {pending ? tc("working") : ti("creditLater")}
             </button>
@@ -1291,14 +1291,14 @@ export function PosSaleClient({
               type="button"
               onClick={sendToKitchen}
               disabled={pending || lines.length === 0}
-              className="min-h-[40px] rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200 dark:hover:bg-amber-950/80 dark:hover:text-amber-50"
+              className="min-h-[40px] rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
             >
               {pending ? tc("working") : "Send to kitchen"}
             </button>
           )}
           <Link
             href={cancelHref}
-            className="inline-flex min-h-[40px] items-center rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-100 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200 dark:hover:bg-red-950/60 dark:hover:text-red-100"
+            className="inline-flex min-h-[40px] items-center rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-100"
           >
             {ti("cancel")}
           </Link>
@@ -1315,14 +1315,14 @@ export function PosSaleClient({
             step="0.01"
             value={cashReceived}
             onChange={(e) => setCashReceived(e.target.value)}
-            className="h-10 w-[7.5rem] rounded-lg border border-emerald-200 bg-emerald-50/80 px-2 text-sm tabular-nums dark:border-emerald-800 dark:bg-emerald-950/30"
+            className="h-10 w-[7.5rem] rounded-lg border border-brand-200 bg-brand-50/80 px-2 text-sm tabular-nums"
           />
           {restaurantWorkflowMode === "counter-sale" ? (
             <button
               type="button"
               onClick={chargeCash}
               disabled={pending || lines.length === 0}
-              className="min-h-[44px] min-w-[8rem] rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+              className="min-h-[44px] min-w-[8rem] rounded-xl bg-brand-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-brand-700 disabled:opacity-50"
             >
               {pending ? tc("working") : tp("placeOrderCash")}
             </button>
@@ -1330,10 +1330,10 @@ export function PosSaleClient({
         </div>
         <div className="flex w-full flex-wrap items-end justify-between gap-3 sm:ms-auto sm:w-auto sm:justify-end">
           <div className="text-end">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
               {tp("totalPayable")}
             </p>
-            <p className="text-2xl font-bold tabular-nums leading-tight text-blue-700 dark:text-blue-300">
+            <p className="text-2xl font-bold tabular-nums leading-tight text-blue-700">
               {pkr.format(previewTotals.total)}
             </p>
           </div>
@@ -1356,13 +1356,13 @@ export function PosSaleClient({
 
       {showMobileCartBar ? (
         <div
-          className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t border-zinc-200 bg-white/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/95 xl:hidden"
+          className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-3 border-t border-zinc-200 bg-white/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur-md xl:hidden"
           role="status"
           aria-live="polite"
         >
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{tp("total")}</p>
-            <p className="truncate text-lg font-bold tabular-nums text-blue-700 dark:text-blue-300">
+            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{tp("total")}</p>
+            <p className="truncate text-lg font-bold tabular-nums text-blue-700">
               {pkr.format(previewTotals.total)}
             </p>
           </div>

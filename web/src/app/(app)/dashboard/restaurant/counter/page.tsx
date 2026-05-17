@@ -43,13 +43,13 @@ export default async function CounterPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Counter desk</h1>
-      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Settle served orders and print receipts.</p>
+      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Counter desk</h1>
+      <p className="mt-1 text-sm text-zinc-600">Settle served orders and print receipts.</p>
       <OrdersRealtimeSync businessId={ctx.businessId} />
-      {error ? <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error.message}</p> : null}
-      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      {error ? <p className="mt-4 text-sm text-red-600">{error.message}</p> : null}
+      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-600">
             <tr>
               <th className="px-4 py-3">Invoice</th>
               <th className="px-4 py-3">Table</th>
@@ -59,10 +59,10 @@ export default async function CounterPage() {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tbody className="divide-y divide-zinc-200">
             {bills.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-zinc-500 dark:text-zinc-400">
+                <td colSpan={6} className="px-4 py-8 text-center text-zinc-500">
                   No served/settled bills.
                 </td>
               </tr>
@@ -92,7 +92,7 @@ export default async function CounterPage() {
                             disabled={inv.status !== "paid"}
                           />
                         ) : null}
-                        <Link href={`/dashboard/invoices/${b.invoice_id}`} className="text-sm font-medium underline text-zinc-900 dark:text-zinc-100">
+                        <Link href={`/dashboard/invoices/${b.invoice_id}`} className="text-sm font-medium underline text-zinc-900">
                           Open bill
                         </Link>
                       </div>

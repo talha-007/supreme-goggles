@@ -49,10 +49,10 @@ export default async function CustomersPage({
   if (error) {
     return (
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
           {t("title")}
         </h1>
-        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error.message}</p>
+        <p className="mt-2 text-sm text-red-600">{error.message}</p>
       </div>
     );
   }
@@ -63,15 +63,15 @@ export default async function CustomersPage({
     <div className="mx-auto max-w-6xl">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
             {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("subtitle")}</p>
+          <p className="mt-1 text-sm text-zinc-600">{t("subtitle")}</p>
         </div>
         {canEdit ? (
           <Link
             href="/dashboard/customers/new"
-            className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+            className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800"
           >
             {t("addCustomer")}
           </Link>
@@ -88,19 +88,19 @@ export default async function CustomersPage({
           type="search"
           defaultValue={rawQ}
           placeholder={t("searchPlaceholder")}
-          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
         />
         <button
           type="submit"
-          className="shrink-0 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          className="shrink-0 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
         >
           {tc("search")}
         </button>
       </form>
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600">
             <tr>
               <th className="px-4 py-3">{t("colName")}</th>
               <th className="px-4 py-3">{t("colPhone")}</th>
@@ -110,30 +110,30 @@ export default async function CustomersPage({
               {canEdit ? <th className="px-4 py-3 text-right">{tc("actions")}</th> : null}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tbody className="divide-y divide-zinc-200">
             {customers.length === 0 ? (
               <tr>
                 <td
                   colSpan={canEdit ? 6 : 5}
-                  className="px-4 py-10 text-center text-zinc-500 dark:text-zinc-400"
+                  className="px-4 py-10 text-center text-zinc-500"
                 >
                   {q ? t("noSearchResults") : t("emptyPrompt")}
                 </td>
               </tr>
             ) : (
               customers.map((c) => (
-                <tr key={c.id} className="text-zinc-800 dark:text-zinc-200">
+                <tr key={c.id} className="text-zinc-800">
                   <td className="px-4 py-3 font-medium">{c.name}</td>
-                  <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{c.phone ?? tc("dash")}</td>
+                  <td className="px-4 py-3 text-zinc-600">{c.phone ?? tc("dash")}</td>
                   <td className="px-4 py-3">{tType(c.type as "retail" | "wholesale" | "walkin")}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{pkr.format(c.outstanding_balance)}</td>
                   <td className="px-4 py-3">
                     {c.is_active ? (
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                      <span className="rounded-full bg-brand-100 px-2 py-0.5 text-xs text-brand-800">
                         {tc("active")}
                       </span>
                     ) : (
-                      <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-xs text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                      <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-xs text-zinc-700">
                         {tc("inactive")}
                       </span>
                     )}
@@ -142,7 +142,7 @@ export default async function CustomersPage({
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/dashboard/customers/${c.id}/edit`}
-                        className="text-sm font-medium text-zinc-900 underline hover:no-underline dark:text-zinc-100"
+                        className="text-sm font-medium text-zinc-900 underline hover:no-underline"
                       >
                         {tc("edit")}
                       </Link>

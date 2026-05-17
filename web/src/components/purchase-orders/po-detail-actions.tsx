@@ -50,7 +50,7 @@ export function PoDetailActions({ poId, status, canConfirm = true }: Props) {
                   : undefined
               }
               onClick={() => run(() => confirmPurchaseOrder(poId))}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
             >
               {pending ? "Working…" : "Confirm order (sent to supplier)"}
             </button>
@@ -58,7 +58,7 @@ export function PoDetailActions({ poId, status, canConfirm = true }: Props) {
               type="button"
               disabled={pending}
               onClick={() => run(() => cancelPurchaseOrder(poId))}
-              className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:text-red-200 dark:hover:bg-red-950/40"
+              className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50 disabled:opacity-50"
             >
               Cancel PO
             </button>
@@ -69,14 +69,14 @@ export function PoDetailActions({ poId, status, canConfirm = true }: Props) {
             type="button"
             disabled={pending}
             onClick={() => run(() => cancelPurchaseOrder(poId))}
-            className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:text-red-200 dark:hover:bg-red-950/40"
+            className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50 disabled:opacity-50"
           >
             Cancel PO
           </button>
         ) : null}
       </div>
       {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {error}
         </p>
       ) : null}

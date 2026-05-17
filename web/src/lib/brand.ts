@@ -16,6 +16,9 @@ export const BRAND_LOGO = {
 
 export const BRAND_FAVICON = "/favicon.png";
 
+/** Primary UI / marketing accent (`brand-*` in Tailwind; scale in `globals.css`). */
+export const BRAND_PRIMARY_HEX = "#3A09B0" as const;
+
 /**
  * Public URL to download the Android app (APK or Play Store).
  *

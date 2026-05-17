@@ -30,18 +30,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const t = await getTranslations("admin");
 
   return (
-    <div className="min-h-full bg-zinc-100 dark:bg-zinc-950">
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="min-h-full bg-zinc-100">
+      <header className="border-b border-zinc-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard"
-              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
             >
               {t("backToApp")}
             </Link>
-            <span className="hidden text-zinc-300 dark:text-zinc-600 sm:inline">|</span>
-            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{t("title")}</span>
+            <span className="hidden text-zinc-300 sm:inline">|</span>
+            <span className="text-sm font-semibold text-zinc-900">{t("title")}</span>
           </div>
           <span className="max-w-[60vw] truncate text-xs text-zinc-500">{user.email}</span>
         </div>

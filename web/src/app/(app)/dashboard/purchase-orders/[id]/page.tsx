@@ -11,11 +11,11 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 const statusStyle: Record<string, string> = {
-  draft: "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200",
-  ordered: "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
-  partial: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  received: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  cancelled: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
+  draft: "bg-zinc-200 text-zinc-800",
+  ordered: "bg-sky-100 text-sky-900",
+  partial: "bg-amber-100 text-amber-900",
+  received: "bg-brand-100 text-brand-900",
+  cancelled: "bg-red-100 text-red-900",
 };
 
 type ProductNested = {
@@ -106,14 +106,14 @@ export default async function PurchaseOrderDetailPage({
         <div>
           <Link
             href="/dashboard/purchase-orders"
-            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
           >
             {t("backLink")}
           </Link>
-          <h1 className="mt-4 font-mono text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="mt-4 font-mono text-2xl font-semibold tracking-tight text-zinc-900">
             {po.po_number as string}
           </h1>
-          <p className="mt-1 text-sm capitalize text-zinc-600 dark:text-zinc-400">
+          <p className="mt-1 text-sm capitalize text-zinc-600">
             <span
               className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusStyle[status] ?? statusStyle.draft}`}
             >
@@ -125,36 +125,36 @@ export default async function PurchaseOrderDetailPage({
 
       <div className="flex flex-col gap-6">
         {hasUnlinkedLines && status !== "cancelled" ? (
-          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/50">
-            <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">
+          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
+            <p className="text-sm font-semibold text-amber-950">
               {t("unlinkedTitle")}
             </p>
-            <p className="mt-1 text-sm text-amber-900/95 dark:text-amber-200/90">{t("unlinkedBody")}</p>
+            <p className="mt-1 text-sm text-amber-900/95">{t("unlinkedBody")}</p>
           </div>
         ) : null}
 
-        <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{t("supplierSection")}</h2>
+        <div className="rounded-xl border border-zinc-200 bg-white p-4">
+          <h2 className="text-sm font-semibold text-zinc-900">{t("supplierSection")}</h2>
           {supplier ? (
-            <div className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
+            <div className="mt-2 text-sm text-zinc-700">
               <p className="font-medium">{supplier.name}</p>
               {supplier.phone ? <p>{supplier.phone}</p> : null}
               {supplier.address ? <p className="whitespace-pre-wrap">{supplier.address}</p> : null}
             </div>
           ) : (
-            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{t("noSupplier")}</p>
+            <p className="mt-2 text-sm text-zinc-600">{t("noSupplier")}</p>
           )}
           {po.notes ? (
-            <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-              <span className="font-medium text-zinc-800 dark:text-zinc-200">{t("notesLabel")}</span>:{" "}
+            <p className="mt-3 text-sm text-zinc-600">
+              <span className="font-medium text-zinc-800">{t("notesLabel")}</span>:{" "}
               {String(po.notes)}
             </p>
           ) : null}
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
           <table className="w-full text-sm">
-            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600">
               <tr>
                 <th className="px-4 py-2 text-left">{t("colProduct")}</th>
                 <th className="px-4 py-2 text-left">{t("colCatalog")}</th>
@@ -164,7 +164,7 @@ export default async function PurchaseOrderDetailPage({
                 <th className="px-4 py-2 text-right">{t("colLine")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            <tbody className="divide-y divide-zinc-200">
               {rawItems.map((row) => {
                 const prod = Array.isArray(row.product) ? row.product[0] : row.product;
                 const quick =
@@ -172,9 +172,9 @@ export default async function PurchaseOrderDetailPage({
                 return (
                   <tr key={row.id}>
                     <td className="px-4 py-2 align-top">
-                      <span className="font-medium text-zinc-900 dark:text-zinc-50">{row.product_name}</span>
+                      <span className="font-medium text-zinc-900">{row.product_name}</span>
                       {prod ? (
-                        <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
+                        <span className="ml-2 text-xs text-zinc-500">
                           {t("stockLabel", {
                             n: Number(prod.current_stock).toLocaleString(intlTag),
                           })}
@@ -183,7 +183,7 @@ export default async function PurchaseOrderDetailPage({
                     </td>
                     <td className="px-4 py-2 align-top">
                       {row.product_id ? (
-                        <span className="text-xs text-emerald-700 dark:text-emerald-300">
+                        <span className="text-xs text-brand-700">
                           {t("linkedHint")}
                         </span>
                       ) : (
@@ -211,7 +211,7 @@ export default async function PurchaseOrderDetailPage({
               })}
             </tbody>
           </table>
-          <div className="flex justify-between border-t border-zinc-200 px-4 py-3 text-sm font-semibold dark:border-zinc-800">
+          <div className="flex justify-between border-t border-zinc-200 px-4 py-3 text-sm font-semibold">
             <span>{t("totalRow")}</span>
             <span className="tabular-nums">{pkr.format(Number(po.total_amount))}</span>
           </div>
@@ -220,11 +220,11 @@ export default async function PurchaseOrderDetailPage({
         <PoDetailActions poId={id} status={status} canConfirm={!hasUnlinkedLines} />
 
         {needsInventorySync ? (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/60 dark:bg-amber-950/40">
-            <p className="text-sm font-medium text-amber-950 dark:text-amber-100">{t("needsSyncTitle")}</p>
-            <p className="mt-1 text-sm text-amber-900/90 dark:text-amber-200/90">{t("needsSyncBody")}</p>
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-medium text-amber-950">{t("needsSyncTitle")}</p>
+            <p className="mt-1 text-sm text-amber-900/90">{t("needsSyncBody")}</p>
             <p className="mt-2 text-sm">
-              <Link href="/dashboard/products" className="font-medium text-amber-950 underline dark:text-amber-100">
+              <Link href="/dashboard/products" className="font-medium text-amber-950 underline">
                 {t("productsLink")}
               </Link>
             </p>

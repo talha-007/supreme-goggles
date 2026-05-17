@@ -46,10 +46,10 @@ export default async function KitchenPage() {
       {/* Page header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
             Kitchen
           </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="mt-1 text-sm text-zinc-500">
             {orders.length === 0
               ? "No active orders right now."
               : `${newCount} new · ${preparingCount} preparing`}
@@ -62,7 +62,7 @@ export default async function KitchenPage() {
       </div>
 
       {error && (
-        <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error.message}</p>
+        <p className="mt-4 text-sm text-red-600">{error.message}</p>
       )}
 
       <div className="mt-6">

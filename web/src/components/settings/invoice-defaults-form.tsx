@@ -21,7 +21,7 @@ export function InvoiceDefaultsForm({ initial, canEdit }: Props) {
     <form action={action} className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
-          <label htmlFor="default_tax_rate" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="default_tax_rate" className="text-sm font-medium text-zinc-700">
             {t("defaultTaxRate")}
           </label>
           <input
@@ -33,12 +33,12 @@ export function InvoiceDefaultsForm({ initial, canEdit }: Props) {
             step="0.01"
             defaultValue={initial.default_tax_rate}
             disabled={!canEdit}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60"
           />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">{t("defaultTaxRateHint")}</p>
+          <p className="text-xs text-zinc-500">{t("defaultTaxRateHint")}</p>
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="tax_label" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="tax_label" className="text-sm font-medium text-zinc-700">
             {t("taxLabel")}
           </label>
           <input
@@ -48,13 +48,13 @@ export function InvoiceDefaultsForm({ initial, canEdit }: Props) {
             placeholder={t("taxLabelPlaceholder")}
             defaultValue={initial.tax_label ?? ""}
             disabled={!canEdit}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60"
           />
         </div>
         <div className="flex flex-col gap-1">
           <label
             htmlFor="default_invoice_discount_amount"
-            className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            className="text-sm font-medium text-zinc-700"
           >
             {t("defaultDiscount")}
           </label>
@@ -66,14 +66,14 @@ export function InvoiceDefaultsForm({ initial, canEdit }: Props) {
             step="0.01"
             defaultValue={initial.default_invoice_discount_amount}
             disabled={!canEdit}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60"
           />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">{t("defaultDiscountHint")}</p>
+          <p className="text-xs text-zinc-500">{t("defaultDiscountHint")}</p>
         </div>
         <div className="flex flex-col gap-1">
           <label
             htmlFor="default_line_discount_pct"
-            className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            className="text-sm font-medium text-zinc-700"
           >
             {t("defaultLineDisc")}
           </label>
@@ -86,24 +86,24 @@ export function InvoiceDefaultsForm({ initial, canEdit }: Props) {
             step="0.01"
             defaultValue={initial.default_line_discount_pct}
             disabled={!canEdit}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 disabled:opacity-60"
           />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">{t("defaultLineDiscHint")}</p>
+          <p className="text-xs text-zinc-500">{t("defaultLineDiscHint")}</p>
         </div>
       </div>
       {canEdit ? (
         <button
           type="submit"
           disabled={pending}
-          className="w-fit rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+          className="w-fit rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
         >
           {pending ? tc("saving") : t("saveButton")}
         </button>
       ) : (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">{tc("onlyOwnersManagersDefaults")}</p>
+        <p className="text-sm text-zinc-500">{tc("onlyOwnersManagersDefaults")}</p>
       )}
       {state.error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {state.error}
         </p>
       ) : null}

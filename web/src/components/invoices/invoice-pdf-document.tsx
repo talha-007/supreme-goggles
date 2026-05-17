@@ -15,16 +15,17 @@ import type {
   InvoiceItemRow,
   InvoiceRow,
 } from "@/types/invoice";
+import { RECEIPT_WIDTH_MM } from "@/lib/invoices/invoice-receipt-dimensions";
 
 /**
  * PDF page size matches common thermal receipt printers (80mm roll).
- * Change RECEIPT_WIDTH_MM to 58 if your hardware uses 58mm paper.
+ * Width is shared with HTML receipt printing (`invoice-receipt-dimensions`).
  * Dimensions use points (PDF); 1 mm = 72/25.4 pt.
  */
-export const RECEIPT_WIDTH_MM = 80;
 const MM_TO_PT = 72 / 25.4;
 /** Width of the printable page = paper width (thermal roll is typically 80mm). */
 export const RECEIPT_WIDTH_PT = RECEIPT_WIDTH_MM * MM_TO_PT;
+export { RECEIPT_WIDTH_MM };
 /**
  * For very long receipts, content is split across pages of this height (mm).
  * Kept short so each printed “slice” wastes less roll than A4-sized pages.

@@ -55,42 +55,42 @@ export default async function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
         {t("title")}
       </h1>
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{t("subtitle")}</p>
+      <p className="mt-2 text-sm text-zinc-600">{t("subtitle")}</p>
 
       {showAdmin ? (
-        <section className="mt-8 rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900/60 dark:bg-violet-950/35">
+        <section className="mt-8 rounded-xl border border-violet-200 bg-violet-50 p-4">
           <Link
             href="/admin"
-            className="text-sm font-semibold text-violet-900 underline decoration-violet-400 underline-offset-2 hover:text-violet-800 dark:text-violet-200 dark:hover:text-violet-100"
+            className="text-sm font-semibold text-violet-900 underline decoration-violet-400 underline-offset-2 hover:text-violet-800"
           >
             {t("adminConsole")}
           </Link>
-          <p className="mt-1 text-sm text-violet-900/90 dark:text-violet-200/85">{t("adminConsoleDesc")}</p>
+          <p className="mt-1 text-sm text-violet-900/90">{t("adminConsoleDesc")}</p>
         </section>
       ) : null}
 
-      <section className="mt-10 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{t("profileSection")}</h2>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("profileSectionDesc")}</p>
+      <section className="mt-10 rounded-xl border border-zinc-200 bg-white p-6">
+        <h2 className="text-sm font-semibold text-zinc-900">{t("profileSection")}</h2>
+        <p className="mt-1 text-sm text-zinc-600">{t("profileSectionDesc")}</p>
         <div className="mt-6">
           <BusinessProfileForm initial={profileInitial} canEdit={canEditSettings} />
         </div>
       </section>
 
-      <section className="mt-10 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{t("invoiceSection")}</h2>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("invoiceSectionDesc")}</p>
+      <section className="mt-10 rounded-xl border border-zinc-200 bg-white p-6">
+        <h2 className="text-sm font-semibold text-zinc-900">{t("invoiceSection")}</h2>
+        <p className="mt-1 text-sm text-zinc-600">{t("invoiceSectionDesc")}</p>
         <div className="mt-6">
           <InvoiceDefaultsForm initial={initial} canEdit={canEditSettings} />
         </div>
       </section>
 
-      <section className="mt-8 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
-        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{t("whatsappSection")}</h2>
-        {/* <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+      <section className="mt-8 rounded-xl border border-zinc-200 bg-white p-6">
+        <h2 className="text-sm font-semibold text-zinc-900">{t("whatsappSection")}</h2>
+        {/* <p className="mt-1 text-sm text-zinc-600">
           {t("whatsappSectionDesc", {
             phoneId: "WHATSAPP_PHONE_NUMBER_ID",
             token: "WHATSAPP_ACCESS_TOKEN",

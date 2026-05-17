@@ -65,8 +65,8 @@ export function InvoiceFinalizeButtons({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-        <label className="text-xs font-medium text-emerald-900 dark:text-emerald-200">
+      <div className="rounded-lg border border-brand-200 bg-brand-50/80 px-3 py-2">
+        <label className="text-xs font-medium text-brand-900">
           {tp("amountCashLabel")}
         </label>
         <input
@@ -75,16 +75,16 @@ export function InvoiceFinalizeButtons({
           step="0.01"
           value={cashReceived}
           onChange={(e) => setCashReceived(e.target.value)}
-          className="mt-1 w-full max-w-xs rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm tabular-nums text-zinc-900 dark:border-emerald-800 dark:bg-zinc-900 dark:text-zinc-50"
+          className="mt-1 w-full max-w-xs rounded-md border border-brand-200 bg-white px-3 py-2 text-sm tabular-nums text-zinc-900"
         />
         {cashChange != null && cashChange > 0.005 ? (
-          <p className="mt-2 text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+          <p className="mt-2 text-sm font-semibold text-brand-800">
             {tp("changeDue")}{" "}
             {cashChange.toLocaleString(intlTag, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
             {tpm("currencySuffix")}
           </p>
         ) : (
-          <p className="mt-1 text-xs text-emerald-800/80 dark:text-emerald-300/80">
+          <p className="mt-1 text-xs text-brand-800/80">
             {tp("hintCash")}
           </p>
         )}
@@ -94,7 +94,7 @@ export function InvoiceFinalizeButtons({
           type="button"
           disabled={pending}
           onClick={() => run(() => finalizeInvoice(invoiceId))}
-          className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-50"
         >
           {pending ? tc("working") : tp("finalizeCredit")}
         </button>
@@ -102,14 +102,14 @@ export function InvoiceFinalizeButtons({
           type="button"
           disabled={pending}
           onClick={onCashFinalize}
-          className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+          className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-50"
         >
           {pending ? tc("working") : tp("finalizeCash")}
         </button>
       </div>
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">{tp("footnote")}</p>
+      <p className="text-xs text-zinc-500">{tp("footnote")}</p>
       {error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {error}
         </p>
       ) : null}

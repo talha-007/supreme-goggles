@@ -36,11 +36,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const statusStyle: Record<string, string> = {
-  draft: "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200",
-  unpaid: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  partial: "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
-  paid: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  cancelled: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
+  draft: "bg-zinc-200 text-zinc-800",
+  unpaid: "bg-amber-100 text-amber-900",
+  partial: "bg-sky-100 text-sky-900",
+  paid: "bg-brand-100 text-brand-900",
+  cancelled: "bg-red-100 text-red-900",
 };
 
 function sumMoney(rows: { total_amount: unknown; paid_amount?: unknown }[], pred: (r: InvoiceRow) => boolean) {
@@ -261,22 +261,22 @@ export default async function DashboardPage({
     <div className="mx-auto max-w-[1600px]">
       {/* <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
             {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("subtitle")}</p>
+          <p className="mt-1 text-sm text-zinc-600">{t("subtitle")}</p>
         </div>
         {canEdit ? (
           <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Link
               href="#dashboard-new-invoice"
-              className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+              className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800"
             >
               {t("newInvoice")}
             </Link>
             <Link
               href="/dashboard/invoices"
-              className="inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
+              className="inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
             >
               {t("allInvoices")}
             </Link>
@@ -289,13 +289,13 @@ export default async function DashboardPage({
         <section id="dashboard-new-invoice" className="scroll-mt-24">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+              <h2 className="text-lg font-semibold tracking-tight text-zinc-900">
                 {t("invoiceSection")}
               </h2>
             </div>
             <Link
               href="/dashboard/invoices/new"
-              className="shrink-0 text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
+              className="shrink-0 text-sm font-medium text-zinc-700 hover:text-zinc-900"
             >
               {t("fullPageInvoice")}
             </Link>
@@ -325,26 +325,26 @@ export default async function DashboardPage({
         <OpenPosPanel items={openPosList} />
       </div>
       {isRestaurant ? (
-        <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+        <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Open tables</h3>
-            <Link href="/dashboard/invoices" className="text-xs font-medium text-zinc-700 underline dark:text-zinc-300">
+            <h3 className="text-sm font-semibold text-zinc-900">Open tables</h3>
+            <Link href="/dashboard/invoices" className="text-xs font-medium text-zinc-700 underline">
               {tCommon("viewAll")}
             </Link>
           </div>
           {openTables.length === 0 ? (
-            <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">No open dine-in orders.</p>
+            <p className="mt-3 text-sm text-zinc-500">No open dine-in orders.</p>
           ) : (
             <ul className="mt-3 space-y-2 text-sm">
               {openTables.map((row) => {
                 const tableName = Array.isArray(row.restaurant_tables)
-                  ? (row.restaurant_tables[0]?.name ?? "—")
-                  : (row.restaurant_tables?.name ?? "—");
+                  ? (row.restaurant_tables[0]?.name ?? "â€”")
+                  : (row.restaurant_tables?.name ?? "â€”");
                 return (
-                  <li key={row.id} className="flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2 dark:border-zinc-800">
-                    <span className="font-medium text-zinc-900 dark:text-zinc-50">{tableName}</span>
-                    <span className="text-zinc-600 dark:text-zinc-300">{row.invoice_number}</span>
-                    <span className="capitalize text-zinc-500 dark:text-zinc-400">{row.restaurant_order_status}</span>
+                  <li key={row.id} className="flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2">
+                    <span className="font-medium text-zinc-900">{tableName}</span>
+                    <span className="text-zinc-600">{row.invoice_number}</span>
+                    <span className="capitalize text-zinc-500">{row.restaurant_order_status}</span>
                   </li>
                 );
               })}
@@ -355,27 +355,27 @@ export default async function DashboardPage({
 
       <div className="mt-10">
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
             {t("recentInvoices")}
           </h2>
           <Link
             href="/dashboard/invoices"
-            className="text-sm font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
+            className="text-sm font-medium text-zinc-700 hover:text-zinc-900"
           >
             {tCommon("viewAll")}
           </Link>
         </div>
 
-        <div className="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-white">
           {recent.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="px-4 py-8 text-center text-sm text-zinc-500">
               {t("noInvoices")}
               {canEdit ? (
                 <>
                   {" "}
                   <Link
                     href="#dashboard-new-invoice"
-                    className="font-medium text-zinc-900 underline dark:text-zinc-100"
+                    className="font-medium text-zinc-900 underline"
                   >
                     {t("createFirstInvoice")}
                   </Link>
@@ -384,7 +384,7 @@ export default async function DashboardPage({
             </p>
           ) : (
             <table className="w-full min-w-[560px] text-left text-sm">
-              <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+              <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600">
                 <tr>
                   <th className="px-4 py-3">{t("colInvoice")}</th>
                   <th className="px-4 py-3">{t("colCustomer")}</th>
@@ -392,17 +392,17 @@ export default async function DashboardPage({
                   <th className="px-4 py-3 text-right">{t("colTotal")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              <tbody className="divide-y divide-zinc-200">
                 {recent.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+                  <tr key={inv.id} className="hover:bg-zinc-50">
                     <td className="px-4 py-3">
                       <Link
                         href={`/dashboard/invoices/${inv.id}`}
-                        className="font-medium text-zinc-900 hover:underline dark:text-zinc-50"
+                        className="font-medium text-zinc-900 hover:underline"
                       >
                         {inv.invoice_number}
                       </Link>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <p className="text-xs text-zinc-500">
                         {new Date(inv.created_at).toLocaleDateString(intlTag, {
                           day: "numeric",
                           month: "short",
@@ -410,7 +410,7 @@ export default async function DashboardPage({
                         })}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
+                    <td className="px-4 py-3 text-zinc-700">
                       {inv.customers?.name ?? tCommon("dash")}
                     </td>
                     <td className="px-4 py-3">
@@ -420,7 +420,7 @@ export default async function DashboardPage({
                         {tInv(inv.status as "draft" | "unpaid" | "partial" | "paid" | "cancelled")}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums text-zinc-900 dark:text-zinc-50">
+                    <td className="px-4 py-3 text-right tabular-nums text-zinc-900">
                       {pkr.format(Number(inv.total_amount))}
                     </td>
                   </tr>
@@ -437,9 +437,9 @@ export default async function DashboardPage({
         <div className="mb-1 flex flex-wrap items-center justify-end gap-3">
           <Link
             href={`/dashboard/analytics?period=${statsPeriod}`}
-            className="text-sm font-medium text-emerald-700 underline decoration-emerald-400/50 underline-offset-2 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300"
+            className="text-sm font-medium text-brand-700 underline decoration-brand-400/50 underline-offset-2 hover:text-brand-800"
           >
-            {tAnalytics("openInsights")} →
+            {tAnalytics("openInsights")} â†’
           </Link>
         </div>
         <DashboardStatsPeriodTabs current={statsPeriod} />

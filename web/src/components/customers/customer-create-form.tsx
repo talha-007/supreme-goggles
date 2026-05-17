@@ -17,7 +17,7 @@ export function CustomerCreateForm() {
     <form action={formAction} className="flex flex-col gap-6">
       <CustomerFields />
       {state.error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-red-600" role="alert">
           {state.error}
         </p>
       ) : null}
@@ -25,7 +25,7 @@ export function CustomerCreateForm() {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+          className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
         >
           {pending ? "Saving…" : "Save customer"}
         </button>

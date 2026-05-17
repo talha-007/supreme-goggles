@@ -54,7 +54,7 @@ export function GoogleOauthButton({ label, onError, disabled, className }: Props
       disabled={Boolean(disabled) || loading}
       className={
         className ??
-        "flex w-full items-center justify-center gap-2.5 rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-800 shadow-sm transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
+        "flex w-full items-center justify-center gap-2.5 rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-800 shadow-sm transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
       }
     >
       <GoogleGMark className="h-5 w-5 shrink-0" aria-hidden />

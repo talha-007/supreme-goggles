@@ -130,14 +130,14 @@ export default async function InvoiceDetailPage({
         <div>
           <Link
             href="/dashboard/invoices"
-            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-900"
           >
             {t("backLink")}
           </Link>
-          <h1 className="mt-4 font-mono text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="mt-4 font-mono text-2xl font-semibold tracking-tight text-zinc-900 whitespace-nowrap">
             {inv.invoice_number}
           </h1>
-          <p className="mt-1 text-sm capitalize text-zinc-600 dark:text-zinc-400">
+          <p className="mt-1 text-sm capitalize text-zinc-600">
             {t("statusLabel")}: {statusLabel}
           </p>
         </div>
@@ -146,7 +146,7 @@ export default async function InvoiceDetailPage({
             href={`/api/invoices/${id}/pdf?copy=customer`}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+            className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-50"
           >
             {t("viewPrintPdf")}
           </a>
@@ -154,7 +154,7 @@ export default async function InvoiceDetailPage({
           {canEdit && inv.status !== "draft" ? (
             <Link
               href="/dashboard/invoices/new"
-              className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+              className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-800"
             >
               {t("newInvoice")}
             </Link>
@@ -162,7 +162,7 @@ export default async function InvoiceDetailPage({
           {canEdit && inv.status === "draft" ? (
             <Link
               href={`/dashboard/invoices/${id}/edit`}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
             >
               {t("editDraft")}
             </Link>
@@ -172,44 +172,44 @@ export default async function InvoiceDetailPage({
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <div className="rounded-xl border border-zinc-200 bg-white p-4">
+            <h2 className="text-sm font-semibold text-zinc-900">
               {t("customerSection")}
             </h2>
             {inv.customers ? (
-              <div className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
+              <div className="mt-2 text-sm text-zinc-700">
                 <p className="font-medium">{inv.customers.name}</p>
                 {inv.customers.phone ? <p>{inv.customers.phone}</p> : null}
                 {inv.customers.address ? <p className="whitespace-pre-wrap">{inv.customers.address}</p> : null}
               </div>
             ) : (
-              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{t("walkIn")}</p>
+              <p className="mt-2 text-sm text-zinc-600">{t("walkIn")}</p>
             )}
             {isRestaurant ? (
-              <div className="mt-3 grid gap-2 text-sm text-zinc-700 dark:text-zinc-300 sm:grid-cols-2">
+              <div className="mt-3 grid gap-2 text-sm text-zinc-700 sm:grid-cols-2">
                 <p>
-                  <span className="text-zinc-500 dark:text-zinc-400">Table: </span>
+                  <span className="text-zinc-500">Table: </span>
                   {tableName ?? "—"}
                 </p>
                 <p>
-                  <span className="text-zinc-500 dark:text-zinc-400">Waiter: </span>
+                  <span className="text-zinc-500">Waiter: </span>
                   {waiterName ?? "—"}
                 </p>
                 <p className="capitalize">
-                  <span className="text-zinc-500 dark:text-zinc-400">Service: </span>
+                  <span className="text-zinc-500">Service: </span>
                   {String(inv.service_mode ?? "counter").replace("_", " ")}
                 </p>
                 <p className="capitalize">
-                  <span className="text-zinc-500 dark:text-zinc-400">Order: </span>
+                  <span className="text-zinc-500">Order: </span>
                   {String(inv.restaurant_order_status ?? "new").replace("_", " ")}
                 </p>
               </div>
             ) : null}
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
             <table className="w-full text-sm">
-              <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+              <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600">
                 <tr>
                   <th className="px-4 py-2 text-left">{t("colItem")}</th>
                   <th className="px-4 py-2 text-right">{t("colQty")}</th>
@@ -217,7 +217,7 @@ export default async function InvoiceDetailPage({
                   <th className="px-4 py-2 text-right">{t("colAmount")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              <tbody className="divide-y divide-zinc-200">
                 {(items ?? []).map((it) => {
                   const row = it as InvoiceItemRow;
                   return (
@@ -241,9 +241,9 @@ export default async function InvoiceDetailPage({
           </div>
 
           {inv.notes ? (
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{t("notesSection")}</h2>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-700 dark:text-zinc-300">
+            <div className="rounded-xl border border-zinc-200 bg-white p-4">
+              <h2 className="text-sm font-semibold text-zinc-900">{t("notesSection")}</h2>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-700">
                 {inv.notes}
               </p>
             </div>
@@ -251,31 +251,31 @@ export default async function InvoiceDetailPage({
         </div>
 
         <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="rounded-xl border border-zinc-200 bg-white p-4">
             <div className="flex justify-between text-sm">
-              <span className="text-zinc-600 dark:text-zinc-400">{t("subtotal")}</span>
+              <span className="text-zinc-600">{t("subtotal")}</span>
               <span className="tabular-nums">{pkr.format(Number(inv.subtotal))}</span>
             </div>
             <div className="mt-2 flex justify-between text-sm">
-              <span className="text-zinc-600 dark:text-zinc-400">{t("discount")}</span>
+              <span className="text-zinc-600">{t("discount")}</span>
               <span className="tabular-nums">{pkr.format(Number(inv.discount_amount))}</span>
             </div>
             <div className="mt-2 flex justify-between text-sm">
-              <span className="text-zinc-600 dark:text-zinc-400">
+              <span className="text-zinc-600">
                 {t("taxWithPct", { pct: Number(inv.tax_rate).toFixed(2) })}
               </span>
               <span className="tabular-nums">{pkr.format(Number(inv.tax_amount))}</span>
             </div>
-            <div className="mt-3 flex justify-between border-t border-zinc-200 pt-3 text-base font-semibold dark:border-zinc-800">
+            <div className="mt-3 flex justify-between border-t border-zinc-200 pt-3 text-base font-semibold">
               <span>{t("total")}</span>
               <span className="tabular-nums">{pkr.format(total)}</span>
             </div>
             <div className="mt-2 flex justify-between text-sm">
-              <span className="text-zinc-600 dark:text-zinc-400">{t("paid")}</span>
+              <span className="text-zinc-600">{t("paid")}</span>
               <span className="tabular-nums">{pkr.format(paid)}</span>
             </div>
             {balance > 0.001 ? (
-              <div className="mt-2 flex justify-between text-sm font-medium text-amber-800 dark:text-amber-200">
+              <div className="mt-2 flex justify-between text-sm font-medium text-amber-800">
                 <span>{t("balance")}</span>
                 <span className="tabular-nums">{pkr.format(balance)}</span>
               </div>
@@ -290,8 +290,8 @@ export default async function InvoiceDetailPage({
             <InvoicePaymentForm invoiceId={id} balanceDue={balance} />
           ) : null}
           {canEdit && isRestaurant && inv.status !== "cancelled" ? (
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Order status</h3>
+            <div className="rounded-xl border border-zinc-200 bg-white p-4">
+              <h3 className="text-sm font-semibold text-zinc-900">Order status</h3>
               <div className="mt-2">
                 <RestaurantOrderStatusButtons
                   invoiceId={id}
@@ -308,8 +308,8 @@ export default async function InvoiceDetailPage({
             </div>
           ) : null}
 
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950">
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{t("paymentsSection")}</h3>
+          <div className="rounded-xl border border-zinc-200 bg-white p-4">
+            <h3 className="text-sm font-semibold text-zinc-900">{t("paymentsSection")}</h3>
             {(payments ?? []).length === 0 ? (
               <p className="mt-2 text-sm text-zinc-500">{t("noPayments")}</p>
             ) : (
@@ -317,9 +317,9 @@ export default async function InvoiceDetailPage({
                 {(payments ?? []).map((p) => (
                   <li
                     key={p.id}
-                    className="flex justify-between border-b border-zinc-100 pb-2 dark:border-zinc-800"
+                    className="flex justify-between border-b border-zinc-100 pb-2"
                   >
-                    <span className="capitalize text-zinc-600 dark:text-zinc-400">
+                    <span className="capitalize text-zinc-600">
                       {paymentMethodLabel(tPay, p.method as string)}
                     </span>
                     <span className="tabular-nums font-medium">
@@ -332,8 +332,8 @@ export default async function InvoiceDetailPage({
           </div>
 
           {showReverse ? (
-            <div className="rounded-xl border border-red-200 bg-red-50/80 p-4 dark:border-red-900/60 dark:bg-red-950/30">
-              <p className="text-xs font-medium uppercase tracking-wide text-red-800 dark:text-red-200">
+            <div className="rounded-xl border border-red-200 bg-red-50/80 p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-red-800">
                 {t("reverseSectionLabel")}
               </p>
               <div className="mt-2">

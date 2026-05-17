@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 const statusStyle: Record<string, string> = {
-  draft:     "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200",
-  unpaid:    "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  partial:   "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
-  paid:      "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  cancelled: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
+  draft:     "bg-zinc-200 text-zinc-800",
+  unpaid:    "bg-amber-100 text-amber-900",
+  partial:   "bg-sky-100 text-sky-900",
+  paid:      "bg-brand-100 text-brand-900",
+  cancelled: "bg-red-100 text-red-900",
 };
 
 const STATUS_OPTIONS = [
@@ -45,7 +45,7 @@ type Props = {
   invoices: InvoiceClientRow[];
   canEdit: boolean;
   isRestaurant: boolean;
-  /** BCP 47 tag for PKR formatting (e.g. `en-PK`, `ur-PK`) — must be serializable, not a function. */
+  /** BCP 47 tag for PKR formatting (e.g. `en-PK`, `ur-PK`) â€” must be serializable, not a function. */
   currencyLocale: string;
   statusLabels: Record<string, string>;
   editLabel: string;
@@ -125,7 +125,7 @@ export function InvoicesClient({
   }, [invoices, search, statusF, dateF, now]);
 
   const inputCls =
-    "rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50";
+    "rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:ring-2";
 
   const hasFilter = search !== "" || statusF !== "" || dateF !== "all";
 
@@ -134,15 +134,15 @@ export function InvoicesClient({
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
             {title}
           </h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{subtitle}</p>
+          <p className="mt-1 text-sm text-zinc-600">{subtitle}</p>
         </div>
         {canEdit && (
           <Link
             href={newInvoiceHref}
-            className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+            className="inline-flex items-center justify-center rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800"
           >
             {newInvoiceLabel}
           </Link>
@@ -162,7 +162,7 @@ export function InvoicesClient({
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search invoice # or customer…"
+            placeholder="Search invoice # or customerâ€¦"
             className={`${inputCls} w-full pl-9 pr-3`}
           />
         </div>
@@ -194,23 +194,23 @@ export function InvoicesClient({
           <button
             type="button"
             onClick={() => { setSearch(""); setStatusF(""); setDateF("all"); }}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50"
           >
             Clear
           </button>
         )}
 
         {/* Result count */}
-        <span className="ml-auto text-xs text-zinc-400 dark:text-zinc-500 tabular-nums">
+        <span className="ml-auto text-xs text-zinc-400 tabular-nums">
           {filtered.length} / {invoices.length}
         </span>
       </div>
 
       {/* Table */}
-      <div className="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="mt-3 overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[680px] text-left text-sm">
-            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium uppercase tracking-wide text-zinc-600">
               <tr>
                 <th className="px-4 py-3">Invoice</th>
                 <th className="px-4 py-3">Customer</th>
@@ -223,33 +223,33 @@ export function InvoicesClient({
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            <tbody className="divide-y divide-zinc-200">
               {filtered.length === 0 ? (
                 <tr>
                   <td
                     colSpan={isRestaurant ? 9 : 7}
-                    className="px-4 py-12 text-center text-sm text-zinc-500 dark:text-zinc-400"
+                    className="px-4 py-12 text-center text-sm text-zinc-500"
                   >
                     {hasFilter ? "No invoices match your filters." : emptyLabel}
                   </td>
                 </tr>
               ) : (
                 filtered.map((inv) => {
-                  const cust = inv.customers?.name ?? "—";
+                  const cust = inv.customers?.name ?? "â€”";
                   const table = Array.isArray(inv.restaurant_tables)
-                    ? (inv.restaurant_tables[0]?.name ?? "—")
-                    : (inv.restaurant_tables?.name ?? "—");
+                    ? (inv.restaurant_tables[0]?.name ?? "â€”")
+                    : (inv.restaurant_tables?.name ?? "â€”");
                   const waiter = Array.isArray(inv.restaurant_staff)
-                    ? (inv.restaurant_staff[0]?.name ?? "—")
-                    : (inv.restaurant_staff?.name ?? "—");
+                    ? (inv.restaurant_staff[0]?.name ?? "â€”")
+                    : (inv.restaurant_staff?.name ?? "â€”");
                   const date = new Date(inv.created_at).toLocaleDateString("en-PK", {
                     day: "2-digit", month: "short", year: "numeric",
                   });
                   return (
-                    <tr key={inv.id} className="text-zinc-800 dark:text-zinc-200">
+                    <tr key={inv.id} className="text-zinc-800">
                       <td className="px-4 py-3 font-mono text-sm">{inv.invoice_number}</td>
                       <td className="px-4 py-3">{cust}</td>
-                      <td className="px-4 py-3 text-xs text-zinc-500 dark:text-zinc-400 tabular-nums">{date}</td>
+                      <td className="px-4 py-3 text-xs text-zinc-500 tabular-nums">{date}</td>
                       <td className="px-4 py-3">
                         <span className={`rounded-full px-2 py-0.5 text-xs capitalize ${statusStyle[inv.status] ?? statusStyle.draft}`}>
                           {statusLabels[inv.status] ?? inv.status}
@@ -267,20 +267,20 @@ export function InvoicesClient({
                         <div className="flex flex-col items-end gap-1.5 sm:flex-row sm:justify-end sm:gap-2">
                           <Link
                             href={`/dashboard/invoices/${inv.id}`}
-                            className="font-medium text-zinc-900 underline hover:no-underline dark:text-zinc-100"
+                            className="font-medium text-zinc-900 underline hover:no-underline"
                           >
                             {viewLabel}
                           </Link>
                           {canEdit && inv.status === "draft" && (
                             <Link
                               href={`/dashboard/invoices/${inv.id}/edit`}
-                              className="font-medium text-zinc-900 underline hover:no-underline dark:text-zinc-100"
+                              className="font-medium text-zinc-900 underline hover:no-underline"
                             >
                               {editLabel}
                             </Link>
                           )}
                           {canEdit && inv.status !== "draft" && inv.status !== "cancelled" && (
-                            <InvoiceReverseButton invoiceId={inv.id} compact className="!border-0 !bg-transparent !px-0 !py-0 !text-xs !font-medium !text-red-700 hover:!bg-transparent dark:!text-red-400" />
+                            <InvoiceReverseButton invoiceId={inv.id} compact className="!border-0 !bg-transparent !px-0 !py-0 !text-xs !font-medium !text-red-700 hover:!bg-transparent" />
                           )}
                         </div>
                       </td>

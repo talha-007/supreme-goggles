@@ -29,18 +29,18 @@ export default async function SignupPage() {
   const androidAppUrl = getAndroidAppUrl();
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
+      <h1 className="text-xl font-semibold tracking-tight text-zinc-900">
         {t("signUpTitle")}
       </h1>
-      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("signUpSubtitle")}</p>
+      <p className="mt-1 text-sm text-zinc-600">{t("signUpSubtitle")}</p>
       <div className="mt-6">
         <SignupForm />
       </div>
       {androidAppUrl ? (
-        <div className="mt-6 border-t border-zinc-200 pt-5 text-center dark:border-zinc-700">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            <AndroidAppDownloadLink className="font-semibold text-emerald-700 decoration-emerald-600/30 hover:underline dark:text-emerald-400">
+        <div className="mt-6 border-t border-zinc-200 pt-5 text-center">
+          <p className="text-xs text-zinc-500">
+            <AndroidAppDownloadLink className="font-semibold text-brand-700 decoration-brand-600/30 hover:underline">
               {t("downloadAndroidApp")}
             </AndroidAppDownloadLink>
           </p>

@@ -43,10 +43,10 @@ export function ProductFields({
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="sm:col-span-2 flex flex-col gap-2">
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t("photo")}</span>
+        <span className="text-sm font-medium text-zinc-700">{t("photo")}</span>
         {existingImageUrl ? (
           <div className="flex flex-wrap items-start gap-4">
-            <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800">
+            <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100">
               <Image
                 src={existingImageUrl}
                 alt=""
@@ -55,7 +55,7 @@ export function ProductFields({
                 className="object-cover"
               />
             </div>
-            <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-700">
               <input
                 type="checkbox"
                 name="remove_image"
@@ -69,13 +69,13 @@ export function ProductFields({
           name="image"
           type="file"
           accept="image/jpeg,image/png,image/gif,image/webp"
-          className="text-sm text-zinc-700 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-900 hover:file:bg-zinc-200 dark:text-zinc-300 dark:file:bg-zinc-800 dark:file:text-zinc-100 dark:hover:file:bg-zinc-700"
+          className="text-sm text-zinc-700 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-zinc-900 hover:file:bg-zinc-200"
         />
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">{t("imageHint")}</p>
+        <p className="text-xs text-zinc-500">{t("imageHint")}</p>
       </div>
 
       <div className="sm:col-span-2 flex flex-col gap-1">
-        <label htmlFor="name" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="name" className="text-sm font-medium text-zinc-700">
           {t("name")} <span className="text-red-500">*</span>
         </label>
         <input
@@ -84,22 +84,22 @@ export function ProductFields({
           type="text"
           required
           defaultValue={d.name}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
         />
       </div>
       {!menuMode ? (
         <>
           <div className="sm:col-span-2 flex flex-col gap-1">
-            <label htmlFor="barcode" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="barcode" className="text-sm font-medium text-zinc-700">
               {t("barcode")}
             </label>
             <ProductBarcodeField defaultValue={barcodeValue} autoFocus={scanMode} />
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs text-zinc-500">
               {t("barcodeHint", { scanMode: t("scanModeWord") })}
             </p>
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="sku" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="sku" className="text-sm font-medium text-zinc-700">
               {t("sku")}
             </label>
             <input
@@ -107,13 +107,13 @@ export function ProductFields({
               name="sku"
               type="text"
               defaultValue={d.sku ?? ""}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
             />
           </div>
         </>
       ) : null}
       <div className="flex flex-col gap-1">
-        <label htmlFor="category" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="category" className="text-sm font-medium text-zinc-700">
           {t("category")}
         </label>
         <input
@@ -122,7 +122,7 @@ export function ProductFields({
           type="text"
           list={categorySuggestions.length > 0 ? categoryListId : undefined}
           defaultValue={d.category ?? ""}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
         />
         {categorySuggestions.length > 0 ? (
           <datalist id={categoryListId}>
@@ -134,7 +134,7 @@ export function ProductFields({
       </div>
       {!menuMode ? (
         <div className="flex flex-col gap-1">
-          <label htmlFor="brand" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="brand" className="text-sm font-medium text-zinc-700">
             {t("brand")}
           </label>
           <input
@@ -143,7 +143,7 @@ export function ProductFields({
             type="text"
             list={brandSuggestions.length > 0 ? brandListId : undefined}
             defaultValue={d.brand ?? ""}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
           />
           {brandSuggestions.length > 0 ? (
             <datalist id={brandListId}>
@@ -155,18 +155,18 @@ export function ProductFields({
         </div>
       ) : null}
       {categorySuggestions.length > 0 || (!menuMode && brandSuggestions.length > 0) ? (
-        <p className="text-xs text-zinc-500 dark:text-zinc-400 sm:col-span-2">{t("taxonomyHint")}</p>
+        <p className="text-xs text-zinc-500 sm:col-span-2">{t("taxonomyHint")}</p>
       ) : null}
       {!menuMode ? (
         <div className="flex flex-col gap-1">
-          <label htmlFor="unit" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="unit" className="text-sm font-medium text-zinc-700">
             {t("unit")}
           </label>
           <select
             id="unit"
             name="unit"
             defaultValue={d.unit ?? "pcs"}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
           >
             {PRODUCT_UNITS.map((u) => (
               <option key={u} value={u}>
@@ -177,7 +177,7 @@ export function ProductFields({
         </div>
       ) : null}
       <div className="sm:col-span-2 flex flex-col gap-1">
-        <label htmlFor="description" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="description" className="text-sm font-medium text-zinc-700">
           {t("description")}
         </label>
         <textarea
@@ -185,12 +185,12 @@ export function ProductFields({
           name="description"
           rows={2}
           defaultValue={d.description ?? ""}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
         />
       </div>
       {!menuMode ? (
         <div className="flex flex-col gap-1">
-          <label htmlFor="purchase_price" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="purchase_price" className="text-sm font-medium text-zinc-700">
             {t("purchasePrice")}
           </label>
           <input
@@ -200,14 +200,14 @@ export function ProductFields({
             min={0}
             step="0.01"
             defaultValue={d.purchase_price ?? 0}
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
           />
         </div>
       ) : (
         <input type="hidden" name="purchase_price" value={String(d.purchase_price ?? 0)} />
       )}
       <div className="flex flex-col gap-1">
-        <label htmlFor="sale_price" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="sale_price" className="text-sm font-medium text-zinc-700">
           {t("salePrice")}
         </label>
         <input
@@ -217,13 +217,13 @@ export function ProductFields({
           min={0}
           step="0.01"
           defaultValue={d.sale_price ?? 0}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
         />
       </div>
       {showPharmacyFields ? (
         <>
           <div className="flex flex-col gap-1">
-            <label htmlFor="mrp" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="mrp" className="text-sm font-medium text-zinc-700">
               {t("mrp")}
             </label>
             <input
@@ -233,7 +233,7 @@ export function ProductFields({
               min={0}
               step="0.01"
               defaultValue={d.mrp ?? ""}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
             />
           </div>
           <div className="sm:col-span-2 flex items-center gap-2">
@@ -244,7 +244,7 @@ export function ProductFields({
               defaultChecked={d.requires_prescription === true}
               className="size-4 rounded border-zinc-300"
             />
-            <label htmlFor="requires_prescription" className="text-sm text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="requires_prescription" className="text-sm text-zinc-700">
               {t("requiresPrescription")}
             </label>
           </div>
@@ -262,7 +262,7 @@ export function ProductFields({
               defaultChecked={d.is_menu_item === true}
               className="size-4 rounded border-zinc-300"
             />
-            <label htmlFor="is_menu_item" className="text-sm text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="is_menu_item" className="text-sm text-zinc-700">
               {t("isMenuItem")}
             </label>
           </div>
@@ -271,7 +271,7 @@ export function ProductFields({
       {!menuMode ? (
         <>
           <div className="flex flex-col gap-1">
-            <label htmlFor="current_stock" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="current_stock" className="text-sm font-medium text-zinc-700">
               {t("currentStock")}
             </label>
             <input
@@ -281,11 +281,11 @@ export function ProductFields({
               min={0}
               step="0.001"
               defaultValue={d.current_stock ?? 0}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="reorder_level" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="reorder_level" className="text-sm font-medium text-zinc-700">
               {t("reorderLevel")}
             </label>
             <input
@@ -295,7 +295,7 @@ export function ProductFields({
               min={0}
               step="0.001"
               defaultValue={d.reorder_level ?? 0}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
             />
           </div>
         </>
@@ -317,7 +317,7 @@ export function ProductFields({
           defaultChecked={d.is_active !== false}
           className="size-4 rounded border-zinc-300"
         />
-        <label htmlFor="is_active" className="text-sm text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="is_active" className="text-sm text-zinc-700">
           {t("activeShown")}
         </label>
       </div>

@@ -59,14 +59,14 @@ export default async function AnalyticsPage({
     <div className="pb-10">
       <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
             {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t("description")}</p>
+          <p className="mt-1 text-sm text-zinc-600">{t("description")}</p>
         </div>
         <Link
           href="/dashboard"
-          className="text-sm font-medium text-emerald-700 underline dark:text-emerald-400"
+          className="text-sm font-medium text-brand-700 underline"
         >
           {t("backToDashboard")}
         </Link>
@@ -75,33 +75,33 @@ export default async function AnalyticsPage({
       <AnalyticsPeriodTabs current={statsPeriod} />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/80 p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
             {t("totalSales")}
           </p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+          <p className="mt-1 text-2xl font-semibold text-zinc-900">
             {formatMoney(snapshot.totalRevenue)}
           </p>
         </div>
-        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/80 p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
             {t("orders")}
           </p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+          <p className="mt-1 text-2xl font-semibold text-zinc-900">
             {String(snapshot.orderCount)}
           </p>
         </div>
-        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/80 p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
             {t("avgOrder")}
           </p>
-          <p className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+          <p className="mt-1 text-2xl font-semibold text-zinc-900">
             {formatMoney(snapshot.averageOrder)}
           </p>
         </div>
       </div>
 
-      <p className="mb-2 text-xs text-zinc-500 dark:text-zinc-400">{t("excludingDrafts")}</p>
+      <p className="mb-2 text-xs text-zinc-500">{t("excludingDrafts")}</p>
 
       <SalesAnalyticsCharts
         snapshot={snapshot}
