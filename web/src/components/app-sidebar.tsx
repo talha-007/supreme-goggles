@@ -1,8 +1,7 @@
 "use client";
 
-import { BRAND_LOGO } from "@/lib/brand";
+import { BrandLogo } from "@/components/brand-logo";
 import { type NavLinkKey, type NavLinkItem, appNav } from "@/lib/nav/app-nav";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -260,21 +259,21 @@ export function AppSidebarDesktop({
           title={brandTitle}
         >
           {collapsed ? (
-            <Image
-              src={BRAND_LOGO.dark}
+            <BrandLogo
+              width={28}
+              height={28}
               alt=""
-              width={32}
-              height={32}
-              className="h-8 w-8 object-contain"
+              wrapperClassName="shrink-0 p-1"
+              className="h-6 w-6"
             />
           ) : (
             <>
-              <Image
-                src={BRAND_LOGO.dark}
+              <BrandLogo
+                width={28}
+                height={28}
                 alt=""
-                width={32}
-                height={32}
-                className="h-8 w-8 shrink-0 object-contain"
+                wrapperClassName="shrink-0 p-1"
+                className="h-6 w-6 shrink-0"
               />
               <span className="truncate text-sm font-semibold text-zinc-900">
                 {brandTitle}

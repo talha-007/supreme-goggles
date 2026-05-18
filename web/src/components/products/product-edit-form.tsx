@@ -1,11 +1,13 @@
 "use client";
 
-import { updateProduct, type ProductActionState } from "@/lib/products/actions";
+import { deleteProduct, updateProduct, type ProductActionState } from "@/lib/products/actions";
 import type { ProductTaxonomy } from "@/lib/products/taxonomy";
 import { ProductFields } from "@/components/products/product-fields";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PRODUCT_IMAGE_MAX_BYTES, validateProductImageSelection } from "@/lib/storage/product-images";
 import type { ProductRow } from "@/types/product";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useActionState, useMemo, useState } from "react";
 
 const MAX_IMAGE_MB = PRODUCT_IMAGE_MAX_BYTES / (1024 * 1024);
@@ -24,17 +26,56 @@ export function ProductEditForm({
   menuMode?: boolean;
 }) {
   const t = useTranslations("productFields");
+  const tp = useTranslations("products");
+  const tc = useTranslations("common");
+  const router = useRouter();
   const updateAction = useMemo(
     () => updateProduct.bind(null, product.id),
     [product.id],
   );
   const [state, formAction, pending] = useActionState(updateAction, {} as ProductActionState);
   const [clientError, setClientError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const displayError = clientError ?? state.error;
 
+  async function executeConfirmedDelete() {
+    setDeleteError(null);
+    setDeleteBusy(true);
+    try {
+      const res = await deleteProduct(product.id);
+      if (res.error) {
+        setDeleteError(res.error);
+        setDeleteConfirmOpen(false);
+        return;
+      }
+      setDeleteConfirmOpen(false);
+      router.push("/dashboard/products");
+      router.refresh();
+    } catch {
+      setDeleteError(tp("deleteFailed"));
+      setDeleteConfirmOpen(false);
+    } finally {
+      setDeleteBusy(false);
+    }
+  }
+
   return (
-    <form
+    <>
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title={tp("deleteDialogTitle")}
+        description={tp("deleteConfirm", { name: product.name })}
+        cancelLabel={tc("cancel")}
+        confirmLabel={tp("delete")}
+        onCancel={() => !deleteBusy && setDeleteConfirmOpen(false)}
+        onConfirm={() => void executeConfirmedDelete()}
+        pending={deleteBusy}
+        danger
+      />
+      <form
       action={formAction}
       className="flex flex-col gap-6"
       onSubmit={(e) => {
@@ -79,5 +120,22 @@ export function ProductEditForm({
         </button>
       </div>
     </form>
+      <div className="mt-6 border-t border-zinc-200 pt-6">
+        <p className="text-sm text-zinc-700">{tp("deleteSectionHint")}</p>
+        <button
+          type="button"
+          disabled={deleteBusy || pending}
+          onClick={() => setDeleteConfirmOpen(true)}
+          className="mt-3 text-sm font-medium text-red-600 hover:underline disabled:opacity-50"
+        >
+          {deleteBusy ? tp("deleting") : tp("delete")}
+        </button>
+        {deleteError ? (
+          <p className="mt-2 text-sm text-red-600" role="alert">
+            {deleteError}
+          </p>
+        ) : null}
+      </div>
+    </>
   );
 }

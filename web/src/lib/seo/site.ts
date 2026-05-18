@@ -1,6 +1,5 @@
 import {
   BRAND_DOMAIN,
-  BRAND_FAVICON,
   BRAND_LOGO,
   BRAND_NAME,
   BRAND_PRIMARY_HEX,
@@ -48,11 +47,6 @@ export function buildRootMetadata(): Metadata {
     },
     description: defaultDescription,
     applicationName: BRAND_NAME,
-    icons: {
-      icon: [{ url: BRAND_FAVICON, type: "image/png" }],
-      shortcut: BRAND_FAVICON,
-      apple: BRAND_FAVICON,
-    },
     referrer: "origin-when-cross-origin",
     formatDetection: {
       email: false,

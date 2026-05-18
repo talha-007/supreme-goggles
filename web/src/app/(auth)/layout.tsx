@@ -1,8 +1,7 @@
-import { BRAND_LOGO } from "@/lib/brand";
+import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { defaultLocale, isAppLocale, type AppLocale } from "@/i18n/routing";
 import { getLocale, getTranslations } from "next-intl/server";
-import Image from "next/image";
 import Link from "next/link";
 
 export default async function AuthLayout({
@@ -22,12 +21,12 @@ export default async function AuthLayout({
         <div className="w-full max-w-sm">
           <div className="mb-8 flex flex-col items-center">
             <Link href="/" className="inline-block" aria-label="Taplite home">
-              <Image
-                src={BRAND_LOGO.dark}
-                alt="Taplite"
+              <BrandLogo
                 width={180}
                 height={64}
-                className="h-16 w-auto max-w-[200px] object-contain object-center"
+                alt="Taplite"
+                wrapperClassName="px-3 py-2"
+                className="h-14 w-auto max-w-[200px] object-contain object-center"
                 priority
               />
             </Link>

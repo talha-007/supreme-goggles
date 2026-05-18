@@ -8,13 +8,21 @@ export const BRAND_DOMAIN = "taplite.store";
 export const BRAND_TAGLINE =
   "Point-of-sale, stock, and billing for shops and counters. Built for taplite.store.";
 
-/** Logos in `/public`: `light` = white theme, `dark` = black/dark theme. */
+/**
+ * Brand mark in `/public` (Obic / full logo). Authored for dark backgrounds; app uses
+ * `BrandLogo` so it sits on a small dark tile on light pages. Open Graph still references this URL.
+ */
 export const BRAND_LOGO = {
-  light: "/white_v.png",
-  dark: "/black_v.png",
+  dark: "/taplite_obic.png",
 } as const;
 
-export const BRAND_FAVICON = "/favicon.png";
+/**
+ * Tab icon path. The actual file must live at `src/app/favicon.ico` (Next App Router
+ * convention) so the `<link rel="icon">` stays same-origin. Do not set `icons` in
+ * metadata with only this path while `metadataBase` is a production URL — Next would
+ * resolve it to that host and break the icon on localhost.
+ */
+export const BRAND_FAVICON = "/favicon.ico";
 
 /** Primary UI / marketing accent (`brand-*` in Tailwind; scale in `globals.css`). */
 export const BRAND_PRIMARY_HEX = "#3A09B0" as const;

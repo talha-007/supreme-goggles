@@ -7,6 +7,7 @@ import {
   uploadProductImage,
 } from "@/lib/storage/product-images";
 import type { ProductUnit } from "@/types/product";
+import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -191,4 +192,46 @@ export async function updateProduct(
 
   revalidatePath("/dashboard/products");
   redirect("/dashboard/products");
+}
+
+export async function deleteProduct(productId: string): Promise<ProductActionState> {
+  const ctx = await requireBusinessContext();
+  if (!canManageProducts(ctx.role)) {
+    return { error: "You do not have permission to delete products." };
+  }
+
+  const supabase = await createClient();
+
+  const { data: existing, error: loadErr } = await supabase
+    .from("products")
+    .select("id, business_id, image_url")
+    .eq("id", productId)
+    .maybeSingle();
+
+  if (loadErr) {
+    return { error: loadErr.message };
+  }
+  if (!existing || existing.business_id !== ctx.businessId) {
+    return { error: "Product not found." };
+  }
+
+  const { error } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", productId)
+    .eq("business_id", ctx.businessId);
+
+  if (error) {
+    if (error.code === "23503") {
+      const t = await getTranslations("products");
+      return { error: t("deleteBlockedFk") };
+    }
+    return { error: error.message };
+  }
+
+  await deleteProductImageByUrl(supabase, existing.image_url);
+
+  revalidatePath("/dashboard/products");
+  revalidatePath(`/dashboard/products/${productId}/edit`);
+  return {};
 }

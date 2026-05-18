@@ -1,5 +1,7 @@
 "use client";
 
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { deleteProduct } from "@/lib/products/actions";
 import { looksLikeBarcode } from "@/lib/products/barcode-utils";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { sanitizeProductSearchQuery } from "@/lib/products/search-query";
@@ -87,11 +89,14 @@ export function ProductsCatalogClient({
   const [products, setProducts] = useState<ProductRow[]>(initialProducts);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ProductRow | null>(null);
 
   const skippedSsrDuplicate = useRef(false);
   const initialRowsRef = useRef(initialProducts);
 
-  /** Debounced server search â€” no full-page navigation. */
+  /** Debounced server search — no full-page navigation. */
   useEffect(() => {
     const ac = new AbortController();
     const debounceTimer = window.setTimeout(async () => {
@@ -170,8 +175,44 @@ export function ProductsCatalogClient({
     searchInputRef.current?.focus();
   }, []);
 
+  const runConfirmedDelete = useCallback(async () => {
+    const p = deleteTarget;
+    if (!p) return;
+    setDeleteError(null);
+    setPendingDeleteId(p.id);
+    try {
+      const res = await deleteProduct(p.id);
+      if (res.error) {
+        setDeleteError(res.error);
+        setDeleteTarget(null);
+        return;
+      }
+      setProducts((rows) => rows.filter((x) => x.id !== p.id));
+      setDeleteTarget(null);
+      router.refresh();
+    } catch {
+      setDeleteError(tp("deleteFailed"));
+      setDeleteTarget(null);
+    } finally {
+      setPendingDeleteId(null);
+    }
+  }, [deleteTarget, router, tp]);
+
   return (
     <div className="mx-auto max-w-6xl">
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title={tp("deleteDialogTitle")}
+        description={
+          deleteTarget ? tp("deleteConfirm", { name: deleteTarget.name }) : ""
+        }
+        cancelLabel={tc("cancel")}
+        confirmLabel={tp("delete")}
+        onCancel={() => pendingDeleteId === null && setDeleteTarget(null)}
+        onConfirm={() => void runConfirmedDelete()}
+        pending={pendingDeleteId !== null}
+        danger
+      />
       <p className="sr-only" aria-live="polite" aria-atomic="true">
         {loading ? tp("ariaLiveLoading") : tp("ariaLiveCount", { count: products.length })}
       </p>
@@ -274,6 +315,11 @@ export function ProductsCatalogClient({
       {loadError ? (
         <p className="mt-3 text-sm text-red-600" role="alert">
           {loadError}
+        </p>
+      ) : null}
+      {deleteError ? (
+        <p className="mt-3 text-sm text-red-600" role="alert">
+          {deleteError}
         </p>
       ) : null}
 
@@ -403,12 +449,22 @@ export function ProductsCatalogClient({
                     </td>
                     {canEdit ? (
                       <td className="px-4 py-3 text-right">
-                        <Link
-                          href={`/dashboard/products/${p.id}/edit`}
-                          className="text-sm font-medium text-zinc-900 underline hover:no-underline"
-                        >
-                          {tc("edit")}
-                        </Link>
+                        <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                          <Link
+                            href={`/dashboard/products/${p.id}/edit`}
+                            className="text-sm font-medium text-zinc-900 underline hover:no-underline"
+                          >
+                            {tc("edit")}
+                          </Link>
+                          <button
+                            type="button"
+                            disabled={pendingDeleteId !== null || deleteTarget !== null}
+                            onClick={() => setDeleteTarget(p)}
+                            className="text-sm font-medium text-red-600 hover:underline disabled:opacity-50"
+                          >
+                            {pendingDeleteId === p.id ? tp("deleting") : tp("delete")}
+                          </button>
+                        </div>
                       </td>
                     ) : null}
                   </tr>

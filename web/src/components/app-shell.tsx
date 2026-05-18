@@ -1,15 +1,15 @@
 "use client";
 
 import { AppSidebarDesktop, SidebarNav } from "@/components/app-sidebar";
-import type { NavLinkItem } from "@/lib/nav/app-nav";
-import type { BusinessCapabilities } from "@/lib/business/capabilities";
+import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
-import { BRAND_LOGO } from "@/lib/brand";
 import type { AppLocale } from "@/i18n/routing";
+import type { BusinessCapabilities } from "@/lib/business/capabilities";
+import type { NavLinkItem } from "@/lib/nav/app-nav";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 type Props = {
   businessName: string;
@@ -131,6 +131,11 @@ export function AppShell({
       data-business-type={capabilities?.type}
       data-cap-batch-expiry={capabilities?.batchExpiry ? "1" : "0"}
       data-cap-table-service={capabilities?.tableService ? "1" : "0"}
+      style={
+        {
+          "--app-sidebar-width": desktopCollapsed ? "5rem" : "14rem",
+        } as CSSProperties
+      }
     >
       <a
         href="#main-content"
@@ -162,12 +167,12 @@ export function AppShell({
           >
             <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-4">
               <Link href="/dashboard" className="flex min-w-0 items-center gap-2" onClick={() => setMobileOpen(false)}>
-                <Image
-                  src={BRAND_LOGO.dark}
-                  alt=""
+                <BrandLogo
                   width={28}
                   height={28}
-                  className="h-7 w-7 shrink-0 object-contain"
+                  alt=""
+                  wrapperClassName="shrink-0 p-1"
+                  className="h-5 w-5"
                 />
                 <span className="truncate text-sm font-semibold text-zinc-900">{brandTitle}</span>
               </Link>
@@ -207,12 +212,12 @@ export function AppShell({
             aria-label={brandTitle}
             title={brandTitle}
           >
-            <Image
-              src={BRAND_LOGO.dark}
-              alt=""
+            <BrandLogo
               width={100}
               height={28}
-              className="h-6 w-auto max-w-[100px] object-contain object-left"
+              alt=""
+              wrapperClassName="shrink-0 px-2 py-1"
+              className="h-5 w-auto max-w-[88px] object-contain object-left"
             />
           </Link>
           <div className="flex min-w-0 flex-1 items-center gap-2">

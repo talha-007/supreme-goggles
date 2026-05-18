@@ -1264,7 +1264,7 @@ export function PosSaleClient({
       </div>
 
       <div
-        className="fixed bottom-0 left-0 right-0 z-40 hidden gap-3 border-t border-zinc-200 bg-white/95 px-4 py-3 shadow-[0_-8px_32px_rgba(0,0,0,0.1)] backdrop-blur-md xl:flex xl:flex-wrap xl:items-center xl:justify-between xl:gap-3 xl:pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:left-56"
+        className="fixed bottom-0 left-0 right-0 z-40 hidden gap-3 border-t border-zinc-200 bg-white/95 px-4 py-3 shadow-[0_-8px_32px_rgba(0,0,0,0.1)] backdrop-blur-md transition-[left] duration-200 ease-out xl:flex xl:flex-wrap xl:items-center xl:justify-between xl:gap-3 xl:pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:left-[var(--app-sidebar-width,14rem)]"
         role="region"
         aria-label={tp("cartTitle")}
       >

@@ -2,10 +2,10 @@
 
 import { defaultLocale, isAppLocale, type AppLocale } from "@/i18n/routing";
 import { AndroidAppDownloadLink } from "@/components/android-app-download-link";
+import { BrandLogo } from "@/components/brand-logo";
 import { HeroMakaryoBlock } from "@/components/landing/hero-makaryo-block";
-import { BRAND_DOMAIN, BRAND_LOGO, BRAND_NAME, getAndroidAppUrl } from "@/lib/brand";
+import { BRAND_DOMAIN, BRAND_NAME, getAndroidAppUrl } from "@/lib/brand";
 import { Noto_Naskh_Arabic, Plus_Jakarta_Sans } from "next/font/google";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -50,12 +50,12 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-3 text-center sm:flex-row sm:text-start sm:px-6">
           <div className="flex flex-col items-center gap-2 sm:items-start">
             <div className="flex items-center justify-center gap-2 sm:justify-start">
-              <Image
-                src={BRAND_LOGO.dark}
-                alt=""
+              <BrandLogo
                 width={100}
                 height={32}
-                className="h-6 w-auto opacity-80"
+                alt=""
+                wrapperClassName="px-1.5 py-1"
+                className="h-5 w-auto opacity-90"
               />
               <p className="text-xs text-zinc-500">
                 {t("footer", { year: new Date().getFullYear(), domain: BRAND_DOMAIN })}

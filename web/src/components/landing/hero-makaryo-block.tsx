@@ -3,8 +3,8 @@
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { defaultLocale, isAppLocale, type AppLocale } from "@/i18n/routing";
 import { AndroidAppDownloadLink } from "@/components/android-app-download-link";
-import { BRAND_DOMAIN, BRAND_LOGO, BRAND_NAME, getAndroidAppUrl } from "@/lib/brand";
-import Image from "next/image";
+import { BrandLogo } from "@/components/brand-logo";
+import { BRAND_DOMAIN, BRAND_NAME, getAndroidAppUrl } from "@/lib/brand";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { HeroMobileAppMock } from "./hero-mobile-mock";
@@ -21,12 +21,12 @@ export function HeroMakaryoBlock() {
       <header className="sticky top-0 z-40 w-full border-b border-zinc-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-2 px-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
-            <Image
-              src={BRAND_LOGO.dark}
-              alt={BRAND_NAME}
+            <BrandLogo
               width={140}
               height={48}
-              className="h-8 w-auto object-contain sm:h-9"
+              alt={BRAND_NAME}
+              wrapperClassName="shrink-0 px-2 py-1.5 sm:px-2.5 sm:py-2"
+              className="h-7 w-auto max-h-8 sm:h-8 sm:max-h-9"
               priority
             />
             <span className="hidden truncate text-xs font-medium text-zinc-500 sm:inline">
