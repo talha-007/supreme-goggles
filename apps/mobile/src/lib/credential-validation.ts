@@ -1,5 +1,3 @@
-import { isDisposableEmailDomain } from "./disposable-email-domains";
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function isValidEmailFormat(email: string): boolean {
@@ -11,7 +9,7 @@ export function isValidEmailFormat(email: string): boolean {
 
 export type SignUpPasswordIssue = "minLength" | "letter" | "number" | "symbol";
 
-export type SignupEmailIssue = "empty" | "format" | "disposable";
+export type SignupEmailIssue = "empty" | "format";
 
 export function getSignUpPasswordIssue(password: string): SignUpPasswordIssue | null {
   if (password.length < 8) return "minLength";
@@ -41,7 +39,6 @@ export function getSignupEmailIssue(email: string): SignupEmailIssue | null {
   const s = email.trim();
   if (s.length === 0) return "empty";
   if (!isValidEmailFormat(email)) return "format";
-  if (isDisposableEmailDomain(email)) return "disposable";
   return null;
 }
 
@@ -55,5 +52,4 @@ export const SIGNUP_PASSWORD_ERROR: Record<SignUpPasswordIssue, string> = {
 export const SIGNUP_EMAIL_ERROR: Record<SignupEmailIssue, string> = {
   empty: "Enter your email address.",
   format: "Enter a valid email address.",
-  disposable: "Temporary or disposable email addresses can’t be used. Use a real inbox you own.",
 };

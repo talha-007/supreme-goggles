@@ -4,7 +4,8 @@ export type BusinessType =
   | "wholesaler"
   | "general_store"
   | "restaurant"
-  | "pharmacy";
+  | "pharmacy"
+  | "spare_parts";
 
 export type BusinessSettings = {
   enable_table_service: boolean;

@@ -77,7 +77,7 @@ export async function getPosCatalogProducts(options?: { menuOnly?: boolean; limi
   let q = supabase
     .from("products")
     .select(
-      "id, business_id, name, sku, barcode, category, brand, description, unit, purchase_price, sale_price, current_stock, reorder_level, requires_prescription, mrp, is_menu_item, is_active, image_url, created_at, updated_at",
+      "id, business_id, name, sku, barcode, category, brand, oem_part_number, alternate_part_numbers, application_notes, manufacturer, description, unit, purchase_price, sale_price, current_stock, reorder_level, requires_prescription, mrp, is_menu_item, is_active, image_url, created_at, updated_at",
     )
     .eq("business_id", ctx.businessId)
     .eq("is_active", true);

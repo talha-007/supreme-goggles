@@ -20,6 +20,8 @@ type Props = {
   brandSuggestions?: readonly string[];
   showPharmacyFields?: boolean;
   showRestaurantFields?: boolean;
+  /** Spare parts / auto parts catalog fields (OEM, interchange, application). */
+  showSparePartsFields?: boolean;
   menuMode?: boolean;
 };
 
@@ -32,6 +34,7 @@ export function ProductFields({
   brandSuggestions = [],
   showPharmacyFields = false,
   showRestaurantFields = false,
+  showSparePartsFields = false,
   menuMode = false,
 }: Props) {
   const t = useTranslations("productFields");
@@ -153,6 +156,60 @@ export function ProductFields({
             </datalist>
           ) : null}
         </div>
+      ) : null}
+      {!menuMode && showSparePartsFields ? (
+        <>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="oem_part_number" className="text-sm font-medium text-zinc-700">
+              {t("oemPartNumber")}
+            </label>
+            <input
+              id="oem_part_number"
+              name="oem_part_number"
+              type="text"
+              defaultValue={d.oem_part_number ?? ""}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="manufacturer" className="text-sm font-medium text-zinc-700">
+              {t("manufacturer")}
+            </label>
+            <input
+              id="manufacturer"
+              name="manufacturer"
+              type="text"
+              defaultValue={d.manufacturer ?? ""}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
+            />
+          </div>
+          <div className="sm:col-span-2 flex flex-col gap-1">
+            <label htmlFor="alternate_part_numbers" className="text-sm font-medium text-zinc-700">
+              {t("alternatePartNumbers")}
+            </label>
+            <textarea
+              id="alternate_part_numbers"
+              name="alternate_part_numbers"
+              rows={2}
+              defaultValue={d.alternate_part_numbers ?? ""}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
+            />
+            <p className="text-xs text-zinc-500">{t("alternatePartNumbersHint")}</p>
+          </div>
+          <div className="sm:col-span-2 flex flex-col gap-1">
+            <label htmlFor="application_notes" className="text-sm font-medium text-zinc-700">
+              {t("applicationNotes")}
+            </label>
+            <textarea
+              id="application_notes"
+              name="application_notes"
+              rows={2}
+              defaultValue={d.application_notes ?? ""}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
+            />
+            <p className="text-xs text-zinc-500">{t("applicationNotesHint")}</p>
+          </div>
+        </>
       ) : null}
       {categorySuggestions.length > 0 || (!menuMode && brandSuggestions.length > 0) ? (
         <p className="text-xs text-zinc-500 sm:col-span-2">{t("taxonomyHint")}</p>
@@ -306,6 +363,10 @@ export function ProductFields({
           <input type="hidden" name="sku" value={d.sku ?? ""} />
           <input type="hidden" name="barcode" value={d.barcode ?? ""} />
           <input type="hidden" name="brand" value={d.brand ?? ""} />
+          <input type="hidden" name="oem_part_number" value={d.oem_part_number ?? ""} />
+          <input type="hidden" name="manufacturer" value={d.manufacturer ?? ""} />
+          <input type="hidden" name="alternate_part_numbers" value={d.alternate_part_numbers ?? ""} />
+          <input type="hidden" name="application_notes" value={d.application_notes ?? ""} />
           <input type="hidden" name="unit" value={d.unit ?? "pcs"} />
         </>
       )}

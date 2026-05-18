@@ -22,6 +22,14 @@ export type ProductRow = {
   category: string | null;
   /** Brand / manufacturer (optional; used with category for filtering). */
   brand: string | null;
+  /** Spare parts: OEM / factory part number. */
+  oem_part_number: string | null;
+  /** Spare parts: interchange / alternate numbers (free text). */
+  alternate_part_numbers: string | null;
+  /** Spare parts: vehicle or application notes. */
+  application_notes: string | null;
+  /** Spare parts: manufacturer label (optional; can differ from brand). */
+  manufacturer: string | null;
   description: string | null;
   unit: ProductUnit;
   purchase_price: number;

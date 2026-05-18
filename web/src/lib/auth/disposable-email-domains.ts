@@ -79,7 +79,7 @@ export function getEmailDomain(email: string): string | null {
   return s.slice(at + 1);
 }
 
-/** True if the email uses a known disposable / temporary-mail domain (registration should be blocked). */
+/** True if the email uses a known disposable / temporary-mail domain (list kept for optional future checks). */
 export function isDisposableEmailDomain(email: string): boolean {
   const domain = getEmailDomain(email);
   if (!domain) return false;

@@ -1,6 +1,7 @@
 import { ProductCreateForm } from "@/components/products/product-create-form";
 import { requireBusinessContext, canManageProducts, guardOwnerPage } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
+import { isSparePartsBusinessType } from "@/lib/business/business-type-helpers";
 import { getProductTaxonomy } from "@/lib/products/taxonomy";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -72,6 +73,7 @@ export default async function NewProductPage({
           taxonomy={taxonomy}
           showPharmacyFields={caps.batchExpiry || caps.prescriptionFlow}
           showRestaurantFields={caps.tableService || caps.kotPrinting || caps.type === "restaurant"}
+          showSparePartsFields={isSparePartsBusinessType(caps.type)}
           menuMode={menuMode}
         />
       </div>

@@ -39,6 +39,8 @@ type Props = {
   initialLowStockOnly: boolean;
   initialScanMode: boolean;
   canEdit: boolean;
+  /** Extra OEM column for spare parts businesses. */
+  showSparePartsColumns?: boolean;
 };
 
 async function fetchProductSearch(
@@ -65,6 +67,7 @@ export function ProductsCatalogClient({
   initialLowStockOnly,
   initialScanMode,
   canEdit,
+  showSparePartsColumns = false,
 }: Props) {
   const tp = useTranslations("products");
   const tc = useTranslations("common");
@@ -147,6 +150,8 @@ export function ProductsCatalogClient({
 
   const safeQ = sanitizeProductSearchQuery(q);
 
+  const tableColSpan = 10 + (showSparePartsColumns ? 1 : 0) + (canEdit ? 1 : 0);
+
   const unknownBarcode =
     !loading &&
     !lowStockOnly &&
@@ -159,7 +164,14 @@ export function ProductsCatalogClient({
     if (e.key !== "Enter") return;
     const t = sanitizeProductSearchQuery(q);
     if (!t || lowStockOnly) return;
-    const exact = products.filter((p) => p.barcode && p.barcode.trim() === t.trim());
+    const qv = t.trim();
+    const exact = products.filter((p) => {
+      return (
+        (p.barcode && p.barcode.trim() === qv) ||
+        (p.sku && p.sku.trim() === qv) ||
+        (p.oem_part_number && p.oem_part_number.trim() === qv)
+      );
+    });
     if (exact.length === 1) {
       e.preventDefault();
       router.push(`/dashboard/products/${exact[0].id}/edit`);
@@ -361,6 +373,7 @@ export function ProductsCatalogClient({
               <th className="px-4 py-3">{tp("colName")}</th>
               <th className="px-4 py-3">{tp("colCategory")}</th>
               <th className="px-4 py-3">{tp("colBrand")}</th>
+              {showSparePartsColumns ? <th className="px-4 py-3">{tp("colOem")}</th> : null}
               <th className="px-4 py-3">{tc("sku")}</th>
               <th className="px-4 py-3">{tc("barcode")}</th>
               <th className="px-4 py-3">{tc("unit")}</th>
@@ -374,7 +387,7 @@ export function ProductsCatalogClient({
             {loading && products.length === 0 ? (
               <tr>
                 <td
-                  colSpan={canEdit ? 11 : 10}
+                  colSpan={tableColSpan}
                   className="px-4 py-10 text-center text-zinc-500"
                 >
                   {tp("loadingRows")}
@@ -383,7 +396,7 @@ export function ProductsCatalogClient({
             ) : !loading && products.length === 0 ? (
               <tr>
                 <td
-                  colSpan={canEdit ? 11 : 10}
+                  colSpan={tableColSpan}
                   className="px-4 py-10 text-center text-zinc-500"
                 >
                   {lowStockOnly
@@ -422,6 +435,11 @@ export function ProductsCatalogClient({
                     <td className="max-w-[8rem] truncate px-4 py-3 text-zinc-600">
                       {p.brand?.trim() ? p.brand : tc("dash")}
                     </td>
+                    {showSparePartsColumns ? (
+                      <td className="max-w-[7rem] truncate px-4 py-3 font-mono text-xs text-zinc-600">
+                        {p.oem_part_number?.trim() ? p.oem_part_number : tc("dash")}
+                      </td>
+                    ) : null}
                     <td className="px-4 py-3 text-zinc-600">{p.sku ?? tc("dash")}</td>
                     <td className="px-4 py-3 font-mono text-xs text-zinc-600">
                       {p.barcode ?? tc("dash")}

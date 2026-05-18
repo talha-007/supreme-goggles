@@ -7,6 +7,7 @@ import { resolveInventoryCost } from "@/lib/dashboard/inventory-cost";
 import { getStatsPeriodRange, parseStatsPeriod } from "@/lib/dashboard/stats-period";
 import { getNewInvoiceEditorData, getPosCatalogProducts } from "@/lib/invoices/new-invoice-data";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
+import { isSparePartsBusinessType } from "@/lib/business/business-type-helpers";
 import {
   requireBusinessContext,
   canManageInvoices,
@@ -307,6 +308,7 @@ export default async function DashboardPage({
               restaurantTables={invoiceEditorData.restaurantTables}
               restaurantWaiters={invoiceEditorData.restaurantWaiters}
               forceRestaurantMode={isRestaurant}
+              sparePartsPos={isSparePartsBusinessType(caps.type)}
               invoiceDefaults={invoiceEditorData.invoiceDefaults}
               cancelHref="/dashboard"
               firstDraftSaveBehavior="refresh-only"

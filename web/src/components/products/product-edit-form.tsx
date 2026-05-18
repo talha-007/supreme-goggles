@@ -17,12 +17,14 @@ export function ProductEditForm({
   taxonomy,
   showPharmacyFields = false,
   showRestaurantFields = false,
+  showSparePartsFields = false,
   menuMode = false,
 }: {
   product: ProductRow;
   taxonomy: ProductTaxonomy;
   showPharmacyFields?: boolean;
   showRestaurantFields?: boolean;
+  showSparePartsFields?: boolean;
   menuMode?: boolean;
 }) {
   const t = useTranslations("productFields");
@@ -103,6 +105,7 @@ export function ProductEditForm({
         brandSuggestions={taxonomy.brands}
         showPharmacyFields={showPharmacyFields}
         showRestaurantFields={showRestaurantFields}
+        showSparePartsFields={showSparePartsFields}
         menuMode={menuMode}
       />
       {displayError ? (

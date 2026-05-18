@@ -33,6 +33,7 @@ export async function GET(request: Request) {
   const rawQ = searchParams.get("q") ?? "";
   const q = sanitizeProductSearchQuery(rawQ);
   const lowStockOnly = searchParams.get("stock") === "low";
+  const menuOnly = searchParams.get("menuOnly") === "1";
   const limitRaw = parseInt(searchParams.get("limit") ?? String(DEFAULT_LIMIT), 10);
   const limit = Math.min(MAX_LIMIT, Math.max(1, Number.isFinite(limitRaw) ? limitRaw : DEFAULT_LIMIT));
 
@@ -42,6 +43,7 @@ export async function GET(request: Request) {
     p_low_stock_only: lowStockOnly,
     p_limit: limit,
     p_offset: 0,
+    p_menu_only: menuOnly,
   });
 
   if (error) {

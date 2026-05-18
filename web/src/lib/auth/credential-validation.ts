@@ -1,5 +1,3 @@
-import { isDisposableEmailDomain } from "./disposable-email-domains";
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
@@ -14,7 +12,7 @@ export function isValidEmailFormat(email: string): boolean {
 
 export type SignUpPasswordIssue = "minLength" | "letter" | "number" | "symbol";
 
-export type SignupEmailIssue = "empty" | "format" | "disposable";
+export type SignupEmailIssue = "empty" | "format";
 
 /**
  * 8+ characters, at least one letter, one digit, one non-alphanumeric (e.g. !@#$*).
@@ -45,13 +43,12 @@ export function getPasswordRulesStatus(password: string): PasswordRulesStatus {
 }
 
 /**
- * For registration only: format, disposable blockers. Returns null if OK to proceed (format-wise).
+ * For registration only: empty + basic format. (Disposable domains are not blocked for now.)
  */
 export function getSignupEmailIssue(email: string): SignupEmailIssue | null {
   const s = email.trim();
   if (s.length === 0) return "empty";
   if (!isValidEmailFormat(email)) return "format";
-  if (isDisposableEmailDomain(email)) return "disposable";
   return null;
 }
 

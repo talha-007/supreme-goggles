@@ -15,6 +15,7 @@ type CreateProps = {
   taxonomy: ProductTaxonomy;
   showPharmacyFields?: boolean;
   showRestaurantFields?: boolean;
+  showSparePartsFields?: boolean;
   menuMode?: boolean;
 };
 
@@ -24,6 +25,7 @@ export function ProductCreateForm({
   taxonomy,
   showPharmacyFields = false,
   showRestaurantFields = false,
+  showSparePartsFields = false,
   menuMode = false,
 }: CreateProps) {
   const t = useTranslations("productFields");
@@ -60,6 +62,7 @@ export function ProductCreateForm({
         brandSuggestions={taxonomy.brands}
         showPharmacyFields={showPharmacyFields}
         showRestaurantFields={showRestaurantFields}
+        showSparePartsFields={showSparePartsFields}
         menuMode={menuMode}
       />
       {displayError ? (

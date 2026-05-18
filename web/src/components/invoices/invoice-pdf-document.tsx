@@ -12,7 +12,7 @@ import type { AppLocale } from "@/i18n/routing";
 import type {
   BusinessInvoiceRow,
   CustomerInvoiceRow,
-  InvoiceItemRow,
+  InvoiceItemPrintRow,
   InvoiceRow,
 } from "@/types/invoice";
 import { RECEIPT_WIDTH_MM } from "@/lib/invoices/invoice-receipt-dimensions";
@@ -39,7 +39,7 @@ const MAX_SINGLE_PAGE_TIGHT_MM = 240;
  * printers often feed paper by PDF page height — tall pages waste blank roll).
  */
 function estimateReceiptHeightMm(
-  items: InvoiceItemRow[],
+  items: InvoiceItemPrintRow[],
   hasLogo: boolean,
   notes: string | null,
   customer: CustomerInvoiceRow | null,
@@ -59,6 +59,7 @@ function estimateReceiptHeightMm(
     const nameLen = it.product_name?.length ?? 0;
     const nameLines = Math.max(1, Math.ceil(nameLen / 26));
     mm += 12 + (nameLines - 1) * 4.5;
+    if (it.receipt_detail?.trim()) mm += 4;
   }
   if (notes?.trim()) {
     mm += Math.min(42, 9 + Math.ceil(notes.length / 42) * 3.5);
@@ -111,6 +112,7 @@ const styles = StyleSheet.create({
   bold: { fontFamily: "Helvetica-Bold" },
   itemBlock: { marginBottom: 5 },
   itemName: { fontSize: 7, fontFamily: "Helvetica-Bold", marginBottom: 2 },
+  itemMeta: { fontSize: 6, color: "#444", marginBottom: 2 },
   itemLine: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -173,7 +175,7 @@ type Props = {
   invoice: InvoiceRow;
   business: BusinessInvoiceRow;
   customer: CustomerInvoiceRow | null;
-  items: InvoiceItemRow[];
+  items: InvoiceItemPrintRow[];
   labels: InvoicePdfLabels;
   locale: AppLocale;
   copyLabel?: string | null;
@@ -281,6 +283,9 @@ export function InvoicePdfDocument({
         {items.map((it, i) => (
           <View key={it.id || i} style={styles.itemBlock} wrap={false}>
             <Text style={styles.itemName}>{it.product_name}</Text>
+            {it.receipt_detail?.trim() ? (
+              <Text style={styles.itemMeta}>{it.receipt_detail}</Text>
+            ) : null}
             <View style={styles.itemLine}>
               <Text style={styles.itemLeft}>
                 {String(it.quantity)} {it.unit} ×{" "}

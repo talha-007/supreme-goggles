@@ -1,5 +1,7 @@
 import { ProductsCatalogClient } from "@/components/products/products-catalog-client";
 import { requireBusinessContext, canManageProducts, guardOwnerPage } from "@/lib/auth/business-context";
+import { isSparePartsBusinessType } from "@/lib/business/business-type-helpers";
+import type { BusinessType } from "@/lib/business/capabilities";
 import { sanitizeProductSearchQuery } from "@/lib/products/search-query";
 import { createClient } from "@/lib/supabase/server";
 import type { ProductRow } from "@/types/product";
@@ -19,13 +21,16 @@ export default async function ProductsPage({
   const lowStock = params.stock === "low";
 
   const supabase = await createClient();
-  const { data: rows, error } = await supabase.rpc("search_products", {
-    p_business_id: ctx.businessId,
-    p_query: q.length > 0 ? q : null,
-    p_low_stock_only: lowStock,
-    p_limit: q.length > 0 ? 100 : 50,
-    p_offset: 0,
-  });
+  const [{ data: businessRow }, { data: rows, error }] = await Promise.all([
+    supabase.from("businesses").select("type").eq("id", ctx.businessId).maybeSingle(),
+    supabase.rpc("search_products", {
+      p_business_id: ctx.businessId,
+      p_query: q.length > 0 ? q : null,
+      p_low_stock_only: lowStock,
+      p_limit: q.length > 0 ? 100 : 50,
+      p_offset: 0,
+    }),
+  ]);
 
   if (error) {
     const t = await getTranslations("products");
@@ -43,6 +48,9 @@ export default async function ProductsPage({
   }
 
   const initialProducts = (rows ?? []) as ProductRow[];
+  const showSparePartsColumns = isSparePartsBusinessType(
+    (businessRow?.type as BusinessType | null) ?? "shop",
+  );
 
   return (
     <ProductsCatalogClient
@@ -51,6 +59,7 @@ export default async function ProductsPage({
       initialLowStockOnly={lowStock}
       initialScanMode={params.scan === "1"}
       canEdit={canEdit}
+      showSparePartsColumns={showSparePartsColumns}
     />
   );
 }

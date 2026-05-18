@@ -58,6 +58,7 @@ export function buildInvoiceReceiptPrintHtml(p: InvoicePrintPayload): string {
       return `
         <div class="item">
           <div class="item-name">${esc(it.product_name)}</div>
+          ${it.receipt_detail?.trim() ? `<div class="item-meta">${esc(it.receipt_detail)}</div>` : ""}
           <div class="item-row">
             <span>${esc(String(it.quantity))} ${esc(it.unit)} × ${esc(formatMoney(Number(it.unit_price), business.currency, intlTag))}${disc}</span>
             <span class="bold">${esc(formatMoney(Number(it.line_total), business.currency, intlTag))}</span>
@@ -115,6 +116,7 @@ export function buildInvoiceReceiptPrintHtml(p: InvoicePrintPayload): string {
     .bold { font-weight: 700; }
     .item { margin-bottom: 6px; page-break-inside: avoid; }
     .item-name { font-size: 10px; font-weight: 700; margin: 0 0 2px; }
+    .item-meta { font-size: 8px; color: #444; margin: 0 0 2px; line-height: 1.25; }
     .item-row { display: flex; justify-content: space-between; gap: 6px; font-size: 9px; }
     .tot { margin-top: 6px; }
     .tot-row { display: flex; justify-content: space-between; margin: 0 0 3px; font-size: 10px; }

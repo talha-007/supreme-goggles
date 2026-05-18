@@ -33,9 +33,7 @@ export function SignupForm() {
   const emailFieldError = emailIssue
     ? emailIssue === "empty"
       ? t("loginFieldEmailRequired")
-      : emailIssue === "format"
-        ? t("invalidEmail")
-        : t("disposableEmailBlocked")
+      : t("invalidEmail")
     : null;
 
   const rules = getPasswordRulesStatus(password);
@@ -55,11 +53,7 @@ export function SignupForm() {
     const eIssue = getSignupEmailIssue(email);
     if (eIssue) {
       setError(
-        eIssue === "empty"
-          ? t("loginFieldEmailRequired")
-          : eIssue === "format"
-            ? t("invalidEmail")
-            : t("disposableEmailBlocked"),
+        eIssue === "empty" ? t("loginFieldEmailRequired") : t("invalidEmail"),
       );
       return;
     }

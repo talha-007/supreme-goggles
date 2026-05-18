@@ -41,6 +41,11 @@ function normalizeProduct(row: Record<string, unknown>): ProductRow {
     barcode: row.barcode != null ? String(row.barcode) : null,
     category: row.category != null ? String(row.category) : null,
     brand: row.brand != null ? String(row.brand) : null,
+    oem_part_number: row.oem_part_number != null ? String(row.oem_part_number) : null,
+    alternate_part_numbers:
+      row.alternate_part_numbers != null ? String(row.alternate_part_numbers) : null,
+    application_notes: row.application_notes != null ? String(row.application_notes) : null,
+    manufacturer: row.manufacturer != null ? String(row.manufacturer) : null,
     description: row.description != null ? String(row.description) : null,
     unit: (String(row.unit ?? "pcs") || "pcs") as ProductUnit,
     purchase_price: Number(row.purchase_price),

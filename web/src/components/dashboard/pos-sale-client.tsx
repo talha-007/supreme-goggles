@@ -12,6 +12,7 @@ import {
 import { invoiceTotals, lineTotal } from "@/lib/invoices/calc";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import { looksLikeBarcode } from "@/lib/products/barcode-utils";
+import { sortProductsForPosSearch } from "@/lib/products/pos-search-sort";
 import { sanitizeProductSearchQuery } from "@/lib/products/search-query";
 import { SearchableFilterList } from "@/components/ui/searchable-filter-list";
 import type { InvoiceEditorDefaults } from "@/types/invoice";
@@ -42,6 +43,8 @@ export type PosSaleClientProps = {
   cancelHref: string;
   firstDraftSaveBehavior: "navigate-to-edit" | "refresh-only";
   fullPageInvoiceHref: string;
+  /** Spare parts counter: tighter catalog + search ranking + part codes on lines. */
+  sparePartsPos?: boolean;
 };
 
 type Props = PosSaleClientProps;
@@ -85,6 +88,16 @@ function tagClassForCategory(name: string): string {
   return palette[h]!;
 }
 
+/** Spare-parts POS: subtitle under product name / cart line. */
+function posPartCodesSubtitle(p: ProductRow | undefined): string | null {
+  if (!p) return null;
+  const bits: string[] = [];
+  if (p.sku?.trim()) bits.push(p.sku.trim());
+  if (p.oem_part_number?.trim()) bits.push(`OEM ${p.oem_part_number.trim()}`);
+  if (p.brand?.trim()) bits.push(p.brand.trim());
+  return bits.length ? bits.join(" · ") : null;
+}
+
 export function PosSaleClient({
   initialCatalogProducts,
   customers,
@@ -97,6 +110,7 @@ export function PosSaleClient({
   cancelHref,
   firstDraftSaveBehavior,
   fullPageInvoiceHref,
+  sparePartsPos = false,
 }: Props) {
   const tp = useTranslations("posSale");
   const ti = useTranslations("invoiceEditor");
@@ -175,7 +189,7 @@ export function PosSaleClient({
         const rows = await fetchProductSearch(q, ac.signal, {
           menuOnly: menuOnlySearch,
         });
-        setDisplayedProducts(rows);
+        setDisplayedProducts(sortProductsForPosSearch(sq, rows, sparePartsPos));
       } catch (e) {
         if (e instanceof Error && e.name === "AbortError") return;
         const raw = e instanceof Error ? e.message : "__SEARCH_FAILED__";
@@ -188,7 +202,7 @@ export function PosSaleClient({
       window.clearTimeout(debounceTimer);
       ac.abort();
     };
-  }, [q, initialCatalogProducts, menuOnlySearch, tp]);
+  }, [q, initialCatalogProducts, menuOnlySearch, sparePartsPos, tp]);
 
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = { all: initialCatalogProducts.length };
@@ -479,7 +493,13 @@ export function PosSaleClient({
     if (e.key !== "Enter") return;
     const sq = sanitizeProductSearchQuery(q);
     if (!sq) return;
-    const exact = displayedProducts.filter((p) => p.barcode && p.barcode.trim() === sq.trim());
+    const v = sq.trim();
+    const exact = displayedProducts.filter(
+      (p) =>
+        (p.barcode && p.barcode.trim() === v) ||
+        (p.sku && p.sku.trim() === v) ||
+        (p.oem_part_number && p.oem_part_number.trim() === v),
+    );
     if (exact.length === 1) {
       e.preventDefault();
       addProduct(exact[0]!);
@@ -610,7 +630,7 @@ export function PosSaleClient({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={onSearchKeyDown}
-            placeholder={tp("searchPlaceholder")}
+            placeholder={sparePartsPos ? tp("searchPlaceholderSpareParts") : tp("searchPlaceholder")}
             autoComplete="off"
             enterKeyHint="search"
             aria-label={tp("posTopSearchHint")}
@@ -718,7 +738,7 @@ export function PosSaleClient({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={onSearchKeyDown}
-              placeholder={tp("searchPlaceholder")}
+              placeholder={sparePartsPos ? tp("searchPlaceholderSpareParts") : tp("searchPlaceholder")}
               autoComplete="off"
               enterKeyHint="search"
               className="min-h-[44px] w-full rounded-xl border border-zinc-200 bg-zinc-50/80 py-2.5 pl-11 pr-4 text-sm text-zinc-900 outline-none ring-blue-500/30 focus:border-blue-400 focus:bg-white focus:ring-2"
@@ -749,7 +769,7 @@ export function PosSaleClient({
             {loading ? (
               <div className="pointer-events-none absolute inset-0 z-10 rounded-xl bg-white/50" />
             ) : null}
-            <div className="grid max-h-[min(56vh,600px)] grid-cols-2 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:max-h-[min(calc(100vh-13rem),680px)] 2xl:grid-cols-5">
+            <div className={`grid max-h-[min(56vh,600px)] gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:max-h-[min(calc(100vh-13rem),680px)] ${sparePartsPos ? "grid-cols-2 2xl:grid-cols-6" : "grid-cols-2 2xl:grid-cols-5"}`}>
               {filteredGrid.map((p) => {
                 const cat = p.category?.trim() || tp("uncategorized");
                 const br = p.brand?.trim() || null;
@@ -761,7 +781,7 @@ export function PosSaleClient({
                     type="button"
                     disabled={out}
                     onClick={() => addProduct(p)}
-                    className={`group flex h-full touch-manipulation flex-col overflow-hidden rounded-2xl border text-left transition active:scale-[0.98] ${
+                    className={`group flex max-h-[240px] w-full touch-manipulation flex-col overflow-hidden rounded-2xl border text-left transition active:scale-[0.98] sm:max-h-[254px] ${
                       out
                         ? "cursor-not-allowed border-zinc-200 opacity-60"
                         : "border-zinc-200 bg-white shadow-sm hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
@@ -784,26 +804,38 @@ export function PosSaleClient({
                         </div>
                       )}
                     </div>
-                    <div className="flex min-h-0 flex-1 flex-col gap-1.5 p-2.5">
-                      <span className="line-clamp-2 min-h-[2.4em] text-xs font-semibold leading-tight text-zinc-900 sm:text-sm">
+                    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1 overflow-hidden p-2.5">
+                      <span
+                        title={p.name}
+                        className="line-clamp-2 min-h-0 break-words text-xs font-semibold leading-snug text-zinc-900 sm:text-sm"
+                      >
                         {p.name}
                       </span>
-                      <div className="flex flex-wrap gap-0.5">
+                      {sparePartsPos ? (
+                        <span className="line-clamp-1 min-h-0 min-w-0 break-words text-[10px] leading-tight text-zinc-500">
+                          {posPartCodesSubtitle(p) ?? "\u00a0"}
+                        </span>
+                      ) : null}
+                      <div className="flex min-h-0 shrink-0 gap-0.5 overflow-hidden">
                         <span
-                          className={`inline-flex max-w-full truncate rounded px-1 py-0.5 text-[9px] font-medium ${tagClassForCategory(cat)}`}
+                          title={cat}
+                          className={`min-w-0 flex-1 truncate rounded px-1 py-0.5 text-center text-[9px] font-medium ${tagClassForCategory(cat)}`}
                         >
                           {cat}
                         </span>
                         {br ? (
-                          <span className="inline-flex max-w-full truncate rounded border border-zinc-200 bg-zinc-100 px-1 py-0.5 text-[9px] font-medium text-zinc-700">
+                          <span
+                            title={br}
+                            className="min-w-0 flex-1 truncate rounded border border-zinc-200 bg-zinc-100 px-1 py-0.5 text-center text-[9px] font-medium text-zinc-700"
+                          >
                             {br}
                           </span>
                         ) : null}
                       </div>
-                      <span className="mt-auto pt-0.5 text-right text-xs font-semibold tabular-nums text-blue-700 sm:text-sm">
+                      <span className="mt-auto shrink-0 truncate pt-0.5 text-right text-xs font-semibold tabular-nums text-blue-700 sm:text-sm">
                         {pkr.format(p.sale_price)}
                       </span>
-                      <span className="text-[9px] leading-tight text-zinc-500">
+                      <span className="line-clamp-1 shrink-0 break-all text-end text-[9px] leading-tight text-zinc-500">
                         {tp("stockLine", {
                           qty: p.current_stock.toLocaleString(intlLocaleTag(locale), {
                             minimumFractionDigits: 0,
@@ -905,6 +937,11 @@ export function PosSaleClient({
                                 <span className="line-clamp-2 text-xs font-medium leading-snug text-zinc-900">
                                   {line.product_name}
                                 </span>
+                                {sparePartsPos && line.product_id ? (
+                                  <span className="line-clamp-1 text-[10px] text-zinc-500">
+                                    {posPartCodesSubtitle(productById.get(line.product_id)) ?? ""}
+                                  </span>
+                                ) : null}
                               </div>
                             </td>
                             <td className="w-[7.75rem] min-w-[7.75rem] max-w-[7.75rem] overflow-hidden align-middle py-2 pe-1">
@@ -975,6 +1012,11 @@ export function PosSaleClient({
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-medium text-zinc-900">{line.product_name}</p>
+                            {sparePartsPos && line.product_id ? (
+                              <p className="line-clamp-1 text-[11px] text-zinc-500">
+                                {posPartCodesSubtitle(productById.get(line.product_id)) ?? ""}
+                              </p>
+                            ) : null}
                             <p className="text-xs text-zinc-500">
                               {pkr.format(line.unit_price)} Ã— {line.quantity}
                             </p>

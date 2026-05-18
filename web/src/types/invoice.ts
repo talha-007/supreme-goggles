@@ -44,6 +44,11 @@ export type InvoiceItemRow = {
   line_total: number;
 };
 
+/** Invoice line + optional second line for thermal/PDF (spare parts: SKU / OEM / brand). */
+export type InvoiceItemPrintRow = InvoiceItemRow & {
+  receipt_detail?: string | null;
+};
+
 export type BusinessInvoiceRow = {
   id: string;
   name: string;
@@ -53,6 +58,8 @@ export type BusinessInvoiceRow = {
   currency: string;
   /** Shown on PDF instead of the word "Tax", e.g. GST, VAT. */
   tax_label?: string | null;
+  /** Business vertical (e.g. spare_parts receipt formatting). */
+  type?: string | null;
 };
 
 /** Applied when creating a new invoice (from Settings). */

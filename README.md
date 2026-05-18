@@ -45,6 +45,8 @@ Optional — npm workspaces from repo root: `npm install` then `npm run pos` (se
 
    Run [`../supabase/migrations/20260329120000_create_business_with_owner.sql`](../supabase/migrations/20260329120000_create_business_with_owner.sql) in the SQL Editor (or use Supabase CLI migrations).
 
+   For **spare parts / auto parts** businesses (extra catalog fields + POS search), apply newer migrations too — e.g. [`20260518140000_spare_parts_business_type_and_product_fields.sql`](../supabase/migrations/20260518140000_spare_parts_business_type_and_product_fields.sql). Details: [`docs/pos-spare-parts-shop-plan.md`](docs/pos-spare-parts-shop-plan.md).
+
 5. Install and run:
 
    ```bash
@@ -56,7 +58,7 @@ Open [http://localhost:3000](http://localhost:3000) — you will be prompted to 
 
 ## Shop setup (first day)
 
-1. **Business:** Complete onboarding with your shop name (one business per account to start).
+1. **Business:** Complete onboarding with your shop name (one business per account to start). Choose **Spare parts / auto parts** if you sell by OEM/SKU at the counter — same POS and stock as a general shop, with extra part fields and receipt lines.
 2. **Products:** Add products under **Products** — set **sale price**, **stock**, and optional **category** and **photo** (helps the dashboard POS grid). Use **barcodes** if you scan at the counter.
 3. **Customers:** Add regular customers if you sell on credit; walk-in sales work without a customer.
 4. **Invoicing defaults:** Under **Settings**, set **tax rate** and invoice defaults so new sales match your shop.

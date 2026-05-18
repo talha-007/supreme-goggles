@@ -20,6 +20,11 @@ export type ProductRow = {
   barcode: string | null;
   category: string | null;
   brand: string | null;
+  /** Spare parts (optional; from DB when column exists). */
+  oem_part_number?: string | null;
+  alternate_part_numbers?: string | null;
+  application_notes?: string | null;
+  manufacturer?: string | null;
   description: string | null;
   unit: ProductUnit;
   purchase_price: number;
