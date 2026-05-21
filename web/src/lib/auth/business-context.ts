@@ -90,6 +90,11 @@ export function canManageCustomers(_role: MemberRole): boolean {
   return true;
 }
 
+/** Destructive customer removal is owner-only. */
+export function canDeleteCustomers(role: MemberRole): boolean {
+  return role === "owner";
+}
+
 export function canManageInvoices(_role: MemberRole): boolean {
   return true;
 }
