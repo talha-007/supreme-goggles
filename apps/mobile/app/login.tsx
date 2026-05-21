@@ -11,15 +11,22 @@ import {
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { BrandMark } from "../src/components/BrandMark";
 import { ErrorBannerWithSupport } from "../src/components/ErrorBannerWithSupport";
 import { FormField } from "../src/components/FormField";
 import { PrimaryButton } from "../src/components/PrimaryButton";
 import { useAuth } from "../src/contexts/auth-context";
+import { useTheme } from "../src/contexts/theme-context";
 import { isValidEmailFormat } from "../src/lib/credential-validation";
 import { LOGIN_FAILED_CREDENTIALS } from "../src/lib/login-hints";
 import { getLoginErrorTranslationId, LOGIN_ERROR_MESSAGE } from "../src/lib/map-login-error";
 import { getPrivacyPolicyUrl } from "../src/lib/privacy-config";
 import { supabase } from "../src/lib/supabase";
+import {
+  screenRootClass,
+  textMutedClass,
+  textPageTitleClass,
+} from "../src/theme/semantic";
 
 function loginEmailFieldMessage(email: string, started: boolean): string | null {
   if (!started) return null;
@@ -39,6 +46,7 @@ export default function LoginScreen() {
     details?: string;
   }>();
   const { session, hasBusiness, subscriptionAccess, loading: authLoading } = useAuth();
+  const { resolved } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldStarted, setFieldStarted] = useState({ email: false, password: false });
@@ -84,7 +92,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-950">
+    <SafeAreaView className={screenRootClass(resolved)}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
@@ -93,14 +101,17 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           contentContainerClassName="flex-grow px-6 pb-8 pt-4"
         >
-          <Text className="text-3xl font-bold text-neutral-100">Welcome back</Text>
-          <Text className="mt-2 text-base text-neutral-500">
+          <View className="mb-6 items-center">
+            <BrandMark size={80} />
+          </View>
+          <Text className={`text-3xl font-bold ${textPageTitleClass(resolved)}`}>Welcome back</Text>
+          <Text className={`mt-2 text-base ${textMutedClass(resolved)}`}>
             Sign in to your store account
           </Text>
 
           {postSignup === "1" ? (
-            <View className="mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
-              <Text className="text-sm text-emerald-300" accessibilityRole="text">
+            <View className="mt-6 rounded-lg border border-brand-500/30 bg-brand-500/10 px-3 py-2">
+              <Text className="text-sm text-brand-300" accessibilityRole="text">
                 Check your email to confirm your account, then sign in.
               </Text>
             </View>
@@ -161,7 +172,7 @@ export default function LoginScreen() {
             <View className="flex-row justify-end">
               <Link href="/forgot-password" asChild>
                 <Pressable hitSlop={8}>
-                  <Text className="text-sm font-medium text-emerald-500">Forgot password?</Text>
+                  <Text className="text-sm font-medium text-brand-500">Forgot password?</Text>
                 </Pressable>
               </Link>
             </View>
@@ -184,10 +195,10 @@ export default function LoginScreen() {
           <PrimaryButton label="Sign in" onPress={() => void onSubmit()} loading={loading} />
 
           <View className="mt-10 flex-row flex-wrap items-center justify-center gap-1">
-            <Text className="text-center text-neutral-500">New here?</Text>
+            <Text className={`text-center ${textMutedClass(resolved)}`}>New here?</Text>
             <Link href="/signup" asChild>
               <Pressable>
-                <Text className="text-center text-base font-semibold text-emerald-400">
+                <Text className="text-center text-base font-semibold text-brand-400">
                   Create an account
                 </Text>
               </Pressable>

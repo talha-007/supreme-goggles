@@ -3,6 +3,17 @@ import { useWindowDimensions, Pressable, Text, View } from "react-native";
 import PagerView from "react-native-pager-view";
 import Animated, { FadeIn } from "react-native-reanimated";
 
+import { BrandMark } from "./BrandMark";
+import { useTheme } from "../contexts/theme-context";
+import {
+  introFooterDividerClass,
+  pagerDotInactiveClass,
+  screenRootClass,
+  textMutedClass,
+  textPageTitleClass,
+  textSubtleClass,
+} from "../theme/semantic";
+
 const SLIDES = [
   {
     title: "Taplite",
@@ -32,6 +43,7 @@ export function IntroSlides({ onDone }: Props) {
   const { width: pageW } = useWindowDimensions();
   const pager = useRef<PagerView>(null);
   const [page, setPage] = useState(0);
+  const { resolved } = useTheme();
 
   const goNext = useCallback(() => {
     if (page < SLIDES.length - 1) {
@@ -42,7 +54,7 @@ export function IntroSlides({ onDone }: Props) {
   }, [page, onDone]);
 
   return (
-    <View className="flex-1 bg-neutral-950">
+    <View className={screenRootClass(resolved)}>
       <PagerView
         ref={pager}
         style={{ flex: 1 }}
@@ -56,15 +68,18 @@ export function IntroSlides({ onDone }: Props) {
             style={{ width: pageW }}
           >
             <Animated.View entering={FadeIn.duration(420)}>
-              <View className="mb-6 self-start rounded-2xl bg-emerald-500/15 px-4 py-2">
-                <Text className="text-sm font-semibold uppercase tracking-wider text-emerald-400">
+              <View className="mb-6 items-center">
+                <BrandMark size={88} />
+              </View>
+              <View className="mb-6 self-start rounded-2xl bg-brand-500/15 px-4 py-2">
+                <Text className="text-sm font-semibold uppercase tracking-wider text-brand-400">
                   {slide.accent}
                 </Text>
               </View>
-              <Text className="text-3xl font-bold leading-tight text-neutral-100">
+              <Text className={`text-3xl font-bold leading-tight ${textPageTitleClass(resolved)}`}>
                 {slide.title}
               </Text>
-              <Text className="mt-4 text-base leading-relaxed text-neutral-400">
+              <Text className={`mt-4 text-base leading-relaxed ${textSubtleClass(resolved)}`}>
                 {slide.body}
               </Text>
             </Animated.View>
@@ -76,15 +91,15 @@ export function IntroSlides({ onDone }: Props) {
         {SLIDES.map((_, i) => (
           <View
             key={String(i)}
-            className={`h-2 rounded-full ${i === page ? "w-8 bg-emerald-500" : "w-2 bg-neutral-700"}`}
+            className={`h-2 rounded-full ${i === page ? "w-8 bg-brand-500" : `w-2 ${pagerDotInactiveClass(resolved)}`}`}
           />
         ))}
       </View>
 
-      <View className="border-t border-neutral-800 px-6 pb-10 pt-4">
+      <View className={`px-6 pb-10 pt-4 ${introFooterDividerClass(resolved)}`}>
         <Pressable
           onPress={goNext}
-          className="rounded-xl bg-emerald-600 px-4 py-4 active:opacity-90"
+          className="rounded-xl bg-brand-600 px-4 py-4 active:opacity-90"
         >
           <Text className="text-center text-base font-semibold text-white">
             {page < SLIDES.length - 1 ? "Next" : "Get started"}
@@ -92,7 +107,7 @@ export function IntroSlides({ onDone }: Props) {
         </Pressable>
         {page < SLIDES.length - 1 ? (
           <Pressable onPress={onDone} className="mt-4 py-2">
-            <Text className="text-center text-sm text-neutral-500">Skip</Text>
+            <Text className={`text-center text-sm ${textMutedClass(resolved)}`}>Skip</Text>
           </Pressable>
         ) : null}
       </View>

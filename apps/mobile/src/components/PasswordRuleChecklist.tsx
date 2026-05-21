@@ -1,6 +1,8 @@
 import { Text, View } from "react-native";
 
+import { useTheme } from "../contexts/theme-context";
 import type { PasswordRulesStatus } from "../lib/credential-validation";
+import { textMutedClass } from "../theme/semantic";
 
 type Props = {
   status: PasswordRulesStatus;
@@ -15,13 +17,14 @@ const copy: Record<keyof PasswordRulesStatus, string> = {
 };
 
 export function PasswordRuleChecklist({ status }: Props) {
+  const { resolved } = useTheme();
   return (
     <View className="mt-2">
-      <Text className="text-[11px] font-medium uppercase text-neutral-500">Password must have</Text>
+      <Text className={`text-[11px] font-medium uppercase ${textMutedClass(resolved)}`}>Password must have</Text>
       {labels.map((k) => (
         <Text
           key={k}
-          className={`mt-1 text-xs ${status[k] ? "text-emerald-400" : "text-neutral-500"}`}
+          className={`mt-1 text-xs ${status[k] ? "text-brand-400" : textMutedClass(resolved)}`}
         >
           {status[k] ? "✓ " : "○ "}
           {copy[k]}

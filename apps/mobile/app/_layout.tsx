@@ -6,23 +6,36 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AppErrorBoundary } from "../src/components/AppErrorBoundary";
 import { AuthProvider } from "../src/contexts/auth-context";
+import { ThemeProvider, useTheme } from "../src/contexts/theme-context";
+
+function ThemedStack() {
+  const { resolved } = useTheme();
+  const bg = resolved === "dark" ? "#0a0a0b" : "#f4f4f5";
+  return (
+    <>
+      <StatusBar style={resolved === "dark" ? "light" : "dark"} />
+      <Stack
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          contentStyle: { backgroundColor: bg },
+          animation: route.name === "index" ? "fade" : "slide_from_right",
+          gestureEnabled: true,
+        })}
+      />
+    </>
+  );
+}
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <SafeAreaProvider>
-        <AppErrorBoundary>
-          <StatusBar style="light" />
-          <Stack
-            screenOptions={({ route }) => ({
-              headerShown: false,
-              contentStyle: { backgroundColor: "#0a0a0b" },
-              animation: route.name === "index" ? "fade" : "slide_from_right",
-              gestureEnabled: true,
-            })}
-          />
-        </AppErrorBoundary>
-      </SafeAreaProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <SafeAreaProvider>
+          <AppErrorBoundary>
+            <ThemedStack />
+          </AppErrorBoundary>
+        </SafeAreaProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

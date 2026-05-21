@@ -1,5 +1,14 @@
 import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
 
+import { useTheme } from "../contexts/theme-context";
+import {
+  modalDialogSurfaceClass,
+  modalSecondaryButtonClass,
+  textMutedClass,
+  textPageTitleClass,
+  textStrongOnSurfaceClass,
+} from "../theme/semantic";
+
 export type ConfirmDialogProps = {
   visible: boolean;
   title: string;
@@ -24,10 +33,11 @@ export function ConfirmDialog({
   onCancel,
   onConfirm,
 }: ConfirmDialogProps) {
+  const { resolved } = useTheme();
   const confirmClasses =
     variant === "danger"
       ? "rounded-xl border border-red-900/60 bg-red-950/40 py-3.5 active:opacity-90 disabled:opacity-50"
-      : "rounded-xl bg-emerald-600 py-3.5 active:opacity-90 disabled:opacity-50";
+      : "rounded-xl bg-violet-600 py-3.5 active:opacity-90 disabled:opacity-50";
 
   const spinnerColor = variant === "danger" ? "#f87171" : "#ffffff";
 
@@ -47,11 +57,11 @@ export function ConfirmDialog({
           className="absolute inset-0 bg-black/70"
         />
         <View
-          className="z-10 w-[92%] max-w-sm rounded-2xl border border-neutral-800 bg-neutral-950 px-4 pb-4 pt-4"
+          className={modalDialogSurfaceClass(resolved)}
           accessibilityViewIsModal
         >
-          <Text className="text-lg font-semibold text-neutral-100">{title}</Text>
-          <Text className="mt-2 text-sm leading-5 text-neutral-500">{message}</Text>
+          <Text className={`text-lg font-semibold ${textPageTitleClass(resolved)}`}>{title}</Text>
+          <Text className={`mt-2 text-sm leading-5 ${textMutedClass(resolved)}`}>{message}</Text>
 
           <View className="mt-5 gap-3">
             <Pressable
@@ -77,11 +87,13 @@ export function ConfirmDialog({
             <Pressable
               onPress={onCancel}
               disabled={loading}
-              className="rounded-xl bg-neutral-800 py-3.5 active:opacity-90 disabled:opacity-50"
+              className={modalSecondaryButtonClass(resolved)}
               accessibilityRole="button"
               accessibilityLabel={cancelLabel}
             >
-              <Text className="text-center text-base font-medium text-neutral-100">{cancelLabel}</Text>
+              <Text className={`text-center text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>
+                {cancelLabel}
+              </Text>
             </Pressable>
           </View>
         </View>

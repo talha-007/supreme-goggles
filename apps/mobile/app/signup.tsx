@@ -11,11 +11,13 @@ import {
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { BrandMark } from "../src/components/BrandMark";
 import { ErrorBannerWithSupport } from "../src/components/ErrorBannerWithSupport";
 import { FormField } from "../src/components/FormField";
 import { PasswordRuleChecklist } from "../src/components/PasswordRuleChecklist";
 import { PrimaryButton } from "../src/components/PrimaryButton";
 import { useAuth } from "../src/contexts/auth-context";
+import { useTheme } from "../src/contexts/theme-context";
 import {
   getPasswordRulesStatus,
   getSignUpPasswordIssue,
@@ -26,9 +28,11 @@ import {
 import { getEmailRedirectUrl } from "../src/lib/auth-redirect";
 import { getPrivacyPolicyUrl } from "../src/lib/privacy-config";
 import { supabase } from "../src/lib/supabase";
+import { screenRootClass, textMutedClass, textPageTitleClass } from "../src/theme/semantic";
 
 export default function SignupScreen() {
   const { session, hasBusiness, subscriptionAccess, loading: authLoading } = useAuth();
+  const { resolved } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldStarted, setFieldStarted] = useState({ email: false, password: false });
@@ -107,7 +111,7 @@ export default function SignupScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-950">
+    <SafeAreaView className={screenRootClass(resolved)}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
@@ -122,12 +126,16 @@ export default function SignupScreen() {
               hitSlop={12}
               className="rounded-lg py-2 pr-4"
             >
-              <Text className="text-base text-emerald-500">Back</Text>
+              <Text className="text-base text-brand-500">Back</Text>
             </Pressable>
           </View>
 
-          <Text className="text-3xl font-bold text-neutral-100">Create account</Text>
-          <Text className="mt-2 text-base text-neutral-500">
+          <View className="mb-6 items-center">
+            <BrandMark size={80} />
+          </View>
+
+          <Text className={`text-3xl font-bold ${textPageTitleClass(resolved)}`}>Create account</Text>
+          <Text className={`mt-2 text-base ${textMutedClass(resolved)}`}>
             Use a real email you can access — temporary inboxes are not allowed.
           </Text>
 
@@ -169,7 +177,7 @@ export default function SignupScreen() {
             <Text className="text-center text-neutral-500">Already have an account?</Text>
             <Link href="/login" asChild>
               <Pressable>
-                <Text className="text-center text-base font-semibold text-emerald-400">
+                <Text className="text-center text-base font-semibold text-brand-400">
                   Sign in
                 </Text>
               </Pressable>

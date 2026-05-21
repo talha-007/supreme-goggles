@@ -12,7 +12,7 @@ export function PrimaryButton({ label, onPress, loading, disabled }: Props) {
     <Pressable
       onPress={onPress}
       disabled={loading || disabled}
-      className="mt-2 rounded-xl bg-emerald-600 px-4 py-4 active:opacity-90 disabled:opacity-60"
+      className="mt-2 rounded-xl bg-violet-600 px-4 py-4 active:opacity-90 disabled:opacity-60"
     >
       {loading ? (
         <ActivityIndicator color="#fff" />

@@ -13,6 +13,7 @@ import { AppState, type AppStateStatus } from "react-native";
 
 import { supabase } from "../lib/supabase";
 import { hasSubscriptionAccess, isSuperAdminBypassMobile } from "../lib/subscription";
+import type { MemberRole } from "../types/member";
 
 type AuthContextValue = {
   session: Session | null;
@@ -20,6 +21,8 @@ type AuthContextValue = {
   loading: boolean;
   hasBusiness: boolean;
   businessId: string | null;
+  /** First membership row role (used for owner-only actions such as deleting customers). */
+  memberRole: MemberRole | null;
   /** False when the business subscription/trial blocks access (mirrors web app layout). True if no business yet. */
   subscriptionAccess: boolean;
   refreshMembership: () => Promise<void>;
@@ -41,22 +44,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [signInRoutingHold, setSignInRoutingHold] = useState(false);
   const [hasBusiness, setHasBusiness] = useState(false);
   const [businessId, setBusinessId] = useState<string | null>(null);
+  const [memberRole, setMemberRole] = useState<MemberRole | null>(null);
   const [subscriptionAccess, setSubscriptionAccess] = useState(true);
 
   const loadMembershipAndSubscription = useCallback(async (u: User | null | undefined) => {
     if (!u?.id) {
       setHasBusiness(false);
       setBusinessId(null);
+      setMemberRole(null);
       setSubscriptionAccess(true);
       return;
     }
     const { data } = await supabase
       .from("business_members")
-      .select("business_id")
+      .select("business_id, role")
       .eq("user_id", u.id)
       .limit(1)
       .maybeSingle();
     const bid = (data?.business_id as string | undefined) ?? null;
+    const roleRaw = data?.role as string | undefined;
+    const roleParsed: MemberRole | null =
+      roleRaw === "owner" || roleRaw === "manager" || roleRaw === "cashier" || roleRaw === "viewer"
+        ? roleRaw
+        : null;
+    setMemberRole(roleParsed);
     let subOk = true;
     if (bid) {
       const superBypass = isSuperAdminBypassMobile(u.id, u.email);
@@ -141,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setHasBusiness(false);
     setBusinessId(null);
+    setMemberRole(null);
     setSubscriptionAccess(true);
   }, []);
 
@@ -153,13 +165,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading: authBusy,
       hasBusiness,
       businessId,
+      memberRole,
       subscriptionAccess,
       refreshMembership: async () => {
         await loadMembershipAndSubscription(user ?? null);
       },
       signOut,
     }),
-    [session, user, authBusy, hasBusiness, businessId, subscriptionAccess, loadMembershipAndSubscription, signOut],
+    [
+      session,
+      user,
+      authBusy,
+      hasBusiness,
+      businessId,
+      memberRole,
+      subscriptionAccess,
+      loadMembershipAndSubscription,
+      signOut,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

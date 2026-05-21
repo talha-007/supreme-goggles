@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "expo-router";
+import { useNavigation, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -11,6 +11,8 @@ import {
   Text,
   View,
 } from "react-native";
+
+import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
 
 import { ConfirmDialog } from "../../src/components/ConfirmDialog";
 import { ErrorBannerWithSupport } from "../../src/components/ErrorBannerWithSupport";
@@ -40,6 +42,24 @@ import {
 } from "../../src/lib/date-range-presets";
 import { formatPkr } from "../../src/lib/format-money";
 import { supabase } from "../../src/lib/supabase";
+import {
+  bottomSheetContainerClass,
+  chipInactiveBorder,
+  chipInactiveText,
+  formLineItemClass,
+  hairlineBorderBClass,
+  listEntityCardClass,
+  modalSecondaryButtonClass,
+  screenCenterRootClass,
+  scrollCanvasClass,
+  subtlePositiveClass,
+  textFieldLabelClass,
+  textMutedClass,
+  textStrongOnSurfaceClass,
+  textSubtleClass,
+  type ResolvedScheme,
+} from "../../src/theme/semantic";
+import { useTheme } from "../../src/contexts/theme-context";
 import type { CustomerRow } from "../../src/types/customer";
 import type { InvoiceItemRow, InvoiceRow, InvoiceStatus } from "../../src/types/invoice";
 
@@ -62,12 +82,70 @@ function statusLabel(s: InvoiceStatus): string {
   return map[s];
 }
 
-function statusBadgeClass(s: InvoiceStatus): string {
+function statusBadgeClass(s: InvoiceStatus, resolved: ResolvedScheme): string {
   if (s === "cancelled") return "bg-red-950 text-red-400";
-  if (s === "paid") return "bg-emerald-950 text-emerald-400";
-  if (s === "draft") return "bg-neutral-800 text-neutral-400";
-  if (s === "partial") return "bg-sky-950 text-sky-400";
-  return "bg-amber-950 text-amber-400";
+  if (s === "paid") return resolved === "dark" ? "bg-brand-950 text-brand-400" : "bg-brand-100 text-brand-800";
+  if (s === "draft") return resolved === "dark" ? "bg-neutral-800 text-neutral-400" : "bg-zinc-200 text-zinc-600";
+  if (s === "partial") return resolved === "dark" ? "bg-sky-950 text-sky-400" : "bg-sky-100 text-sky-800";
+  return resolved === "dark" ? "bg-amber-950 text-amber-400" : "bg-amber-100 text-amber-800";
+}
+
+function brandChipActiveSurface(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "border-brand-500 bg-brand-500/15" : "border-brand-500 bg-brand-100";
+}
+
+function brandChipActiveText(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "text-brand-400" : "text-brand-800";
+}
+
+function skyChipActiveSurface(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "border-sky-500 bg-sky-500/15" : "border-sky-600 bg-sky-100";
+}
+
+function skyChipActiveText(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "text-sky-400" : "text-sky-800";
+}
+
+function ionIconMuted(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "#525252" : "#71717a";
+}
+
+function ionIconSecondary(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "#a3a3a3" : "#52525b";
+}
+
+function catalogSearchChipClass(resolved: ResolvedScheme): string {
+  return resolved === "dark"
+    ? "mb-3 self-start rounded-lg border border-sky-600/50 bg-sky-950/40 px-3 py-2 active:opacity-90"
+    : "mb-3 self-start rounded-lg border border-sky-400/50 bg-sky-50 px-3 py-2 active:opacity-90";
+}
+
+function catalogSearchChipText(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "text-sky-400" : "text-sky-800";
+}
+
+function creditSaleCardSurfaceClass(resolved: ResolvedScheme): string {
+  return resolved === "dark"
+    ? "rounded-xl border border-amber-600/50 bg-amber-950/25 py-3.5 active:opacity-90 disabled:opacity-50"
+    : "rounded-xl border border-amber-400/60 bg-amber-50 py-3.5 active:opacity-90 disabled:opacity-50";
+}
+
+function creditSaleSurfaceClass(resolved: ResolvedScheme): string {
+  return `mt-2 ${creditSaleCardSurfaceClass(resolved)}`;
+}
+
+function creditSaleTextClass(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "text-amber-300" : "text-amber-900";
+}
+
+function receiptCtaSurfaceClass(resolved: ResolvedScheme): string {
+  return resolved === "dark"
+    ? "mt-4 rounded-xl border border-brand-700/50 bg-brand-950/30 py-3.5 active:opacity-90 disabled:opacity-50"
+    : "mt-4 rounded-xl border border-brand-300 bg-brand-50 py-3.5 active:opacity-90 disabled:opacity-50";
+}
+
+function receiptCtaTitleClass(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "text-brand-400" : "text-brand-800";
 }
 
 type InvoiceListRow = InvoiceRow & {
@@ -165,7 +243,9 @@ export default function InvoicesScreen() {
   const navigation = useNavigation();
   const bottomPad = useTabScreenBottomPadding();
   const { businessId, user } = useAuth();
+  const params = useLocalSearchParams<{ invoiceId?: string | string[]; invoiceFocus?: string | string[] }>();
   const { refreshGeneration } = useRealtimeNotifications();
+  const { resolved } = useTheme();
 
   const [rows, setRows] = useState<InvoiceListRow[]>([]);
   const [query, setQuery] = useState("");
@@ -233,16 +313,18 @@ export default function InvoicesScreen() {
               void loadCustomers();
             }}
             hitSlop={12}
-            className="flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
+            className={`flex-row items-center rounded-full px-3 py-1.5 active:opacity-80 ${
+              resolved === "dark" ? "bg-brand-500/15" : "bg-brand-100"
+            }`}
             accessibilityRole="button"
             accessibilityLabel="New bill"
           >
-            <Ionicons name="add" size={22} color="#34d399" />
-            <Text className="ml-1 text-sm font-semibold text-emerald-400">New</Text>
+            <Ionicons name="add" size={22} color={BRAND_ACCENT_HEX} />
+            <Text className={`ml-1 text-sm font-semibold ${brandChipActiveText(resolved)}`}>New</Text>
           </Pressable>,
         ),
     });
-  }, [navigation]);
+  }, [navigation, resolved]);
 
   const loadCustomers = useCallback(async () => {
     if (!businessId) return;
@@ -460,6 +542,20 @@ export default function InvoicesScreen() {
     setReverseOpen(false);
     setDetailLineImages({});
   };
+
+  /** Open a bill when another screen links here with `invoiceId` (+ optional `invoiceFocus` nonce). */
+  useEffect(() => {
+    const raw = params.invoiceId;
+    const id = typeof raw === "string" ? raw : Array.isArray(raw) ? raw[0] : null;
+    if (!id || !businessId) return;
+    setDetailId(id);
+    setDetail(null);
+    setDetailError(null);
+    setFinalizeMode(null);
+    setReverseOpen(false);
+    setDetailLineImages({});
+    void fetchDetail(id);
+  }, [params.invoiceId, params.invoiceFocus, businessId, fetchDetail]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -739,14 +835,14 @@ export default function InvoicesScreen() {
 
   if (loading && rows.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-neutral-950">
-        <ActivityIndicator size="large" color="#34d399" />
+      <View className={screenCenterRootClass(resolved)}>
+        <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-neutral-950">
+    <View className={scrollCanvasClass(resolved)}>
       {error ? <ErrorBannerWithSupport message={error} /> : null}
 
       <FlatList
@@ -754,7 +850,7 @@ export default function InvoicesScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: bottomPad + 8, paddingHorizontal: 16 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#34d399" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={BRAND_ACCENT_HEX} />
         }
         ListHeaderComponent={
           <View className="pb-2 pt-2">
@@ -764,7 +860,9 @@ export default function InvoicesScreen() {
               placeholder="Search invoice # or customer"
               accessibilityLabel="Search bills"
             />
-            <Text className="mt-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Status</Text>
+            <Text className={`mt-2 text-xs font-semibold uppercase tracking-wide ${textSubtleClass(resolved)}`}>
+              Status
+            </Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -782,11 +880,11 @@ export default function InvoicesScreen() {
                     key={f.key}
                     onPress={() => setFilter(f.key)}
                     className={`mr-2 rounded-full border px-3.5 py-2 ${
-                      active ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                      active ? brandChipActiveSurface(resolved) : chipInactiveBorder(resolved)
                     }`}
                   >
                     <Text
-                      className={`text-sm font-medium ${active ? "text-emerald-400" : "text-neutral-400"}`}
+                      className={`text-sm font-medium ${active ? brandChipActiveText(resolved) : chipInactiveText(resolved)}`}
                     >
                       {f.label}
                     </Text>
@@ -794,7 +892,9 @@ export default function InvoicesScreen() {
                 );
               })}
             </ScrollView>
-            <Text className="mt-3 text-xs font-semibold uppercase tracking-wide text-neutral-500">Date</Text>
+            <Text className={`mt-3 text-xs font-semibold uppercase tracking-wide ${textSubtleClass(resolved)}`}>
+              Date
+            </Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -812,11 +912,11 @@ export default function InvoicesScreen() {
                     key={f.key}
                     onPress={() => setDatePreset(f.key)}
                     className={`mr-2 rounded-full border px-3.5 py-2 ${
-                      active ? "border-sky-500 bg-sky-500/15" : "border-neutral-700 bg-neutral-900"
+                      active ? skyChipActiveSurface(resolved) : chipInactiveBorder(resolved)
                     }`}
                   >
                     <Text
-                      className={`text-sm font-medium ${active ? "text-sky-400" : "text-neutral-400"}`}
+                      className={`text-sm font-medium ${active ? skyChipActiveText(resolved) : chipInactiveText(resolved)}`}
                     >
                       {f.label}
                     </Text>
@@ -824,12 +924,12 @@ export default function InvoicesScreen() {
                 );
               })}
             </ScrollView>
-            <Text className="mt-2 text-[11px] leading-4 text-neutral-600">
+            <Text className={`mt-2 text-[11px] leading-4 ${textMutedClass(resolved)}`}>
               {datePreset === "all"
                 ? `Loads up to ${INVOICE_FETCH_LIMIT} most recent.`
                 : "Date filter is applied on the server for this list."}
             </Text>
-            <Text className="mt-3 text-xs text-neutral-500">
+            <Text className={`mt-3 text-xs ${textMutedClass(resolved)}`}>
               {filtered.length === rows.length
                 ? `${rows.length} bill${rows.length === 1 ? "" : "s"}`
                 : `${filtered.length} of ${rows.length} shown`}
@@ -838,8 +938,8 @@ export default function InvoicesScreen() {
         }
         ListEmptyComponent={
           <View className="items-center px-4 py-12">
-            <Ionicons name="document-text-outline" size={48} color="#525252" />
-            <Text className="mt-4 text-center text-base font-medium text-neutral-300">
+            <Ionicons name="document-text-outline" size={48} color={ionIconMuted(resolved)} />
+            <Text className={`mt-4 text-center text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>
               {rows.length === 0 &&
               !query.trim() &&
               filter === "all" &&
@@ -847,7 +947,7 @@ export default function InvoicesScreen() {
                 ? "No bills yet"
                 : "No bills match"}
             </Text>
-            <Text className="mt-2 text-center text-sm leading-5 text-neutral-500">
+            <Text className={`mt-2 text-center text-sm leading-5 ${textMutedClass(resolved)}`}>
               {rows.length === 0 &&
               !query.trim() &&
               filter === "all" &&
@@ -860,31 +960,31 @@ export default function InvoicesScreen() {
         renderItem={({ item }) => (
           <Pressable
             onPress={() => openDetail(item.id)}
-            className="mb-2 rounded-2xl border border-neutral-800 bg-neutral-900/90 px-4 py-4 active:opacity-90"
+            className={listEntityCardClass(resolved)}
           >
             <View className="flex-row items-start justify-between gap-3">
               <View className="min-w-0 flex-1">
-                <Text className="font-mono text-sm text-neutral-300">{item.invoice_number}</Text>
-                <Text className="mt-1 text-base font-semibold text-neutral-100">
+                <Text className={`font-mono text-sm ${textSubtleClass(resolved)}`}>{item.invoice_number}</Text>
+                <Text className={`mt-1 text-base font-semibold ${textStrongOnSurfaceClass(resolved)}`}>
                   {item.customer?.name ?? "Walk-in"}
                 </Text>
                 <View className="mt-2 flex-row flex-wrap items-center gap-2">
-                  <View className={`rounded-full px-2.5 py-0.5 ${statusBadgeClass(item.status)}`}>
+                  <View className={`rounded-full px-2.5 py-0.5 ${statusBadgeClass(item.status, resolved)}`}>
                     <Text className="text-xs font-semibold">{statusLabel(item.status)}</Text>
                   </View>
-                  <Text className="text-xs text-neutral-600">{shortDate(item.created_at)}</Text>
+                  <Text className={`text-xs ${textSubtleClass(resolved)}`}>{shortDate(item.created_at)}</Text>
                 </View>
               </View>
               <View className="items-end">
-                <Text className="text-base font-semibold text-emerald-400/95">
+                <Text className={`text-base font-semibold ${subtlePositiveClass(resolved)}`}>
                   {formatPkr(item.total_amount)}
                 </Text>
                 {item.status !== "draft" && item.status !== "cancelled" ? (
-                  <Text className="mt-0.5 text-xs text-neutral-500">
+                  <Text className={`mt-0.5 text-xs ${textMutedClass(resolved)}`}>
                     Paid {formatPkr(item.paid_amount)}
                   </Text>
                 ) : null}
-                <Ionicons name="chevron-forward" size={20} color="#525252" style={{ marginTop: 4 }} />
+                <Ionicons name="chevron-forward" size={20} color={ionIconMuted(resolved)} style={{ marginTop: 4 }} />
               </View>
             </View>
           </Pressable>
@@ -902,9 +1002,9 @@ export default function InvoicesScreen() {
         }}
       >
         <View className="flex-1 justify-end bg-black/60">
-          <View className="max-h-[92%] rounded-t-2xl bg-neutral-950 px-4 pb-8 pt-4">
+          <View className={`max-h-[92%] px-4 pb-8 pt-4 ${bottomSheetContainerClass(resolved)}`}>
             <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-lg font-semibold text-neutral-100">New bill</Text>
+              <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>New bill</Text>
               <Pressable
                 onPress={() => {
                   setProductPickOpen(false);
@@ -914,15 +1014,15 @@ export default function InvoicesScreen() {
                 hitSlop={12}
                 accessibilityLabel="Close"
               >
-                <Ionicons name="close" size={26} color="#a3a3a3" />
+                <Ionicons name="close" size={26} color={ionIconSecondary(resolved)} />
               </Pressable>
             </View>
-            <Text className="text-sm text-neutral-500">
+            <Text className={`text-sm ${textMutedClass(resolved)}`}>
               Complete sale (cash) records full payment. Credit leaves the bill unpaid and updates the customer&apos;s
               balance when a customer is selected. Or save a draft to edit or charge later.
             </Text>
             <ScrollView keyboardShouldPersistTaps="handled" className="mt-4">
-              <Text className="mb-2 text-sm font-medium text-neutral-300">Customer (optional)</Text>
+              <Text className={`mb-2 text-sm font-medium ${textFieldLabelClass(resolved)}`}>Customer (optional)</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -932,20 +1032,27 @@ export default function InvoicesScreen() {
                 <Pressable
                   onPress={() => setCustomerId(null)}
                   className={`mr-2 rounded-full border px-3 py-2 ${
-                    customerId === null ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                    customerId === null ? brandChipActiveSurface(resolved) : chipInactiveBorder(resolved)
                   }`}
                 >
-                  <Text className="text-sm text-neutral-200">Walk-in</Text>
+                  <Text
+                    className={`text-sm ${customerId === null ? brandChipActiveText(resolved) : chipInactiveText(resolved)}`}
+                  >
+                    Walk-in
+                  </Text>
                 </Pressable>
                 {customers.map((c) => (
                   <Pressable
                     key={c.id}
                     onPress={() => setCustomerId(c.id)}
                     className={`mr-2 rounded-full border px-3 py-2 ${
-                      customerId === c.id ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                      customerId === c.id ? brandChipActiveSurface(resolved) : chipInactiveBorder(resolved)
                     }`}
                   >
-                    <Text className="text-sm text-neutral-200" numberOfLines={1}>
+                    <Text
+                      className={`text-sm ${customerId === c.id ? brandChipActiveText(resolved) : chipInactiveText(resolved)}`}
+                      numberOfLines={1}
+                    >
                       {c.name}
                     </Text>
                   </Pressable>
@@ -975,20 +1082,22 @@ export default function InvoicesScreen() {
 
               <FormField label="Notes (optional)" value={notes} onChangeText={setNotes} placeholder="Terms, reference" />
 
-              <Text className="mb-2 text-sm font-medium text-neutral-300">Line items</Text>
+              <Text className={`mb-2 text-sm font-medium ${textFieldLabelClass(resolved)}`}>Line items</Text>
               {lines.map((line, index) => (
-                <View key={line.key} className="mb-4 rounded-xl border border-neutral-800 bg-neutral-900/50 p-3">
+                <View key={line.key} className={formLineItemClass(resolved)}>
                   <View className="mb-2 flex-row items-center justify-between">
-                    <Text className="text-xs font-medium text-neutral-500">Line {index + 1}</Text>
+                    <Text className={`text-xs font-medium ${textMutedClass(resolved)}`}>Line {index + 1}</Text>
                     {line.product_id ? (
-                      <Text className="text-[10px] font-medium uppercase text-emerald-500/90">Catalog</Text>
+                      <Text className="text-[10px] font-medium uppercase text-brand-500/90">Catalog</Text>
                     ) : null}
                   </View>
                   <Pressable
                     onPress={() => openProductPickerForLine(line.key)}
-                    className="mb-3 self-start rounded-lg border border-sky-600/50 bg-sky-950/40 px-3 py-2 active:opacity-90"
+                    className={catalogSearchChipClass(resolved)}
                   >
-                    <Text className="text-sm font-semibold text-sky-400">Search catalog</Text>
+                    <Text className={`text-sm font-semibold ${catalogSearchChipText(resolved)}`}>
+                      Search catalog
+                    </Text>
                   </Pressable>
                   <FormField
                     label="Description"
@@ -1041,9 +1150,11 @@ export default function InvoicesScreen() {
 
               <Pressable
                 onPress={() => setLines((prev) => [...prev, newLine()])}
-                className="mb-4 rounded-xl border border-dashed border-neutral-600 py-3"
+                className={`mb-4 rounded-xl border border-dashed py-3 ${
+                  resolved === "dark" ? "border-neutral-600" : "border-zinc-400"
+                }`}
               >
-                <Text className="text-center text-sm font-medium text-emerald-500">+ Add line</Text>
+                <Text className="text-center text-sm font-medium text-brand-500">+ Add line</Text>
               </Pressable>
 
               {saveError ? <ErrorBannerWithSupport message={saveError} variant="compact" /> : null}
@@ -1057,15 +1168,15 @@ export default function InvoicesScreen() {
               <Pressable
                 onPress={() => void onCompleteSaleCredit()}
                 disabled={createModalBusy}
-                className="mt-2 rounded-xl border border-amber-600/50 bg-amber-950/25 py-3.5 active:opacity-90 disabled:opacity-50"
+                className={creditSaleSurfaceClass(resolved)}
                 accessibilityRole="button"
                 accessibilityLabel="Complete sale on credit"
               >
-                <Text className="text-center text-base font-semibold text-amber-300">
+                <Text className={`text-center text-base font-semibold ${creditSaleTextClass(resolved)}`}>
                   {createCheckoutBusy === "credit" ? "Processing…" : "Complete sale (credit)"}
                 </Text>
               </Pressable>
-              <Text className="mt-2 text-center text-xs text-neutral-600">
+              <Text className={`mt-2 text-center text-xs ${textMutedClass(resolved)}`}>
                 Cash: paid in full. Credit: unpaid bill; walk-in allowed; linked customer gets the amount on their
                 tab.
               </Text>
@@ -1074,7 +1185,7 @@ export default function InvoicesScreen() {
                 disabled={createModalBusy}
                 className="mt-4 py-3 active:opacity-80 disabled:opacity-50"
               >
-                <Text className="text-center text-sm font-medium text-neutral-400">
+                <Text className={`text-center text-sm font-medium ${textSubtleClass(resolved)}`}>
                   Save as draft only
                 </Text>
               </Pressable>
@@ -1086,7 +1197,7 @@ export default function InvoicesScreen() {
                 }}
                 className="mt-1 py-3"
               >
-                <Text className="text-center text-base text-neutral-500">Cancel</Text>
+                <Text className={`text-center text-base ${textMutedClass(resolved)}`}>Cancel</Text>
               </Pressable>
             </ScrollView>
           </View>
@@ -1103,9 +1214,9 @@ export default function InvoicesScreen() {
         }}
       >
         <View className="flex-1 justify-end bg-black/70">
-          <View className="max-h-[85%] rounded-t-2xl bg-neutral-950 px-4 pb-8 pt-4">
+          <View className={`max-h-[85%] px-4 pb-8 pt-4 ${bottomSheetContainerClass(resolved)}`}>
             <View className="mb-3 flex-row items-center justify-between">
-              <Text className="text-lg font-semibold text-neutral-100">Choose product</Text>
+              <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>Choose product</Text>
               <Pressable
                 onPress={() => {
                   setProductPickOpen(false);
@@ -1114,10 +1225,10 @@ export default function InvoicesScreen() {
                 hitSlop={12}
                 accessibilityLabel="Close catalog search"
               >
-                <Ionicons name="close" size={26} color="#a3a3a3" />
+                <Ionicons name="close" size={26} color={ionIconSecondary(resolved)} />
               </Pressable>
             </View>
-            <Text className="mb-2 text-xs text-neutral-500">
+            <Text className={`mb-2 text-xs ${textMutedClass(resolved)}`}>
               Search by name, SKU, or barcode. Picks fill description, unit, and sale price.
             </Text>
             <SearchBar
@@ -1128,7 +1239,7 @@ export default function InvoicesScreen() {
             />
             {catalogPickerLoading ? (
               <View className="py-8">
-                <ActivityIndicator color="#34d399" />
+                <ActivityIndicator color={BRAND_ACCENT_HEX} />
               </View>
             ) : (
               <FlatList
@@ -1138,20 +1249,20 @@ export default function InvoicesScreen() {
                 className="mt-2"
                 keyboardShouldPersistTaps="handled"
                 ListEmptyComponent={
-                  <Text className="py-8 text-center text-neutral-500">
+                  <Text className={`py-8 text-center ${textMutedClass(resolved)}`}>
                     No products found. Try another search, add items under Stock, or type a custom line.
                   </Text>
                 }
                 renderItem={({ item }) => (
                   <Pressable
                     onPress={() => applyCatalogProductToLine(item)}
-                    className="border-b border-neutral-800 py-3.5 active:opacity-80"
+                    className={`py-3.5 active:opacity-80 ${hairlineBorderBClass(resolved)}`}
                   >
                     <View className="flex-row items-center gap-3">
                       <ProductThumbnail imageUrl={item.image_url} size={48} />
                       <View className="min-w-0 flex-1">
-                        <Text className="text-base text-neutral-100">{item.name}</Text>
-                        <Text className="mt-0.5 text-sm text-neutral-500">
+                        <Text className={`text-base ${textStrongOnSurfaceClass(resolved)}`}>{item.name}</Text>
+                        <Text className={`mt-0.5 text-sm ${textMutedClass(resolved)}`}>
                           {item.unit} · {formatPkr(item.sale_price)}
                         </Text>
                       </View>
@@ -1166,29 +1277,29 @@ export default function InvoicesScreen() {
 
       <Modal visible={detailId !== null} animationType="slide" transparent onRequestClose={closeDetail}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className="max-h-[92%] rounded-t-2xl bg-neutral-950 px-4 pb-10 pt-4">
+          <View className={`max-h-[92%] px-4 pb-10 pt-4 ${bottomSheetContainerClass(resolved)}`}>
             {detailLoading ? (
               <View className="py-12">
-                <ActivityIndicator size="large" color="#34d399" />
+                <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
               </View>
             ) : detail ? (
               <ScrollView keyboardShouldPersistTaps="handled">
                 <View className="flex-row items-center justify-between">
-                  <Text className="font-mono text-base text-neutral-400">{detail.invoice_number}</Text>
+                  <Text className={`font-mono text-base ${textSubtleClass(resolved)}`}>{detail.invoice_number}</Text>
                   <Pressable onPress={closeDetail} hitSlop={12} accessibilityLabel="Close">
-                    <Ionicons name="close" size={26} color="#a3a3a3" />
+                    <Ionicons name="close" size={26} color={ionIconSecondary(resolved)} />
                   </Pressable>
                 </View>
                 <View className="mt-2 flex-row flex-wrap items-center gap-2">
-                  <View className={`rounded-full px-2.5 py-0.5 ${statusBadgeClass(detail.status)}`}>
+                  <View className={`rounded-full px-2.5 py-0.5 ${statusBadgeClass(detail.status, resolved)}`}>
                     <Text className="text-xs font-semibold">{statusLabel(detail.status)}</Text>
                   </View>
                 </View>
-                <Text className="mt-2 text-lg font-semibold text-neutral-100">
+                <Text className={`mt-2 text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>
                   {detail.customer?.name ?? "Walk-in"}
                 </Text>
                 {detail.customer?.phone ? (
-                  <Text className="text-sm text-neutral-500">{detail.customer.phone}</Text>
+                  <Text className={`text-sm ${textMutedClass(resolved)}`}>{detail.customer.phone}</Text>
                 ) : null}
 
                 {detailError ? (
@@ -1197,36 +1308,38 @@ export default function InvoicesScreen() {
                   </View>
                 ) : null}
 
-                <Text className="mt-5 text-2xl font-semibold text-emerald-400/95">
+                <Text className={`mt-5 text-2xl font-semibold ${subtlePositiveClass(resolved)}`}>
                   {formatPkr(detail.total_amount)}
                 </Text>
-                <Text className="mt-1 text-sm text-neutral-500">
+                <Text className={`mt-1 text-sm ${textMutedClass(resolved)}`}>
                   Paid {formatPkr(detail.paid_amount)}
                   {balanceDue > 0.009 ? ` · Due ${formatPkr(balanceDue)}` : null}
                 </Text>
 
-                <Text className="mt-4 text-xs uppercase text-neutral-600">
+                <Text className={`mt-4 text-xs uppercase ${textMutedClass(resolved)}`}>
                   Subtotal {formatPkr(detail.subtotal)} · Tax {formatPkr(detail.tax_amount)} · Discount{" "}
                   {formatPkr(detail.discount_amount)}
                 </Text>
 
                 {detail.notes ? (
-                  <Text className="mt-3 text-sm text-neutral-400">{detail.notes}</Text>
+                  <Text className={`mt-3 text-sm ${textSubtleClass(resolved)}`}>{detail.notes}</Text>
                 ) : null}
 
-                <Text className="mt-6 text-sm font-semibold uppercase tracking-wide text-neutral-500">Lines</Text>
+                <Text className={`mt-6 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
+                  Lines
+                </Text>
                 {detail.items.map((it) => (
                   <View
                     key={it.id}
-                    className="mt-2 flex-row gap-3 border-b border-neutral-800 py-2"
+                    className={`mt-2 flex-row gap-3 py-2 ${hairlineBorderBClass(resolved)}`}
                   >
                     <ProductThumbnail
                       imageUrl={it.product_id ? detailLineImages[it.product_id] ?? null : null}
                       size={44}
                     />
                     <View className="min-w-0 flex-1">
-                      <Text className="text-base text-neutral-100">{it.product_name}</Text>
-                      <Text className="mt-0.5 text-sm text-neutral-500">
+                      <Text className={`text-base ${textStrongOnSurfaceClass(resolved)}`}>{it.product_name}</Text>
+                      <Text className={`mt-0.5 text-sm ${textMutedClass(resolved)}`}>
                         {it.quantity} {it.unit} × {formatPkr(it.unit_price)} → {formatPkr(it.line_total)}
                       </Text>
                     </View>
@@ -1237,14 +1350,14 @@ export default function InvoicesScreen() {
                   <Pressable
                     onPress={() => void openReceiptShareForDetail()}
                     disabled={receiptFetchBusy}
-                    className="mt-4 rounded-xl border border-emerald-700/50 bg-emerald-950/30 py-3.5 active:opacity-90 disabled:opacity-50"
+                    className={receiptCtaSurfaceClass(resolved)}
                     accessibilityRole="button"
                     accessibilityLabel="Share or print receipt"
                   >
-                    <Text className="text-center text-base font-semibold text-emerald-400">
+                    <Text className={`text-center text-base font-semibold ${receiptCtaTitleClass(resolved)}`}>
                       {receiptFetchBusy ? "Loading receipt…" : "Share or print receipt"}
                     </Text>
-                    <Text className="mt-1 px-1 text-center text-[11px] leading-4 text-neutral-500">
+                    <Text className={`mt-1 px-1 text-center text-[11px] leading-4 ${textMutedClass(resolved)}`}>
                       Opens a preview — use Share to send to WhatsApp, email, or a printer app.
                     </Text>
                   </Pressable>
@@ -1255,7 +1368,7 @@ export default function InvoicesScreen() {
                     <Pressable
                       onPress={() => setFinalizeMode("cash")}
                       disabled={workflowBusy}
-                      className="rounded-xl bg-emerald-600 py-3.5 active:opacity-90 disabled:opacity-50"
+                      className="rounded-xl bg-brand-600 py-3.5 active:opacity-90 disabled:opacity-50"
                     >
                       <Text className="text-center text-base font-semibold text-white">
                         Finalize &amp; take cash (paid in full)
@@ -1264,9 +1377,9 @@ export default function InvoicesScreen() {
                     <Pressable
                       onPress={() => setFinalizeMode("credit")}
                       disabled={workflowBusy}
-                      className="rounded-xl border border-amber-600/50 bg-amber-950/25 py-3.5 active:opacity-90 disabled:opacity-50"
+                      className={creditSaleCardSurfaceClass(resolved)}
                     >
-                      <Text className="text-center text-base font-semibold text-amber-300">
+                      <Text className={`text-center text-base font-semibold ${creditSaleTextClass(resolved)}`}>
                         Finalize on credit (unpaid)
                       </Text>
                     </Pressable>
@@ -1275,7 +1388,7 @@ export default function InvoicesScreen() {
 
                 {detail.status !== "draft" && detail.status !== "cancelled" ? (
                   <>
-                    <Text className="mt-6 text-xs leading-5 text-neutral-500">
+                    <Text className={`mt-6 text-xs leading-5 ${textMutedClass(resolved)}`}>
                       Only if this sale was entered by mistake. Payments are removed, what the customer owes is
                       corrected, and stock goes back up where it was reduced.
                     </Text>
@@ -1289,12 +1402,12 @@ export default function InvoicesScreen() {
                   </>
                 ) : null}
 
-                <Pressable onPress={closeDetail} className="mt-4 rounded-xl bg-neutral-800 py-3">
-                  <Text className="text-center text-base font-medium text-neutral-100">Close</Text>
+                <Pressable onPress={closeDetail} className={`mt-4 ${modalSecondaryButtonClass(resolved)}`}>
+                  <Text className={`text-center text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>Close</Text>
                 </Pressable>
               </ScrollView>
             ) : (
-              <Text className="py-8 text-center text-neutral-400">
+              <Text className={`py-8 text-center ${textSubtleClass(resolved)}`}>
                 {detailError ?? "Could not load this bill."}
               </Text>
             )}

@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
+import { BRAND_ACCENT_HEX } from "../theme/brand";
 
 import { openSupportWhatsApp, SUPPORT_PHONE_DISPLAY } from "../lib/support-contact";
 
@@ -35,14 +36,14 @@ export function ErrorBannerWithSupport({ message, variant = "banner" }: Props) {
         onPress={() => void openSupportWhatsApp()}
         className={
           isCompact
-            ? "mt-2 flex-row items-center gap-2 self-start rounded-lg bg-emerald-600/15 px-2.5 py-1.5 active:opacity-90"
-            : "mt-3 flex-row items-center justify-center gap-2 rounded-lg bg-emerald-600/20 py-2.5 active:opacity-90"
+            ? "mt-2 flex-row items-center gap-2 self-start rounded-lg bg-brand-600/15 px-2.5 py-1.5 active:opacity-90"
+            : "mt-3 flex-row items-center justify-center gap-2 rounded-lg bg-brand-600/20 py-2.5 active:opacity-90"
         }
         accessibilityRole="button"
         accessibilityLabel="Open WhatsApp to contact app support"
       >
-        <Ionicons name="logo-whatsapp" size={isCompact ? 16 : 20} color="#34d399" />
-        <Text className={`font-semibold text-emerald-400 ${isCompact ? "text-xs" : "text-sm"}`}>
+        <Ionicons name="logo-whatsapp" size={isCompact ? 16 : 20} color={BRAND_ACCENT_HEX} />
+        <Text className={`font-semibold text-brand-400 ${isCompact ? "text-xs" : "text-sm"}`}>
           WhatsApp support
         </Text>
       </Pressable>

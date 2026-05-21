@@ -12,6 +12,8 @@ import {
   View,
 } from "react-native";
 
+import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
+
 import { ConfirmDialog } from "../../src/components/ConfirmDialog";
 import { ErrorBannerWithSupport } from "../../src/components/ErrorBannerWithSupport";
 import { headerRightWithSupport } from "../../src/components/SupportHeaderButton";
@@ -31,6 +33,26 @@ import {
   type ProductUnit,
 } from "../../src/lib/po-workflow";
 import { supabase } from "../../src/lib/supabase";
+import {
+  borderedSurfaceClass,
+  bottomSheetContainerClass,
+  chipInactiveBorder,
+  chipInactiveText,
+  formLineItemClass,
+  hairlineBorderBClass,
+  listEntityCardClass,
+  modalSecondaryButtonClass,
+  screenCenterRootClass,
+  scrollCanvasClass,
+  stackedMutedPanelClass,
+  subtlePositiveClass,
+  textFieldLabelClass,
+  textMutedClass,
+  textStrongOnSurfaceClass,
+  textSubtleClass,
+  type ResolvedScheme,
+} from "../../src/theme/semantic";
+import { useTheme } from "../../src/contexts/theme-context";
 import type {
   PoItemDetail,
   PurchaseOrderDetail,
@@ -54,11 +76,57 @@ function poStatusLabel(s: PurchaseOrderStatus): string {
   return map[s];
 }
 
-function statusBadgeClass(s: PurchaseOrderStatus): string {
-  if (s === "cancelled") return "bg-neutral-800 text-neutral-400";
-  if (s === "received") return "bg-emerald-950 text-emerald-400";
-  if (s === "draft") return "bg-amber-950 text-amber-400";
-  return "bg-sky-950 text-sky-400";
+function statusBadgeClass(s: PurchaseOrderStatus, resolved: ResolvedScheme): string {
+  if (s === "cancelled") return resolved === "dark" ? "bg-neutral-800 text-neutral-400" : "bg-zinc-200 text-zinc-600";
+  if (s === "received") return resolved === "dark" ? "bg-brand-950 text-brand-400" : "bg-brand-100 text-brand-800";
+  if (s === "draft") return resolved === "dark" ? "bg-amber-950 text-amber-400" : "bg-amber-100 text-amber-800";
+  return resolved === "dark" ? "bg-sky-950 text-sky-400" : "bg-sky-100 text-sky-800";
+}
+
+function brandChipActiveSurface(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "border-brand-500 bg-brand-500/15" : "border-brand-500 bg-brand-100";
+}
+
+function brandChipActiveText(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "text-brand-400" : "text-brand-800";
+}
+
+function ionIconMuted(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "#525252" : "#71717a";
+}
+
+function ionIconSecondary(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "#a3a3a3" : "#52525b";
+}
+
+function catalogSearchChipClass(resolved: ResolvedScheme): string {
+  return resolved === "dark"
+    ? "rounded-lg border border-sky-600/50 bg-sky-950/40 px-3 py-2 active:opacity-90"
+    : "rounded-lg border border-sky-400/50 bg-sky-50 px-3 py-2 active:opacity-90";
+}
+
+function catalogSearchChipText(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "text-sky-400" : "text-sky-800";
+}
+
+function brandSoftCtaClass(resolved: ResolvedScheme): string {
+  return resolved === "dark"
+    ? "rounded-lg border border-brand-600/50 bg-brand-950/40 px-3 py-2 active:opacity-90"
+    : "rounded-lg border border-brand-400/50 bg-brand-50 px-3 py-2 active:opacity-90";
+}
+
+function brandSoftCtaText(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "text-brand-400" : "text-brand-800";
+}
+
+function poUnlinkedBannerClass(resolved: ResolvedScheme): string {
+  return resolved === "dark"
+    ? "mt-4 rounded-xl border border-amber-900/50 bg-amber-950/30 px-3 py-3"
+    : "mt-4 rounded-xl border border-amber-300 bg-amber-50 px-3 py-3";
+}
+
+function poUnlinkedBannerText(resolved: ResolvedScheme): string {
+  return resolved === "dark" ? "text-sm leading-5 text-amber-200/95" : "text-sm leading-5 text-amber-900";
 }
 
 type LineDraft = { key: string; product_name: string; qty: string; unit_cost: string };
@@ -119,6 +187,7 @@ export default function PurchaseOrdersScreen() {
   const navigation = useNavigation();
   const bottomPad = useTabScreenBottomPadding();
   const { businessId, user } = useAuth();
+  const { resolved } = useTheme();
   const [rows, setRows] = useState<PurchaseOrderListRow[]>([]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<PoFilterKey>("all");
@@ -183,16 +252,18 @@ export default function PurchaseOrdersScreen() {
               setCreateOpen(true);
             }}
             hitSlop={12}
-            className="flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
+            className={`flex-row items-center rounded-full px-3 py-1.5 active:opacity-80 ${
+              resolved === "dark" ? "bg-brand-500/15" : "bg-brand-100"
+            }`}
             accessibilityRole="button"
             accessibilityLabel="New purchase order"
           >
-            <Ionicons name="add" size={22} color="#34d399" />
-            <Text className="ml-1 text-sm font-semibold text-emerald-400">New</Text>
+            <Ionicons name="add" size={22} color={BRAND_ACCENT_HEX} />
+            <Text className={`ml-1 text-sm font-semibold ${brandChipActiveText(resolved)}`}>New</Text>
           </Pressable>,
         ),
     });
-  }, [navigation]);
+  }, [navigation, resolved]);
 
   const load = useCallback(async () => {
     if (!businessId || !user) {
@@ -590,14 +661,14 @@ export default function PurchaseOrdersScreen() {
 
   if (loading && rows.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-neutral-950">
-        <ActivityIndicator size="large" color="#34d399" />
+      <View className={screenCenterRootClass(resolved)}>
+        <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-neutral-950">
+    <View className={scrollCanvasClass(resolved)}>
       {error ? <ErrorBannerWithSupport message={error} /> : null}
 
       <FlatList
@@ -605,7 +676,7 @@ export default function PurchaseOrdersScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: bottomPad + 8, paddingHorizontal: 16 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#34d399" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={BRAND_ACCENT_HEX} />
         }
         ListHeaderComponent={
           <View className="pb-2 pt-2">
@@ -632,11 +703,11 @@ export default function PurchaseOrdersScreen() {
                     key={f.key}
                     onPress={() => setFilter(f.key)}
                     className={`mr-2 rounded-full border px-3.5 py-2 ${
-                      active ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                      active ? brandChipActiveSurface(resolved) : chipInactiveBorder(resolved)
                     }`}
                   >
                     <Text
-                      className={`text-sm font-medium ${active ? "text-emerald-400" : "text-neutral-400"}`}
+                      className={`text-sm font-medium ${active ? brandChipActiveText(resolved) : chipInactiveText(resolved)}`}
                     >
                       {f.label}
                     </Text>
@@ -644,7 +715,7 @@ export default function PurchaseOrdersScreen() {
                 );
               })}
             </ScrollView>
-            <Text className="mt-3 text-xs text-neutral-500">
+            <Text className={`mt-3 text-xs ${textMutedClass(resolved)}`}>
               {rows.length === 0
                 ? "No orders yet"
                 : `${filtered.length === rows.length ? rows.length : `${filtered.length} of ${rows.length}`} · ${poStats.draft} draft · ${poStats.transit} in transit`}
@@ -653,11 +724,11 @@ export default function PurchaseOrdersScreen() {
         }
         ListEmptyComponent={
           <View className="items-center px-4 py-12">
-            <Ionicons name="document-text-outline" size={48} color="#525252" />
-            <Text className="mt-4 text-center text-base font-medium text-neutral-300">
+            <Ionicons name="document-text-outline" size={48} color={ionIconMuted(resolved)} />
+            <Text className={`mt-4 text-center text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>
               {query.trim() || filter !== "all" ? "No orders match" : "No purchase orders yet"}
             </Text>
-            <Text className="mt-2 text-center text-sm leading-5 text-neutral-500">
+            <Text className={`mt-2 text-center text-sm leading-5 ${textMutedClass(resolved)}`}>
               {query.trim() || filter !== "all"
                 ? "Adjust search or filters."
                 : "Tap New to create a draft and order stock from a supplier."}
@@ -667,26 +738,28 @@ export default function PurchaseOrdersScreen() {
         renderItem={({ item }) => (
           <Pressable
             onPress={() => openDetail(item.id)}
-            className="mb-2 rounded-2xl border border-neutral-800 bg-neutral-900/90 px-4 py-4 active:opacity-90"
+            className={listEntityCardClass(resolved)}
           >
             <View className="flex-row items-center justify-between gap-3">
               <View className="min-w-0 flex-1">
                 <View className="flex-row flex-wrap items-center gap-2">
-                  <Text className="text-base font-semibold text-neutral-100">{item.po_number}</Text>
-                  <View className={`rounded-full px-2.5 py-0.5 ${statusBadgeClass(item.status)}`}>
+                  <Text className={`text-base font-semibold ${textStrongOnSurfaceClass(resolved)}`}>
+                    {item.po_number}
+                  </Text>
+                  <View className={`rounded-full px-2.5 py-0.5 ${statusBadgeClass(item.status, resolved)}`}>
                     <Text className="text-xs font-semibold">{poStatusLabel(item.status)}</Text>
                   </View>
                 </View>
-                <Text className="mt-1.5 text-sm text-neutral-400">
+                <Text className={`mt-1.5 text-sm ${textSubtleClass(resolved)}`}>
                   {item.supplier?.name ?? "No supplier"}
                 </Text>
-                <Text className="mt-0.5 text-xs text-neutral-600">{shortDate(item.created_at)}</Text>
+                <Text className={`mt-0.5 text-xs ${textMutedClass(resolved)}`}>{shortDate(item.created_at)}</Text>
               </View>
               <View className="flex-row items-center gap-2">
-                <Text className="text-base font-semibold text-emerald-400/95">
+                <Text className={`text-base font-semibold ${subtlePositiveClass(resolved)}`}>
                   {formatPkr(Number(item.total_amount))}
                 </Text>
-                <Ionicons name="chevron-forward" size={20} color="#525252" />
+                <Ionicons name="chevron-forward" size={20} color={ionIconMuted(resolved)} />
               </View>
             </View>
           </Pressable>
@@ -695,18 +768,18 @@ export default function PurchaseOrdersScreen() {
 
       <Modal visible={createOpen} animationType="slide" transparent onRequestClose={() => setCreateOpen(false)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className="max-h-[92%] rounded-t-2xl bg-neutral-950 px-4 pb-8 pt-4">
+          <View className={`max-h-[92%] px-4 pb-8 pt-4 ${bottomSheetContainerClass(resolved)}`}>
             <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-lg font-semibold text-neutral-100">New purchase order</Text>
+              <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>New purchase order</Text>
               <Pressable onPress={() => setCreateOpen(false)} hitSlop={12} accessibilityLabel="Close">
-                <Ionicons name="close" size={26} color="#a3a3a3" />
+                <Ionicons name="close" size={26} color={ionIconSecondary(resolved)} />
               </Pressable>
             </View>
-            <Text className="mt-1 text-sm text-neutral-500">
+            <Text className={`mt-1 text-sm ${textMutedClass(resolved)}`}>
               Saved as a draft. Review and confirm when you are ready to place the order.
             </Text>
             <ScrollView keyboardShouldPersistTaps="handled" className="mt-4">
-              <Text className="mb-2 text-sm font-medium text-neutral-300">Supplier (optional)</Text>
+              <Text className={`mb-2 text-sm font-medium ${textFieldLabelClass(resolved)}`}>Supplier (optional)</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -716,30 +789,38 @@ export default function PurchaseOrdersScreen() {
                 <Pressable
                   onPress={() => setSupplierId(null)}
                   className={`mr-2 rounded-full border px-3 py-2 ${
-                    supplierId === null ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                    supplierId === null ? brandChipActiveSurface(resolved) : chipInactiveBorder(resolved)
                   }`}
                 >
-                  <Text className="text-sm text-neutral-200">None</Text>
+                  <Text
+                    className={`text-sm ${supplierId === null ? brandChipActiveText(resolved) : chipInactiveText(resolved)}`}
+                  >
+                    None
+                  </Text>
                 </Pressable>
                 {suppliers.map((s) => (
                   <Pressable
                     key={s.id}
                     onPress={() => setSupplierId(s.id)}
                     className={`mr-2 rounded-full border px-3 py-2 ${
-                      supplierId === s.id ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                      supplierId === s.id ? brandChipActiveSurface(resolved) : chipInactiveBorder(resolved)
                     }`}
                   >
-                    <Text className="text-sm text-neutral-200">{s.name}</Text>
+                    <Text
+                      className={`text-sm ${supplierId === s.id ? brandChipActiveText(resolved) : chipInactiveText(resolved)}`}
+                    >
+                      {s.name}
+                    </Text>
                   </Pressable>
                 ))}
               </ScrollView>
 
               <FormField label="Notes (optional)" value={notes} onChangeText={setNotes} placeholder="Delivery notes" />
 
-              <Text className="mb-2 text-sm font-medium text-neutral-300">Lines</Text>
+              <Text className={`mb-2 text-sm font-medium ${textFieldLabelClass(resolved)}`}>Lines</Text>
               {lines.map((line, index) => (
-                <View key={line.key} className="mb-4 rounded-xl border border-neutral-800 bg-neutral-900/50 p-3">
-                  <Text className="mb-2 text-xs font-medium text-neutral-500">Line {index + 1}</Text>
+                <View key={line.key} className={formLineItemClass(resolved)}>
+                  <Text className={`mb-2 text-xs font-medium ${textMutedClass(resolved)}`}>Line {index + 1}</Text>
                   <FormField
                     label="Product"
                     value={line.product_name}
@@ -792,16 +873,18 @@ export default function PurchaseOrdersScreen() {
 
               <Pressable
                 onPress={() => setLines((prev) => [...prev, newLine()])}
-                className="mb-4 rounded-xl border border-dashed border-neutral-600 py-3"
+                className={`mb-4 rounded-xl border border-dashed py-3 ${
+                  resolved === "dark" ? "border-neutral-600" : "border-zinc-400"
+                }`}
               >
-                <Text className="text-center text-sm font-medium text-emerald-500">+ Add line</Text>
+                <Text className="text-center text-sm font-medium text-brand-500">+ Add line</Text>
               </Pressable>
 
               {saveError ? <ErrorBannerWithSupport message={saveError} variant="compact" /> : null}
 
               <PrimaryButton label="Create draft PO" onPress={() => void onCreatePo()} loading={saving} />
               <Pressable onPress={() => setCreateOpen(false)} className="mt-3 py-3">
-                <Text className="text-center text-base text-neutral-400">Cancel</Text>
+                <Text className={`text-center text-base ${textSubtleClass(resolved)}`}>Cancel</Text>
               </Pressable>
             </ScrollView>
           </View>
@@ -810,37 +893,37 @@ export default function PurchaseOrdersScreen() {
 
       <Modal visible={detailId !== null} animationType="slide" transparent onRequestClose={closeDetail}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className="max-h-[92%] rounded-t-2xl bg-neutral-950 px-4 pb-10 pt-4">
+          <View className={`max-h-[92%] px-4 pb-10 pt-4 ${bottomSheetContainerClass(resolved)}`}>
             {detailLoading ? (
               <View className="py-12">
-                <ActivityIndicator size="large" color="#34d399" />
+                <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
               </View>
             ) : detail ? (
               <ScrollView keyboardShouldPersistTaps="handled">
                 <View className="flex-row items-center justify-between">
-                  <Text className="text-lg font-semibold text-neutral-100">{detail.po_number}</Text>
+                  <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>{detail.po_number}</Text>
                   <Pressable onPress={closeDetail} hitSlop={12} accessibilityLabel="Close">
-                    <Ionicons name="close" size={26} color="#a3a3a3" />
+                    <Ionicons name="close" size={26} color={ionIconSecondary(resolved)} />
                   </Pressable>
                 </View>
                 <View className="mt-2 flex-row flex-wrap items-center gap-2">
-                  <View className={`rounded-full px-2.5 py-0.5 ${statusBadgeClass(detail.status)}`}>
+                  <View className={`rounded-full px-2.5 py-0.5 ${statusBadgeClass(detail.status, resolved)}`}>
                     <Text className="text-xs font-semibold">{poStatusLabel(detail.status)}</Text>
                   </View>
                 </View>
-                <Text className="mt-2 text-sm text-neutral-400">
+                <Text className={`mt-2 text-sm ${textSubtleClass(resolved)}`}>
                   {detail.supplier?.name ?? "No supplier"}
                 </Text>
-                <Text className="mt-1 text-xl font-semibold text-emerald-400/95">
+                <Text className={`mt-1 text-xl font-semibold ${subtlePositiveClass(resolved)}`}>
                   {formatPkr(detail.total_amount)}
                 </Text>
                 {detail.notes ? (
-                  <Text className="mt-3 text-sm text-neutral-400">{detail.notes}</Text>
+                  <Text className={`mt-3 text-sm ${textSubtleClass(resolved)}`}>{detail.notes}</Text>
                 ) : null}
 
                 {!poLinesFullyLinked(detail.items) ? (
-                  <View className="mt-4 rounded-xl border border-amber-900/50 bg-amber-950/30 px-3 py-3">
-                    <Text className="text-sm leading-5 text-amber-200/95">
+                  <View className={poUnlinkedBannerClass(resolved)}>
+                    <Text className={poUnlinkedBannerText(resolved)}>
                       Link each line to a product in your catalog before you can place this order or receive
                       stock into inventory.
                     </Text>
@@ -853,38 +936,40 @@ export default function PurchaseOrdersScreen() {
                   </View>
                 ) : null}
 
-                <Text className="mt-6 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+                <Text className={`mt-6 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
                   Lines
                 </Text>
                 {detail.items.map((it) => (
                   <View
                     key={it.id}
-                    className="mt-3 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-3"
+                    className={stackedMutedPanelClass(resolved)}
                   >
-                    <Text className="text-base text-neutral-100">{it.product_name}</Text>
-                    <Text className="mt-1 text-sm text-neutral-500">
+                    <Text className={`text-base ${textStrongOnSurfaceClass(resolved)}`}>{it.product_name}</Text>
+                    <Text className={`mt-1 text-sm ${textMutedClass(resolved)}`}>
                       {it.qty_ordered} × {formatPkr(it.unit_cost)} · Received {it.qty_received}
                     </Text>
-                    <Text className="mt-1 text-sm text-neutral-300">{formatPkr(it.line_total)}</Text>
+                    <Text className={`mt-1 text-sm ${textStrongOnSurfaceClass(resolved)}`}>{formatPkr(it.line_total)}</Text>
                     {!it.product_id && Number(it.qty_ordered) > 0 ? (
                       <View className="mt-3 flex-row flex-wrap gap-2">
                         <Pressable
                           onPress={() => openQuickAdd(it)}
                           disabled={workflowBusy}
-                          className="rounded-lg border border-sky-600/50 bg-sky-950/40 px-3 py-2 active:opacity-90"
+                          className={catalogSearchChipClass(resolved)}
                         >
-                          <Text className="text-sm font-semibold text-sky-400">Quick add to catalog</Text>
+                          <Text className={`text-sm font-semibold ${catalogSearchChipText(resolved)}`}>
+                            Quick add to catalog
+                          </Text>
                         </Pressable>
                         <Pressable
                           onPress={() => openProductPicker(it.id)}
                           disabled={workflowBusy}
-                          className="rounded-lg border border-emerald-600/50 bg-emerald-950/40 px-3 py-2 active:opacity-90"
+                          className={brandSoftCtaClass(resolved)}
                         >
-                          <Text className="text-sm font-semibold text-emerald-400">Link existing</Text>
+                          <Text className={`text-sm font-semibold ${brandSoftCtaText(resolved)}`}>Link existing</Text>
                         </Pressable>
                       </View>
                     ) : it.product_id ? (
-                      <Text className="mt-2 text-xs text-neutral-600">Linked to catalog</Text>
+                      <Text className={`mt-2 text-xs ${textMutedClass(resolved)}`}>Linked to catalog</Text>
                     ) : null}
                   </View>
                 ))}
@@ -894,7 +979,7 @@ export default function PurchaseOrdersScreen() {
                     <Pressable
                       onPress={() => void onPlaceOrder()}
                       disabled={workflowBusy}
-                      className="rounded-xl bg-emerald-600 py-3.5 active:opacity-90 disabled:opacity-50"
+                      className="rounded-xl bg-brand-600 py-3.5 active:opacity-90 disabled:opacity-50"
                     >
                       <Text className="text-center text-base font-semibold text-white">
                         {workflowBusy ? "…" : "Place order"}
@@ -908,7 +993,7 @@ export default function PurchaseOrdersScreen() {
                     <Pressable
                       onPress={onReceiveRemaining}
                       disabled={workflowBusy}
-                      className="rounded-xl bg-emerald-600 py-3.5 active:opacity-90 disabled:opacity-50"
+                      className="rounded-xl bg-brand-600 py-3.5 active:opacity-90 disabled:opacity-50"
                     >
                       <Text className="text-center text-base font-semibold text-white">
                         Receive remaining
@@ -927,12 +1012,14 @@ export default function PurchaseOrdersScreen() {
                   )}
                 </View>
 
-                <Pressable onPress={closeDetail} className="mt-4 rounded-xl bg-neutral-800 py-3">
-                  <Text className="text-center text-base font-medium text-neutral-100">Close</Text>
+                <Pressable onPress={closeDetail} className={`mt-4 ${modalSecondaryButtonClass(resolved)}`}>
+                  <Text className={`text-center text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>
+                    Close
+                  </Text>
                 </Pressable>
               </ScrollView>
             ) : (
-              <Text className="py-8 text-center text-neutral-400">Could not load this order.</Text>
+              <Text className={`py-8 text-center ${textSubtleClass(resolved)}`}>Could not load this order.</Text>
             )}
           </View>
         </View>
@@ -948,9 +1035,9 @@ export default function PurchaseOrdersScreen() {
         }}
       >
         <View className="flex-1 justify-end bg-black/70">
-          <View className="max-h-[85%] rounded-t-2xl bg-neutral-950 px-4 pb-8 pt-4">
+          <View className={`max-h-[85%] px-4 pb-8 pt-4 ${bottomSheetContainerClass(resolved)}`}>
             <View className="mb-3 flex-row items-center justify-between">
-              <Text className="text-lg font-semibold text-neutral-100">Choose product</Text>
+              <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>Choose product</Text>
               <Pressable
                 onPress={() => {
                   setProductPickOpen(false);
@@ -958,7 +1045,7 @@ export default function PurchaseOrdersScreen() {
                 }}
                 hitSlop={12}
               >
-                <Ionicons name="close" size={26} color="#a3a3a3" />
+                <Ionicons name="close" size={26} color={ionIconSecondary(resolved)} />
               </Pressable>
             </View>
             <SearchBar
@@ -969,7 +1056,7 @@ export default function PurchaseOrdersScreen() {
             />
             {catalogLoading ? (
               <View className="py-8">
-                <ActivityIndicator color="#34d399" />
+                <ActivityIndicator color={BRAND_ACCENT_HEX} />
               </View>
             ) : (
               <FlatList
@@ -979,7 +1066,7 @@ export default function PurchaseOrdersScreen() {
                 className="mt-2"
                 keyboardShouldPersistTaps="handled"
                 ListEmptyComponent={
-                  <Text className="py-8 text-center text-neutral-500">
+                  <Text className={`py-8 text-center ${textMutedClass(resolved)}`}>
                     {catalogProducts.length === 0
                       ? "No active products in catalog. Add products first."
                       : "No matches."}
@@ -989,9 +1076,9 @@ export default function PurchaseOrdersScreen() {
                   <Pressable
                     onPress={() => void onLinkProduct(item.id)}
                     disabled={workflowBusy}
-                    className="border-b border-neutral-800 py-3.5 active:opacity-80"
+                    className={`py-3.5 active:opacity-80 ${hairlineBorderBClass(resolved)}`}
                   >
-                    <Text className="text-base text-neutral-100">{item.name}</Text>
+                    <Text className={`text-base ${textStrongOnSurfaceClass(resolved)}`}>{item.name}</Text>
                   </Pressable>
                 )}
               />
@@ -1034,9 +1121,9 @@ export default function PurchaseOrdersScreen() {
         }}
       >
         <View className="flex-1 justify-center bg-black/70 px-4">
-          <View className="rounded-2xl border border-neutral-800 bg-neutral-950 p-4">
-            <Text className="text-lg font-semibold text-neutral-100">Quick add to catalog</Text>
-            <Text className="mt-2 text-sm leading-5 text-neutral-500">
+          <View className={borderedSurfaceClass(resolved)}>
+            <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>Quick add to catalog</Text>
+            <Text className={`mt-2 text-sm leading-5 ${textMutedClass(resolved)}`}>
               Creates the product from this line name, links it, then you can place or receive stock.
             </Text>
             <View className="mt-4">
@@ -1048,7 +1135,7 @@ export default function PurchaseOrdersScreen() {
                 keyboardType="decimal-pad"
               />
             </View>
-            <Text className="mt-3 text-xs font-medium uppercase text-neutral-500">Unit</Text>
+            <Text className={`mt-3 text-xs font-medium uppercase ${textMutedClass(resolved)}`}>Unit</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -1062,10 +1149,10 @@ export default function PurchaseOrdersScreen() {
                     key={u}
                     onPress={() => setQuickAddUnit(u)}
                     className={`mr-2 rounded-full border px-3 py-2 ${
-                      active ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                      active ? brandChipActiveSurface(resolved) : chipInactiveBorder(resolved)
                     }`}
                   >
-                    <Text className={`text-sm ${active ? "text-emerald-400" : "text-neutral-300"}`}>
+                    <Text className={`text-sm ${active ? brandChipActiveText(resolved) : chipInactiveText(resolved)}`}>
                       {u}
                     </Text>
                   </Pressable>
@@ -1084,7 +1171,7 @@ export default function PurchaseOrdersScreen() {
               }}
               className="mt-3 py-3"
             >
-              <Text className="text-center text-base text-neutral-400">Cancel</Text>
+              <Text className={`text-center text-base ${textSubtleClass(resolved)}`}>Cancel</Text>
             </Pressable>
           </View>
         </View>

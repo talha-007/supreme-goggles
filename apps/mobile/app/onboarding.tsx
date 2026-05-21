@@ -10,11 +10,21 @@ import {
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { BrandMark } from "../src/components/BrandMark";
 import { ErrorBannerWithSupport } from "../src/components/ErrorBannerWithSupport";
 import { FormField } from "../src/components/FormField";
 import { PrimaryButton } from "../src/components/PrimaryButton";
 import { useAuth } from "../src/contexts/auth-context";
+import { useTheme } from "../src/contexts/theme-context";
 import { supabase } from "../src/lib/supabase";
+import {
+  chipInactiveBorder,
+  screenRootClass,
+  textBodyClass,
+  textFieldLabelClass,
+  textMutedClass,
+  textPageTitleClass,
+} from "../src/theme/semantic";
 
 const BUSINESS_TYPES = [
   { value: "shop" as const, label: "Shop" },
@@ -24,6 +34,7 @@ const BUSINESS_TYPES = [
 
 export default function OnboardingScreen() {
   const { session, hasBusiness, subscriptionAccess, loading: authLoading, refreshMembership } = useAuth();
+  const { resolved } = useTheme();
   const [name, setName] = useState("");
   const [type, setType] = useState<(typeof BUSINESS_TYPES)[number]["value"]>("shop");
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +64,7 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-950">
+    <SafeAreaView className={screenRootClass(resolved)}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
@@ -62,8 +73,11 @@ export default function OnboardingScreen() {
           keyboardShouldPersistTaps="handled"
           contentContainerClassName="flex-grow px-6 pb-8 pt-4"
         >
-          <Text className="text-2xl font-semibold text-neutral-100">Your business</Text>
-          <Text className="mt-1 text-sm text-neutral-500">
+          <View className="mb-6 items-center">
+            <BrandMark size={72} />
+          </View>
+          <Text className={`text-2xl font-semibold ${textPageTitleClass(resolved)}`}>Your business</Text>
+          <Text className={`mt-1 text-sm ${textMutedClass(resolved)}`}>
             Add your store name and type to finish setup.
           </Text>
 
@@ -77,24 +91,26 @@ export default function OnboardingScreen() {
             />
           </View>
 
-          <Text className="mb-2 mt-2 text-sm font-medium text-neutral-300">Business type</Text>
+          <Text className={`mb-2 mt-2 text-sm font-medium ${textFieldLabelClass(resolved)}`}>Business type</Text>
           <View className="gap-2">
             {BUSINESS_TYPES.map((opt) => (
               <Pressable
                 key={opt.value}
                 onPress={() => setType(opt.value)}
                 className={`flex-row items-center rounded-xl border px-4 py-3 ${
-                  type === opt.value
-                    ? "border-emerald-500 bg-emerald-500/10"
-                    : "border-neutral-800 bg-neutral-900"
+                  type === opt.value ? "border-brand-500 bg-brand-500/10" : chipInactiveBorder(resolved)
                 }`}
               >
                 <View
                   className={`mr-3 h-4 w-4 rounded-full border-2 ${
-                    type === opt.value ? "border-emerald-500 bg-emerald-500" : "border-neutral-600"
+                    type === opt.value
+                      ? "border-brand-500 bg-brand-500"
+                      : resolved === "dark"
+                        ? "border-neutral-600"
+                        : "border-zinc-400"
                   }`}
                 />
-                <Text className="text-base text-neutral-200">{opt.label}</Text>
+                <Text className={`text-base ${textBodyClass(resolved)}`}>{opt.label}</Text>
               </Pressable>
             ))}
           </View>

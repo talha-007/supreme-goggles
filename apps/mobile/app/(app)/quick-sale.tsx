@@ -11,6 +11,8 @@ import {
   View,
 } from "react-native";
 
+import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
+
 import { FormField } from "../../src/components/FormField";
 import { PrimaryButton } from "../../src/components/PrimaryButton";
 import { ProductThumbnail } from "../../src/components/ProductThumbnail";
@@ -26,6 +28,19 @@ import { fetchReceiptTextForInvoice } from "../../src/lib/receipt-fetch";
 import { formatPkr } from "../../src/lib/format-money";
 import { openSupportWhatsApp } from "../../src/lib/support-contact";
 import { supabase } from "../../src/lib/supabase";
+import {
+  chipInactiveBorder,
+  headerTint,
+  listRowPressableClass,
+  scrollCanvasClass,
+  stackedMutedPanelClass,
+  stickyFooterBarClass,
+  textMutedClass,
+  textSectionBodyClass,
+  textStrongOnSurfaceClass,
+  textSubtleClass,
+} from "../../src/theme/semantic";
+import { useTheme } from "../../src/contexts/theme-context";
 import type { CustomerRow } from "../../src/types/customer";
 
 type CatalogRow = { id: string; name: string; unit: string; sale_price: number; image_url: string | null };
@@ -58,6 +73,7 @@ export default function QuickSaleScreen() {
   const bottomPad = useTabScreenBottomPadding();
   const { businessId, user } = useAuth();
   const { refreshGeneration } = useRealtimeNotifications();
+  const { resolved } = useTheme();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -69,7 +85,7 @@ export default function QuickSaleScreen() {
           accessibilityRole="button"
           accessibilityLabel="Go back"
         >
-          <Ionicons name="chevron-back" size={26} color="#fafafa" />
+          <Ionicons name="chevron-back" size={26} color={headerTint(resolved)} />
         </Pressable>
       ),
       headerRight: () =>
@@ -85,7 +101,7 @@ export default function QuickSaleScreen() {
           </Pressable>,
         ),
     });
-  }, [navigation]);
+  }, [navigation, resolved]);
 
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -343,7 +359,7 @@ export default function QuickSaleScreen() {
     () => (
       <View>
         <View className="px-4 pt-3">
-          <Text className="mb-2 text-xs font-medium uppercase text-neutral-600">Customer (optional)</Text>
+          <Text className={`mb-2 text-xs font-medium uppercase ${textSubtleClass(resolved)}`}>Customer (optional)</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -352,20 +368,20 @@ export default function QuickSaleScreen() {
             <Pressable
               onPress={() => setCustomerId(null)}
               className={`mr-2 rounded-full border px-3 py-2 ${
-                customerId === null ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                customerId === null ? "border-brand-500 bg-brand-500/15" : chipInactiveBorder(resolved)
               }`}
             >
-              <Text className="text-sm text-neutral-200">Walk-in</Text>
+              <Text className={`text-sm ${textSectionBodyClass(resolved)}`}>Walk-in</Text>
             </Pressable>
             {customers.map((c) => (
               <Pressable
                 key={c.id}
                 onPress={() => setCustomerId(c.id)}
                 className={`mr-2 rounded-full border px-3 py-2 ${
-                  customerId === c.id ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                  customerId === c.id ? "border-brand-500 bg-brand-500/15" : chipInactiveBorder(resolved)
                 }`}
               >
-                <Text className="max-w-[140px] text-sm text-neutral-200" numberOfLines={1}>
+                <Text className={`max-w-[140px] text-sm ${textSectionBodyClass(resolved)}`} numberOfLines={1}>
                   {c.name}
                 </Text>
               </Pressable>
@@ -389,21 +405,21 @@ export default function QuickSaleScreen() {
   const listFooter = useMemo(
     () => (
       <View className="mt-2 px-4">
-        <Text className="text-xs font-medium uppercase text-neutral-600">Cart</Text>
+        <Text className={`text-xs font-medium uppercase ${textSubtleClass(resolved)}`}>Cart</Text>
         {cart.length === 0 ? (
-          <Text className="mt-2 text-sm text-neutral-500">Tap a product above to add it.</Text>
+          <Text className={`mt-2 text-sm ${textMutedClass(resolved)}`}>Tap a product above to add it.</Text>
         ) : (
           cart.map((c) => (
             <View
               key={c.product_id}
-              className="mt-2 flex-row items-center justify-between gap-2 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-3"
+              className={stackedMutedPanelClass(resolved)}
             >
               <ProductThumbnail imageUrl={c.image_url} size={44} />
               <View className="min-w-0 flex-1">
-                <Text className="text-base text-neutral-100" numberOfLines={2}>
+                <Text className={`text-base ${textStrongOnSurfaceClass(resolved)}`} numberOfLines={2}>
                   {c.product_name}
                 </Text>
-                <Text className="mt-0.5 text-xs text-neutral-500">
+                <Text className={`mt-0.5 text-xs ${textMutedClass(resolved)}`}>
                   {formatPkr(c.unit_price)} / {c.unit}
                 </Text>
               </View>
@@ -413,9 +429,9 @@ export default function QuickSaleScreen() {
                   className="h-9 w-9 items-center justify-center rounded-lg bg-neutral-800"
                   accessibilityLabel="Decrease quantity"
                 >
-                  <Text className="text-lg text-neutral-200">−</Text>
+                  <Text className={`text-lg ${textSectionBodyClass(resolved)}`}>−</Text>
                 </Pressable>
-                <Text className="min-w-[28px] text-center text-base font-semibold text-neutral-100">
+                <Text className={`min-w-[28px] text-center text-base font-semibold ${textStrongOnSurfaceClass(resolved)}`}>
                   {c.quantity}
                 </Text>
                 <Pressable
@@ -423,7 +439,7 @@ export default function QuickSaleScreen() {
                   className="h-9 w-9 items-center justify-center rounded-lg bg-neutral-800"
                   accessibilityLabel="Increase quantity"
                 >
-                  <Text className="text-lg text-neutral-200">+</Text>
+                  <Text className={`text-lg ${textSectionBodyClass(resolved)}`}>+</Text>
                 </Pressable>
               </View>
             </View>
@@ -459,17 +475,17 @@ export default function QuickSaleScreen() {
     ({ item }: { item: CatalogRow }) => (
       <Pressable
         onPress={() => addToCart(item)}
-        className="border-b border-neutral-800 px-4 py-3.5 active:bg-neutral-900"
+        className={listRowPressableClass(resolved)}
       >
         <View className="flex-row items-center justify-between gap-2">
           <ProductThumbnail imageUrl={item.image_url} size={48} />
           <View className="min-w-0 flex-1">
-            <Text className="text-base font-medium text-neutral-100">{item.name}</Text>
-            <Text className="mt-0.5 text-sm text-neutral-500">
+            <Text className={`text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>{item.name}</Text>
+            <Text className={`mt-0.5 text-sm ${textMutedClass(resolved)}`}>
               {item.unit} · {formatPkr(item.sale_price)}
             </Text>
           </View>
-          <Ionicons name="add-circle" size={28} color="#34d399" />
+          <Ionicons name="add-circle" size={28} color={BRAND_ACCENT_HEX} />
         </View>
       </Pressable>
     ),
@@ -483,19 +499,19 @@ export default function QuickSaleScreen() {
     if (catalogLoading) {
       return (
         <View className="py-8">
-          <ActivityIndicator color="#34d399" />
+          <ActivityIndicator color={BRAND_ACCENT_HEX} />
         </View>
       );
     }
     return (
-      <Text className="px-4 py-6 text-center text-sm text-neutral-500">
+      <Text className={`px-4 py-6 text-center text-sm ${textMutedClass(resolved)}`}>
         No products. Add stock under Stock or adjust search.
       </Text>
     );
   }, [catalogLoading]);
 
   return (
-    <View className="flex-1 bg-neutral-950">
+    <View className={scrollCanvasClass(resolved)}>
       <FlatList
         data={catalog}
         keyExtractor={(item) => item.id}
@@ -512,16 +528,16 @@ export default function QuickSaleScreen() {
       />
 
       <View
-        className="absolute bottom-0 left-0 right-0 border-t border-neutral-800 bg-neutral-950 px-4 pt-2"
+        className={stickyFooterBarClass(resolved)}
         style={{ paddingBottom: bottomPad + 8 }}
       >
         <View className="flex-row items-end justify-between gap-2">
           <View className="min-w-0 flex-1">
-            <Text className="text-[10px] uppercase text-neutral-500">Total</Text>
-            <Text className="text-xl font-bold text-emerald-400" numberOfLines={1}>
+            <Text className={`text-[10px] uppercase ${textMutedClass(resolved)}`}>Total</Text>
+            <Text className="text-xl font-bold text-brand-400" numberOfLines={1}>
               {formatPkr(totals.total_amount)}
             </Text>
-            <Text className="text-[10px] text-neutral-600" numberOfLines={1}>
+            <Text className={`text-[10px] ${textSubtleClass(resolved)}`} numberOfLines={1}>
               Subtotal {formatPkr(totals.subtotal)} · Tax {formatPkr(totals.tax_amount)}
             </Text>
           </View>
@@ -537,7 +553,7 @@ export default function QuickSaleScreen() {
               accessibilityRole="button"
               accessibilityLabel="WhatsApp support"
             >
-              <Text className="text-xs font-semibold text-emerald-400">Message support</Text>
+              <Text className="text-xs font-semibold text-brand-400">Message support</Text>
             </Pressable>
           </View>
         ) : null}
@@ -559,7 +575,7 @@ export default function QuickSaleScreen() {
               {checkoutBusy === "credit" ? "Processing…" : "Complete sale (credit / owe later)"}
             </Text>
           </Pressable>
-          <Text className="text-center text-[10px] leading-4 text-neutral-600">
+          <Text className={`text-center text-[10px] leading-4 ${textSubtleClass(resolved)}`}>
             Credit: bill stays unpaid, stock updates. If you pick a customer, what they owe goes on their balance.
           </Text>
         </View>

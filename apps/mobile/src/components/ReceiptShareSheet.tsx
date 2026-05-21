@@ -1,5 +1,13 @@
 import { Modal, Platform, Pressable, ScrollView, Share, Text, useWindowDimensions, View } from "react-native";
 
+import { useTheme } from "../contexts/theme-context";
+import {
+  modalSecondaryButtonClass,
+  receiptSheetSurfaceClass,
+  textMutedClass,
+  textPageTitleClass,
+  textStrongOnSurfaceClass,
+} from "../theme/semantic";
 import { THERMAL_CHARS } from "../lib/receipt-text";
 
 type Props = {
@@ -10,6 +18,7 @@ type Props = {
 };
 
 export function ReceiptShareSheet({ visible, title = "Receipt", receiptText, onClose }: Props) {
+  const { resolved } = useTheme();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const padX = 10;
   /** Max paper fits modal; inner area is for exactly 42 monospace columns. */
@@ -46,11 +55,11 @@ export function ReceiptShareSheet({ visible, title = "Receipt", receiptText, onC
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/70">
         <View
-          className="rounded-t-2xl border border-neutral-800 bg-neutral-950 px-4 pb-8 pt-4"
+          className={receiptSheetSurfaceClass(resolved)}
           style={{ maxHeight: sheetMaxH }}
         >
-          <Text className="text-lg font-semibold text-neutral-100">{title}</Text>
-          <Text className="mt-1 text-xs text-neutral-500">
+          <Text className={`text-lg font-semibold ${textPageTitleClass(resolved)}`}>{title}</Text>
+          <Text className={`mt-1 text-xs ${textMutedClass(resolved)}`}>
             Thermal-width preview (~{THERMAL_CHARS} columns). Share sends this text to your printer app.
           </Text>
 
@@ -108,12 +117,12 @@ export function ReceiptShareSheet({ visible, title = "Receipt", receiptText, onC
 
           <Pressable
             onPress={() => void Share.share({ message: receiptText, title: "Receipt" })}
-            className="mt-4 rounded-xl bg-emerald-600 py-3.5 active:opacity-90"
+            className="mt-4 rounded-xl bg-brand-600 py-3.5 active:opacity-90"
           >
             <Text className="text-center text-base font-semibold text-white">Share / print</Text>
           </Pressable>
-          <Pressable onPress={onClose} className="mt-3 rounded-xl bg-neutral-800 py-3">
-            <Text className="text-center text-base font-medium text-neutral-100">Done</Text>
+          <Pressable onPress={onClose} className={`mt-3 ${modalSecondaryButtonClass(resolved)}`}>
+            <Text className={`text-center text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>Done</Text>
           </Pressable>
         </View>
       </View>

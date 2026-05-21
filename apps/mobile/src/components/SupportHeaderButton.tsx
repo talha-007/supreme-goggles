@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Pressable, View } from "react-native";
 
 import { openSupportWhatsApp } from "../lib/support-contact";
+import { BRAND_ACCENT_HEX } from "../theme/brand";
 
 /** Compact WhatsApp control for stack / tab headers (trailing edge). */
 export function SupportHeaderButton() {
@@ -10,11 +11,11 @@ export function SupportHeaderButton() {
     <Pressable
       onPress={() => void openSupportWhatsApp()}
       hitSlop={10}
-      className="rounded-full bg-emerald-500/12 p-2 active:opacity-80"
+      className="rounded-full bg-brand-500/12 p-2 active:opacity-80"
       accessibilityRole="button"
       accessibilityLabel="WhatsApp app support"
     >
-      <Ionicons name="logo-whatsapp" size={22} color="#4ade80" />
+      <Ionicons name="logo-whatsapp" size={22} color={BRAND_ACCENT_HEX} />
     </Pressable>
   );
 }

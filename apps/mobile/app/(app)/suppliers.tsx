@@ -12,6 +12,8 @@ import {
   View,
 } from "react-native";
 
+import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
+
 import { ErrorBannerWithSupport } from "../../src/components/ErrorBannerWithSupport";
 import { headerRightWithSupport } from "../../src/components/SupportHeaderButton";
 import { FormField } from "../../src/components/FormField";
@@ -20,6 +22,17 @@ import { SearchBar } from "../../src/components/SearchBar";
 import { useAuth } from "../../src/contexts/auth-context";
 import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
 import { supabase } from "../../src/lib/supabase";
+import {
+  bottomSheetContainerClass,
+  listEntityCardClass,
+  screenCenterRootClass,
+  scrollCanvasClass,
+  textFieldLabelClass,
+  textMutedClass,
+  textStrongOnSurfaceClass,
+  textSubtleClass,
+} from "../../src/theme/semantic";
+import { useTheme } from "../../src/contexts/theme-context";
 import type { SupplierListRow } from "../../src/types/purchase";
 
 function matchesQuery(row: SupplierListRow, q: string): boolean {
@@ -36,6 +49,7 @@ export default function SuppliersScreen() {
   const navigation = useNavigation();
   const bottomPad = useTabScreenBottomPadding();
   const { businessId, user } = useAuth();
+  const { resolved } = useTheme();
   const [rows, setRows] = useState<SupplierListRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -63,12 +77,12 @@ export default function SuppliersScreen() {
               setAddOpen(true);
             }}
             hitSlop={12}
-            className="flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
+            className="flex-row items-center rounded-full bg-brand-500/15 px-3 py-1.5 active:opacity-80"
             accessibilityRole="button"
             accessibilityLabel="Add supplier"
           >
-            <Ionicons name="add" size={22} color="#34d399" />
-            <Text className="ml-1 text-sm font-semibold text-emerald-400">Add</Text>
+            <Ionicons name="add" size={22} color={BRAND_ACCENT_HEX} />
+            <Text className="ml-1 text-sm font-semibold text-brand-400">Add</Text>
           </Pressable>,
         ),
     });
@@ -134,14 +148,14 @@ export default function SuppliersScreen() {
 
   if (loading && rows.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-neutral-950">
-        <ActivityIndicator size="large" color="#34d399" />
+      <View className={screenCenterRootClass(resolved)}>
+        <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-neutral-950">
+    <View className={scrollCanvasClass(resolved)}>
       {error ? <ErrorBannerWithSupport message={error} /> : null}
 
       <FlatList
@@ -149,7 +163,7 @@ export default function SuppliersScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: bottomPad + 8, paddingHorizontal: 16 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#34d399" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={BRAND_ACCENT_HEX} />
         }
         ListHeaderComponent={
           <View className="pb-2 pt-2">
@@ -159,7 +173,7 @@ export default function SuppliersScreen() {
               placeholder="Search by name, phone, or email"
               accessibilityLabel="Search suppliers"
             />
-            <Text className="mt-2 text-xs text-neutral-500">
+            <Text className={`mt-2 text-xs ${textMutedClass(resolved)}`}>
               {filtered.length === rows.length
                 ? `${rows.length} vendor${rows.length === 1 ? "" : "s"}`
                 : `${filtered.length} of ${rows.length} shown`}
@@ -169,10 +183,10 @@ export default function SuppliersScreen() {
         ListEmptyComponent={
           <View className="items-center px-4 py-12">
             <Ionicons name="people-outline" size={48} color="#525252" />
-            <Text className="mt-4 text-center text-base font-medium text-neutral-300">
+            <Text className={`mt-4 text-center text-base font-medium ${textFieldLabelClass(resolved)}`}>
               {query.trim() ? "No matches" : "No suppliers yet"}
             </Text>
-            <Text className="mt-2 text-center text-sm leading-5 text-neutral-500">
+            <Text className={`mt-2 text-center text-sm leading-5 ${textMutedClass(resolved)}`}>
               {query.trim()
                 ? "Try a different search."
                 : "Tap Add to register a vendor you buy stock from."}
@@ -182,13 +196,13 @@ export default function SuppliersScreen() {
         renderItem={({ item }) => (
           <Pressable
             onPress={() => setDetail(item)}
-            className="mb-2 rounded-2xl border border-neutral-800 bg-neutral-900/90 px-4 py-4 active:opacity-90"
+            className={listEntityCardClass(resolved)}
           >
             <View className="flex-row items-start justify-between gap-3">
               <View className="min-w-0 flex-1">
-                <Text className="text-base font-semibold text-neutral-100">{item.name}</Text>
+                <Text className={`text-base font-semibold ${textStrongOnSurfaceClass(resolved)}`}>{item.name}</Text>
                 {item.phone ? (
-                  <Text className="mt-1 text-sm text-neutral-400">{item.phone}</Text>
+                  <Text className={`mt-1 text-sm ${textSubtleClass(resolved)}`}>{item.phone}</Text>
                 ) : null}
                 {!item.is_active ? (
                   <Text className="mt-2 text-xs font-medium uppercase tracking-wide text-amber-500">
@@ -204,9 +218,9 @@ export default function SuppliersScreen() {
 
       <Modal visible={addOpen} animationType="slide" transparent onRequestClose={() => setAddOpen(false)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className="max-h-[90%] rounded-t-2xl bg-neutral-950 px-4 pb-8 pt-4">
+          <View className={`max-h-[90%] px-4 pb-8 pt-4 ${bottomSheetContainerClass(resolved)}`}>
             <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-lg font-semibold text-neutral-100">New supplier</Text>
+              <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>New supplier</Text>
               <Pressable onPress={() => setAddOpen(false)} hitSlop={12} accessibilityLabel="Close">
                 <Ionicons name="close" size={26} color="#a3a3a3" />
               </Pressable>
@@ -231,7 +245,7 @@ export default function SuppliersScreen() {
               {saveError ? <ErrorBannerWithSupport message={saveError} variant="compact" /> : null}
               <PrimaryButton label="Save supplier" onPress={() => void onSaveSupplier()} loading={saving} />
               <Pressable onPress={() => setAddOpen(false)} className="mt-3 py-3">
-                <Text className="text-center text-base text-neutral-400">Cancel</Text>
+                <Text className={`text-center text-base ${textSubtleClass(resolved)}`}>Cancel</Text>
               </Pressable>
             </ScrollView>
           </View>
@@ -242,15 +256,15 @@ export default function SuppliersScreen() {
         <View className="flex-1 justify-end bg-black/60">
           <Pressable className="flex-1" onPress={() => setDetail(null)} accessibilityLabel="Dismiss" />
           {detail ? (
-            <View className="rounded-t-2xl bg-neutral-950 px-4 pb-10 pt-4">
-              <Text className="text-lg font-semibold text-neutral-100">{detail.name}</Text>
+            <View className={`rounded-t-2xl px-4 pb-10 pt-4 ${bottomSheetContainerClass(resolved)}`}>
+              <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>{detail.name}</Text>
               <View className="mt-4 gap-2">
                 <Row label="Phone" value={detail.phone ?? "—"} />
                 <Row label="Email" value={detail.email ?? "—"} />
                 <Row label="Status" value={detail.is_active ? "Active" : "Inactive"} />
               </View>
               <Pressable onPress={() => setDetail(null)} className="mt-6 rounded-xl bg-neutral-800 py-3">
-                <Text className="text-center text-base font-medium text-neutral-100">Close</Text>
+                <Text className={`text-center text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>Close</Text>
               </Pressable>
             </View>
           ) : null}
@@ -261,10 +275,15 @@ export default function SuppliersScreen() {
 }
 
 function Row({ label, value }: { label: string; value: string }) {
+  const { resolved } = useTheme();
   return (
-    <View className="flex-row justify-between gap-4 border-b border-neutral-800 py-2">
-      <Text className="text-sm text-neutral-500">{label}</Text>
-      <Text className="max-w-[65%] flex-shrink text-right text-sm text-neutral-200">{value}</Text>
+    <View
+      className={`flex-row justify-between gap-2 border-b py-2 ${
+        resolved === "dark" ? "border-neutral-800" : "border-zinc-200"
+      }`}
+    >
+      <Text className={`text-sm ${textMutedClass(resolved)}`}>{label}</Text>
+      <Text className={`max-w-[65%] flex-shrink text-right text-sm ${textSubtleClass(resolved)}`}>{value}</Text>
     </View>
   );
 }

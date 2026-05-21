@@ -5,13 +5,13 @@
     "scheme": "pos-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/app-logo.png",
+    "icon": "./assets/brand-mark.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/app-logo.png",
+      "image": "./assets/brand-mark.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#09090b"
     },
     "ios": {
       "supportsTablet": true,
@@ -19,14 +19,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/app-logo.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/brand-mark.png",
+        "backgroundColor": "#14033d"
       },
       "package": "com.supremegoggles.posmobile"
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/app-logo.png"
+      "favicon": "./assets/brand-mark.png"
     },
     "plugins": [
       "expo-router"

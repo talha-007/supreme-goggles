@@ -2,9 +2,11 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { router, useNavigation } from "expo-router";
+import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
 
 import { useAuth } from "../../src/contexts/auth-context";
 import { useRealtimeNotifications } from "../../src/contexts/realtime-notifications-context";
+import { useTheme } from "../../src/contexts/theme-context";
 import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
 import {
   getRangeStartForPreset,
@@ -12,6 +14,24 @@ import {
   type StatsDatePreset,
 } from "../../src/lib/date-range-presets";
 import { supabase } from "../../src/lib/supabase";
+import {
+  chipActiveBorder,
+  chipActiveText,
+  chipInactiveBorder,
+  chipInactiveText,
+  insightsPromoCardClass,
+  insightsPromoHintClass,
+  insightsPromoTitleClass,
+  metricCardClass,
+  quickSalePromoCardClass,
+  rowLinkCardClass,
+  screenCenterRootClass,
+  scrollCanvasClass,
+  textMutedClass,
+  textSectionBodyClass,
+  textStrongOnSurfaceClass,
+  textSubtleClass,
+} from "../../src/theme/semantic";
 
 const pkr = new Intl.NumberFormat("en-PK", {
   style: "currency",
@@ -30,6 +50,7 @@ export default function DashboardScreen() {
   const bottomPad = useTabScreenBottomPadding();
   const { businessId, user } = useAuth();
   const { refreshGeneration } = useRealtimeNotifications();
+  const { resolved } = useTheme();
   const [statsPeriod, setStatsPeriod] = useState<StatsDatePreset>("month");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<{
@@ -155,23 +176,23 @@ export default function DashboardScreen() {
 
   if (loading || !stats) {
     return (
-      <View className="flex-1 items-center justify-center bg-neutral-950">
-        <ActivityIndicator size="large" color="#34d399" />
+      <View className={screenCenterRootClass(resolved)}>
+        <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
       </View>
     );
   }
 
   return (
     <ScrollView
-      className="flex-1 bg-neutral-950"
+      className={scrollCanvasClass(resolved)}
       contentContainerClassName="px-4 pt-4"
       contentContainerStyle={{ paddingBottom: bottomPad }}
     >
-      <Text className="text-base text-neutral-200">
+      <Text className={`text-base ${textSectionBodyClass(resolved)}`}>
         Sales, stock, and purchasing at a glance.
       </Text>
 
-      <Text className="mt-4 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+      <Text className={`mt-4 text-xs font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
         Sales period
       </Text>
       <ScrollView
@@ -191,10 +212,10 @@ export default function DashboardScreen() {
               key={o.key}
               onPress={() => setStatsPeriod(o.key)}
               className={`mr-2 rounded-full border px-3.5 py-2 ${
-                active ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                active ? chipActiveBorder(resolved) : chipInactiveBorder(resolved)
               }`}
             >
-              <Text className={`text-sm font-medium ${active ? "text-emerald-400" : "text-neutral-400"}`}>
+              <Text className={`text-sm font-medium ${active ? chipActiveText(resolved) : chipInactiveText(resolved)}`}>
                 {o.short}
               </Text>
             </Pressable>
@@ -204,30 +225,36 @@ export default function DashboardScreen() {
 
       <Pressable
         onPress={() => router.push("/analysis")}
-        className="mt-4 rounded-xl border border-sky-600/40 bg-sky-950/25 px-4 py-3.5 active:opacity-90"
+        className={insightsPromoCardClass(resolved)}
         accessibilityRole="button"
         accessibilityLabel="Open business insights"
       >
-        <Text className="text-center text-base font-semibold text-sky-300">Business insights</Text>
-        <Text className="mt-1 text-center text-xs text-neutral-500">
+        <Text className={insightsPromoTitleClass(resolved)}>Business insights</Text>
+        <Text className={insightsPromoHintClass(resolved)}>
           Sales by day and top products — same metrics as the web dashboard charts.
         </Text>
       </Pressable>
 
       <Pressable
         onPress={() => router.push("/quick-sale")}
-        className="mt-6 rounded-2xl border border-emerald-600/40 bg-emerald-950/35 px-4 py-4 active:opacity-90"
+        className={quickSalePromoCardClass(resolved)}
         accessibilityRole="button"
         accessibilityLabel="Open quick sale"
       >
         <View className="flex-row items-center justify-between gap-3">
           <View className="min-w-0 flex-1">
-            <Text className="text-base font-semibold text-emerald-300">Quick sale</Text>
-            <Text className="mt-1 text-sm leading-5 text-neutral-400">
+            <Text
+              className={
+                resolved === "dark" ? "text-base font-semibold text-brand-300" : "text-base font-semibold text-brand-800"
+              }
+            >
+              Quick sale
+            </Text>
+            <Text className={`mt-1 text-sm leading-5 ${textSubtleClass(resolved)}`}>
               Search products, tap to add, complete cash sale — receipt ready to share or print.
             </Text>
           </View>
-          <Text className="text-2xl text-emerald-400">→</Text>
+          <Text className="text-2xl text-brand-400">→</Text>
         </View>
       </Pressable>
 
@@ -242,7 +269,7 @@ export default function DashboardScreen() {
         <StatCard label="Customers" value={String(stats.customers)} />
       </View>
 
-      <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+      <Text className={`mt-8 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
         Purchasing
       </Text>
       <View className="mt-3 gap-2">
@@ -250,9 +277,9 @@ export default function DashboardScreen() {
           <Pressable
             key={item.href}
             onPress={() => router.push(item.href)}
-            className="rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3.5 active:opacity-90"
+            className={rowLinkCardClass(resolved)}
           >
-            <Text className="text-base font-medium text-neutral-100">{item.label}</Text>
+            <Text className={`text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>{item.label}</Text>
           </Pressable>
         ))}
       </View>
@@ -261,10 +288,11 @@ export default function DashboardScreen() {
 }
 
 function StatCard({ label, value }: { label: string; value: string }) {
+  const { resolved } = useTheme();
   return (
-    <View className="min-w-[46%] flex-1 rounded-xl border border-neutral-800 bg-neutral-900/80 p-4">
-      <Text className="text-xs text-neutral-500">{label}</Text>
-      <Text className="mt-1 text-lg font-semibold text-neutral-100">{value}</Text>
+    <View className={metricCardClass(resolved)}>
+      <Text className={`text-xs ${textMutedClass(resolved)}`}>{label}</Text>
+      <Text className={`mt-1 text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>{value}</Text>
     </View>
   );
 }

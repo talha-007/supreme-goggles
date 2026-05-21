@@ -5,10 +5,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { PrimaryButton } from "../src/components/PrimaryButton";
 import { useAuth } from "../src/contexts/auth-context";
+import { useTheme } from "../src/contexts/theme-context";
 import { openSupportWhatsApp } from "../src/lib/support-contact";
+import {
+  screenCenterRootClass,
+  screenRootClass,
+  subscriptionChoiceCardClass,
+  textMutedClass,
+  textSectionBodyClass,
+} from "../src/theme/semantic";
 
 export default function SubscriptionExpiredScreen() {
   const { session, hasBusiness, loading: authLoading, subscriptionAccess, signOut } = useAuth();
+  const { resolved } = useTheme();
 
   useEffect(() => {
     if (authLoading) return;
@@ -27,14 +36,14 @@ export default function SubscriptionExpiredScreen() {
 
   if (authLoading || !session || !hasBusiness || subscriptionAccess) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-neutral-950">
-        <Text className="text-sm text-neutral-500">Loading…</Text>
+      <SafeAreaView className={screenCenterRootClass(resolved)}>
+        <Text className={textMutedClass(resolved)}>Loading…</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-950 px-6 pt-4">
+    <SafeAreaView className={`${screenRootClass(resolved)} px-6 pt-4`}>
       <View className="mt-6 rounded-2xl border border-red-900/60 bg-red-950/35 p-6">
         <Text className="text-xl font-semibold text-red-100">Subscription access expired</Text>
         <Text className="mt-3 text-sm leading-5 text-red-200/95">
@@ -54,16 +63,16 @@ export default function SubscriptionExpiredScreen() {
         />
         <Pressable
           onPress={() => void signOut()}
-          className="rounded-xl border border-neutral-600 bg-neutral-900 py-4 active:opacity-90"
+          className={subscriptionChoiceCardClass(resolved)}
           accessibilityRole="button"
           accessibilityLabel="Sign out"
         >
-          <Text className="text-center text-base font-semibold text-neutral-200">Sign out</Text>
+          <Text className={`text-center text-base font-semibold ${textSectionBodyClass(resolved)}`}>Sign out</Text>
         </Pressable>
       </View>
 
       <Pressable onPress={() => router.replace("/login")} className="mt-6 py-3 active:opacity-80">
-        <Text className="text-center text-base text-neutral-500">Back to sign in</Text>
+        <Text className={`text-center text-base ${textMutedClass(resolved)}`}>Back to sign in</Text>
       </Pressable>
     </SafeAreaView>
   );

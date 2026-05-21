@@ -11,15 +11,19 @@ import {
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { BrandMark } from "../src/components/BrandMark";
 import { FormField } from "../src/components/FormField";
 import { PrimaryButton } from "../src/components/PrimaryButton";
 import { isValidEmailFormat } from "../src/lib/credential-validation";
 import { getPasswordResetRedirectUrl } from "../src/lib/auth-redirect";
 import { getPrivacyPolicyUrl } from "../src/lib/privacy-config";
 import { supabase } from "../src/lib/supabase";
+import { screenRootClass, textMutedClass, textPageTitleClass } from "../src/theme/semantic";
 import { ErrorBannerWithSupport } from "../src/components/ErrorBannerWithSupport";
+import { useTheme } from "../src/contexts/theme-context";
 
 export default function ForgotPasswordScreen() {
+  const { resolved } = useTheme();
   const [email, setEmail] = useState("");
   const [started, setStarted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +61,7 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-950">
+    <SafeAreaView className={screenRootClass(resolved)}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
@@ -67,16 +71,19 @@ export default function ForgotPasswordScreen() {
           contentContainerClassName="flex-grow px-6 pb-8 pt-4"
         >
           <Pressable onPress={() => router.back()} className="mb-4 self-start py-2" hitSlop={12}>
-            <Text className="text-base text-emerald-500">Back</Text>
+            <Text className="text-base text-brand-500">Back</Text>
           </Pressable>
-          <Text className="text-3xl font-bold text-neutral-100">Reset password</Text>
-          <Text className="mt-2 text-base text-neutral-500">
+          <View className="mb-6 items-center">
+            <BrandMark size={72} />
+          </View>
+          <Text className={`text-3xl font-bold ${textPageTitleClass(resolved)}`}>Reset password</Text>
+          <Text className={`mt-2 text-base ${textMutedClass(resolved)}`}>
             We&apos;ll email you a link to choose a new password. You&apos;ll complete the reset in
             your browser.
           </Text>
           {done ? (
-            <View className="mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-3">
-              <Text className="text-sm text-emerald-300">
+            <View className="mt-6 rounded-lg border border-brand-500/30 bg-brand-500/10 px-3 py-3">
+              <Text className="text-sm text-brand-300">
                 If that email is registered, you&apos;ll get a link shortly. Check your inbox and
                 spam folder, then open the link on this device or any browser.
               </Text>
@@ -111,7 +118,7 @@ export default function ForgotPasswordScreen() {
           )}
           <Link href="/login" asChild>
             <Pressable className="mt-6">
-              <Text className="text-center text-sm text-emerald-400">Back to sign in</Text>
+              <Text className="text-center text-sm text-brand-400">Back to sign in</Text>
             </Pressable>
           </Link>
           {getPrivacyPolicyUrl() ? (

@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Pressable, Text, TextInput, type TextInputProps, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
+import { useTheme } from "../contexts/theme-context";
+import { formTextInputClass, textFieldLabelClass, textMutedClass, type FormInputVariant } from "../theme/semantic";
+
 type Props = {
   label: string;
   /** Shown in smaller text under the label and above the input. */
@@ -37,18 +40,20 @@ export function FormField({
   multiline = false,
   editable = true,
 }: Props) {
+  const { resolved } = useTheme();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const isPassword = Boolean(secureTextEntry);
   const effectiveSecure = isPassword && showPasswordToggle ? !passwordVisible : secureTextEntry;
   const hasErr = Boolean(error);
   const showWarn = borderWarning && !hasErr;
+  const inputVariant: FormInputVariant = hasErr ? "error" : showWarn ? "warning" : "normal";
 
   const input = (
     <TextInput
       value={value}
       onChangeText={onChangeText}
       placeholder={placeholder}
-      placeholderTextColor="#737373"
+      placeholderTextColor={resolved === "dark" ? "#737373" : "#71717a"}
       secureTextEntry={effectiveSecure}
       keyboardType={keyboardType}
       autoCapitalize={autoCapitalize}
@@ -56,23 +61,17 @@ export function FormField({
       multiline={multiline}
       editable={editable}
       textAlignVertical={multiline ? "top" : "center"}
-      className={`rounded-xl border bg-neutral-900 text-base text-neutral-100 ${
-        hasErr
-          ? "border-rose-500/80"
-          : showWarn
-            ? "border-amber-500/80"
-            : "border-neutral-800"
-      } ${isPassword && showPasswordToggle ? "pl-4 pr-12" : "px-4"} py-3.5 ${
-        multiline ? "min-h-[88px]" : ""
-      } ${!editable ? "opacity-60" : ""}`}
+      className={`${formTextInputClass(resolved, inputVariant)} ${
+        isPassword && showPasswordToggle ? "pl-4 pr-12" : "px-4"
+      } py-3.5 ${multiline ? "min-h-[88px]" : ""} ${!editable ? "opacity-60" : ""}`}
     />
   );
 
   return (
     <View className="mb-4">
-      <Text className="mb-2 text-sm font-medium text-neutral-300">{label}</Text>
+      <Text className={`mb-2 text-sm font-medium ${textFieldLabelClass(resolved)}`}>{label}</Text>
       {hint ? (
-        <Text className="mb-2 text-xs text-neutral-500" accessibilityRole="text">
+        <Text className={`mb-2 text-xs ${textMutedClass(resolved)}`} accessibilityRole="text">
           {hint}
         </Text>
       ) : null}
@@ -89,7 +88,7 @@ export function FormField({
             <Ionicons
               name={passwordVisible ? "eye-off-outline" : "eye-outline"}
               size={22}
-              color="#a3a3a3"
+              color={resolved === "dark" ? "#a3a3a3" : "#71717a"}
             />
           </Pressable>
         </View>

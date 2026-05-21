@@ -2,14 +2,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { router } from "expo-router";
+import { BRAND_ACCENT_HEX } from "../src/theme/brand";
 
 import { INTRO_KEY, useAuth } from "../src/contexts/auth-context";
 import { IntroSlides } from "../src/components/IntroSlides";
+import { useTheme } from "../src/contexts/theme-context";
+import { screenRootClass } from "../src/theme/semantic";
 
 type Phase = "boot" | "slides" | "routing";
 
 export default function IndexScreen() {
   const { session, hasBusiness, subscriptionAccess, loading: authLoading } = useAuth();
+  const { resolved } = useTheme();
   const [phase, setPhase] = useState<Phase>("boot");
 
   useEffect(() => {
@@ -43,8 +47,8 @@ export default function IndexScreen() {
 
   if (phase === "boot") {
     return (
-      <View className="flex-1 items-center justify-center bg-neutral-950">
-        <ActivityIndicator size="large" color="#34d399" />
+      <View className={`${screenRootClass(resolved)} items-center justify-center`}>
+        <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
       </View>
     );
   }
@@ -54,8 +58,8 @@ export default function IndexScreen() {
   }
 
   return (
-    <View className="flex-1 items-center justify-center bg-neutral-950">
-      <ActivityIndicator size="large" color="#34d399" />
+    <View className={`${screenRootClass(resolved)} items-center justify-center`}>
+      <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
     </View>
   );
 }

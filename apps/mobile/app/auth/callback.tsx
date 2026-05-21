@@ -2,8 +2,11 @@ import { useCallback, useEffect, useRef } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
+import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
 
 import { supabase } from "../../src/lib/supabase";
+import { useTheme } from "../../src/contexts/theme-context";
+import { screenCenterRootClass, textMutedClass } from "../../src/theme/semantic";
 
 function getQueryValue(q: Linking.ParsedURL["queryParams"] | null, key: string): string | null {
   if (!q) return null;
@@ -92,6 +95,7 @@ async function processAuthUrlOnce(url: string | null) {
 }
 
 export default function AuthCallbackScreen() {
+  const { resolved } = useTheme();
   const lastHandled = useRef<string | null>(null);
   const linkingUrl = Linking.useLinkingURL();
 
@@ -120,9 +124,9 @@ export default function AuthCallbackScreen() {
   }, [run]);
 
   return (
-    <View className="flex-1 items-center justify-center bg-neutral-950 px-6">
-      <ActivityIndicator size="large" color="#34d399" />
-      <Text className="mt-4 text-center text-sm text-neutral-500">Signing you in…</Text>
+    <View className={`${screenCenterRootClass(resolved)} px-6`}>
+      <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
+      <Text className={`mt-4 text-center text-sm ${textMutedClass(resolved)}`}>Signing you in…</Text>
     </View>
   );
 }

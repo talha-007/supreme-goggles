@@ -2,12 +2,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 import type { ComponentProps } from "react";
 import { ActivityIndicator, Platform, View } from "react-native";
+import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
 
 import { FloatingTabBar } from "../../src/components/FloatingTabBar";
 import { SupportHeaderButton } from "../../src/components/SupportHeaderButton";
 import { RealtimeUpdateBanner } from "../../src/components/RealtimeUpdateBanner";
 import { useAuth } from "../../src/contexts/auth-context";
 import { RealtimeNotificationsProvider } from "../../src/contexts/realtime-notifications-context";
+import { useTheme } from "../../src/contexts/theme-context";
+import {
+  headerSurfaceStyle,
+  headerTint,
+  screenRootClass,
+  tabBarInactiveTint,
+} from "../../src/theme/semantic";
 
 type IonName = ComponentProps<typeof Ionicons>["name"];
 
@@ -21,11 +29,12 @@ const TAB_ICONS: Record<string, { active: IonName; inactive: IonName }> = {
 
 export default function AppGroupLayout() {
   const { session, loading, hasBusiness, subscriptionAccess } = useAuth();
+  const { resolved } = useTheme();
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-neutral-950">
-        <ActivityIndicator size="large" color="#34d399" />
+      <View className={`${screenRootClass(resolved)} items-center justify-center`}>
+        <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
       </View>
     );
   }
@@ -44,15 +53,15 @@ export default function AppGroupLayout() {
 
   return (
     <RealtimeNotificationsProvider>
-      <View className="flex-1 bg-neutral-950">
+      <View className={screenRootClass(resolved)}>
         <RealtimeUpdateBanner />
         <Tabs
       initialRouteName="dashboard"
       tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={({ route }) => ({
         headerShown: true,
-        headerStyle: { backgroundColor: "#171717" },
-        headerTintColor: "#fafafa",
+        headerStyle: headerSurfaceStyle(resolved),
+        headerTintColor: headerTint(resolved),
         headerTitleStyle: { fontWeight: "600" },
         headerShadowVisible: false,
         headerRight: () => (
@@ -61,8 +70,8 @@ export default function AppGroupLayout() {
           </View>
         ),
         tabBarHideOnKeyboard: true,
-        tabBarActiveTintColor: "#34d399",
-        tabBarInactiveTintColor: "#737373",
+        tabBarActiveTintColor: BRAND_ACCENT_HEX,
+        tabBarInactiveTintColor: tabBarInactiveTint(resolved),
         tabBarShowLabel: true,
         tabBarAllowFontScaling: false,
         /** Shorter strings + bounded width so labels ellipsize instead of spilling past the pill. */

@@ -22,8 +22,17 @@ import {
 import { getPrivacyPolicyUrl } from "../src/lib/privacy-config";
 import { supabase } from "../src/lib/supabase";
 import { ErrorBannerWithSupport } from "../src/components/ErrorBannerWithSupport";
+import { useTheme } from "../src/contexts/theme-context";
+import {
+  screenCenterRootClass,
+  screenRootClass,
+  textMutedClass,
+  textPageTitleClass,
+  textSubtleClass,
+} from "../src/theme/semantic";
 
 export default function UpdatePasswordScreen() {
+  const { resolved } = useTheme();
   const [ready, setReady] = useState<"check" | "no" | "yes">("check");
   const [password, setPassword] = useState("");
   const [started, setStarted] = useState(false);
@@ -71,27 +80,27 @@ export default function UpdatePasswordScreen() {
 
   if (ready === "check") {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-neutral-950">
-        <Text className="text-neutral-400">Loading…</Text>
+      <SafeAreaView className={screenCenterRootClass(resolved)}>
+        <Text className={textSubtleClass(resolved)}>Loading…</Text>
       </SafeAreaView>
     );
   }
 
   if (ready === "no") {
     return (
-      <SafeAreaView className="flex-1 bg-neutral-950 px-6 pt-4">
+      <SafeAreaView className={`${screenRootClass(resolved)} px-6 pt-4`}>
         <Text className="text-sm text-rose-300">
           This reset link is invalid or expired. Open the link from the latest email, or request a
           new one from Forgot password.
         </Text>
         <Link href="/forgot-password" asChild>
           <Pressable className="mt-4">
-            <Text className="text-emerald-400">Forgot password</Text>
+            <Text className="text-brand-400">Forgot password</Text>
           </Pressable>
         </Link>
         <Link href="/login" asChild>
           <Pressable className="mt-2">
-            <Text className="text-neutral-400">Sign in</Text>
+            <Text className={textSubtleClass(resolved)}>Sign in</Text>
           </Pressable>
         </Link>
       </SafeAreaView>
@@ -100,17 +109,17 @@ export default function UpdatePasswordScreen() {
 
   if (success) {
     return (
-      <SafeAreaView className="flex-1 bg-neutral-950 px-6 pt-4">
-        <Text className="text-lg text-emerald-300">Your password was updated. Sign in with the new one.</Text>
+      <SafeAreaView className={`${screenRootClass(resolved)} px-6 pt-4`}>
+        <Text className="text-lg text-brand-300">Your password was updated. Sign in with the new one.</Text>
         <Pressable onPress={() => router.replace("/login")} className="mt-6">
-          <Text className="text-center text-base font-semibold text-emerald-400">Go to sign in</Text>
+          <Text className="text-center text-base font-semibold text-brand-400">Go to sign in</Text>
         </Pressable>
         {getPrivacyPolicyUrl() ? (
           <Pressable
             onPress={() => void Linking.openURL(getPrivacyPolicyUrl())}
             className="mt-8 self-center"
           >
-            <Text className="text-xs text-neutral-500 underline">Privacy policy</Text>
+            <Text className={`text-xs ${textMutedClass(resolved)} underline`}>Privacy policy</Text>
           </Pressable>
         ) : null}
       </SafeAreaView>
@@ -118,14 +127,14 @@ export default function UpdatePasswordScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-950">
+      <SafeAreaView className={screenRootClass(resolved)}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
       >
         <ScrollView contentContainerClassName="flex-grow px-6 pb-8 pt-4" keyboardShouldPersistTaps="handled">
-          <Text className="text-3xl font-bold text-neutral-100">New password</Text>
-          <Text className="mt-2 text-base text-neutral-500">Choose a strong password for your account.</Text>
+          <Text className={`text-3xl font-bold ${textPageTitleClass(resolved)}`}>New password</Text>
+          <Text className={`mt-2 text-base ${textMutedClass(resolved)}`}>Choose a strong password for your account.</Text>
           <View className="mt-8">
             <FormField
               label="New password"

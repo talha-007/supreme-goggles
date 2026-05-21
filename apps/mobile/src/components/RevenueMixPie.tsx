@@ -1,16 +1,16 @@
 import { View } from "react-native";
 import Svg, { G, Path } from "react-native-svg";
 
-/** Aligned with web `sales-analytics-charts` palette. */
+/** Taplite brand-violet palette (distinct slices; last is neutral). */
 export const REVENUE_MIX_SLICE_COLORS = [
-  "#0d9488",
-  "#10b981",
-  "#14b8a6",
-  "#2dd4bf",
-  "#047857",
-  "#0f766e",
-  "#115e59",
-  "#134e4a",
+  "#5c22d4",
+  "#8f66f0",
+  "#3a09b0",
+  "#b89fff",
+  "#2f078f",
+  "#d4c4ff",
+  "#260673",
+  "#1e0558",
   "#64748b",
 ] as const;
 

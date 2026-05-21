@@ -1,6 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, TextInput, View } from "react-native";
 
+import { useTheme } from "../contexts/theme-context";
+import { searchBarWrapClass, textStrongOnSurfaceClass } from "../theme/semantic";
+
 type Props = {
   value: string;
   onChangeText: (t: string) => void;
@@ -18,16 +21,19 @@ export function SearchBar({
   placeholder = "Search…",
   accessibilityLabel = "Search",
 }: Props) {
+  const { resolved } = useTheme();
+  const iconMuted = resolved === "dark" ? "#737373" : "#71717a";
+  const iconSubtle = resolved === "dark" ? "#a3a3a3" : "#a1a1aa";
   return (
-    <View className="flex-row items-center rounded-2xl border border-neutral-800/90 bg-neutral-900/90 px-3 shadow-sm">
-      <Ionicons name="search" size={20} color="#737373" accessibilityElementsHidden />
+    <View className={searchBarWrapClass(resolved)}>
+      <Ionicons name="search" size={20} color={iconMuted} accessibilityElementsHidden />
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#737373"
+        placeholderTextColor={iconMuted}
         accessibilityLabel={accessibilityLabel}
-        className="min-h-[48px] flex-1 py-3 pl-2.5 text-base text-neutral-100"
+        className={`min-h-[48px] flex-1 py-3 pl-2.5 text-base ${textStrongOnSurfaceClass(resolved)}`}
         autoCorrect={false}
         autoCapitalize="none"
         returnKeyType="search"
@@ -41,7 +47,7 @@ export function SearchBar({
           accessibilityLabel="Clear search"
           className="p-1"
         >
-          <Ionicons name="close-circle" size={22} color="#a3a3a3" />
+          <Ionicons name="close-circle" size={22} color={iconSubtle} />
         </Pressable>
       ) : null}
     </View>

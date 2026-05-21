@@ -10,11 +10,19 @@ import {
   PRIVACY_POLICY_EFFECTIVE_DATE,
   PRIVACY_POLICY_SECTIONS,
 } from "../../src/lib/privacy-config";
+import { useTheme } from "../../src/contexts/theme-context";
+import {
+  scrollCanvasClass,
+  textMutedClass,
+  textPageTitleClass,
+  textSubtleClass,
+} from "../../src/theme/semantic";
 
 export default function PrivacyPolicyScreen() {
   const navigation = useNavigation();
   const bottomPad = useTabScreenBottomPadding();
   const hostedPolicyUrl = getPrivacyPolicyUrl();
+  const { resolved } = useTheme();
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: "Privacy policy" });
@@ -22,21 +30,21 @@ export default function PrivacyPolicyScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-neutral-950 px-4 pt-4"
+      className={`${scrollCanvasClass(resolved)} px-4 pt-4`}
       contentContainerStyle={{ paddingBottom: bottomPad }}
       keyboardShouldPersistTaps="handled"
     >
-      <Text className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+      <Text className={`text-xs font-medium uppercase tracking-wide ${textMutedClass(resolved)}`}>
         Effective {PRIVACY_POLICY_EFFECTIVE_DATE}
       </Text>
 
-      <Text className="mt-4 text-base font-semibold text-neutral-100">Summary</Text>
-      <Text className="mt-2 text-sm leading-6 text-neutral-400">{IN_APP_DATA_PROCESSING_SUMMARY}</Text>
+      <Text className={`mt-4 text-base font-semibold ${textPageTitleClass(resolved)}`}>Summary</Text>
+      <Text className={`mt-2 text-sm leading-6 ${textSubtleClass(resolved)}`}>{IN_APP_DATA_PROCESSING_SUMMARY}</Text>
 
       {PRIVACY_POLICY_SECTIONS.map((section) => (
         <View key={section.title} className="mt-8">
-          <Text className="text-base font-semibold text-neutral-100">{section.title}</Text>
-          <Text className="mt-2 text-sm leading-6 text-neutral-400">{section.body}</Text>
+          <Text className={`text-base font-semibold ${textPageTitleClass(resolved)}`}>{section.title}</Text>
+          <Text className={`mt-2 text-sm leading-6 ${textSubtleClass(resolved)}`}>{section.body}</Text>
         </View>
       ))}
 
@@ -49,7 +57,7 @@ export default function PrivacyPolicyScreen() {
         >
           <View className="min-w-0 flex-1">
             <Text className="text-base font-semibold text-sky-400">Hosted privacy policy</Text>
-            <Text className="mt-0.5 text-xs text-neutral-500" numberOfLines={2}>
+            <Text className={`mt-0.5 text-xs ${textMutedClass(resolved)}`} numberOfLines={2}>
               {hostedPolicyUrl}
             </Text>
           </View>

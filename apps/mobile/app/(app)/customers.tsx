@@ -12,6 +12,9 @@ import {
   View,
 } from "react-native";
 
+import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
+
+import { CustomerEditBottomSheet } from "../../src/components/CustomerEditBottomSheet";
 import { ErrorBannerWithSupport } from "../../src/components/ErrorBannerWithSupport";
 import { headerRightWithSupport } from "../../src/components/SupportHeaderButton";
 import { FormField } from "../../src/components/FormField";
@@ -20,36 +23,28 @@ import { SearchBar } from "../../src/components/SearchBar";
 import { useAuth } from "../../src/contexts/auth-context";
 import { useRealtimeNotifications } from "../../src/contexts/realtime-notifications-context";
 import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
+import { normalizeCustomer, roundMoney } from "../../src/lib/customers-normalize";
 import { formatPkr } from "../../src/lib/format-money";
 import { supabase } from "../../src/lib/supabase";
+import {
+  bottomSheetContainerClass,
+  chipInactiveBorder,
+  chipInactiveText,
+  listEntityCardClass,
+  screenCenterRootClass,
+  scrollCanvasClass,
+  textFieldLabelClass,
+  textMutedClass,
+  textStrongOnSurfaceClass,
+  textSubtleClass,
+} from "../../src/theme/semantic";
+import { useTheme } from "../../src/contexts/theme-context";
 import {
   CUSTOMER_TYPES,
   type CustomerRow,
   type CustomerType,
   customerTypeLabel,
 } from "../../src/types/customer";
-
-function roundMoney(n: number): number {
-  return Math.round(n * 100) / 100;
-}
-
-function normalizeCustomer(row: Record<string, unknown>): CustomerRow {
-  return {
-    id: String(row.id),
-    business_id: String(row.business_id),
-    name: String(row.name),
-    phone: row.phone != null ? String(row.phone) : null,
-    email: row.email != null ? String(row.email) : null,
-    address: row.address != null ? String(row.address) : null,
-    type: (String(row.type ?? "retail") || "retail") as CustomerType,
-    credit_limit: Number(row.credit_limit),
-    outstanding_balance: Number(row.outstanding_balance),
-    notes: row.notes != null ? String(row.notes) : null,
-    is_active: Boolean(row.is_active),
-    created_at: String(row.created_at),
-    updated_at: String(row.updated_at),
-  };
-}
 
 function matchesQuery(row: CustomerRow, q: string): boolean {
   if (!q.trim()) return true;
@@ -64,8 +59,10 @@ function matchesQuery(row: CustomerRow, q: string): boolean {
 export default function CustomersScreen() {
   const navigation = useNavigation();
   const bottomPad = useTabScreenBottomPadding();
-  const { businessId, user } = useAuth();
+  const { businessId, user, memberRole } = useAuth();
   const { refreshGeneration } = useRealtimeNotifications();
+  const { resolved } = useTheme();
+  const isOwner = memberRole === "owner";
 
   const [rows, setRows] = useState<CustomerRow[]>([]);
   const [query, setQuery] = useState("");
@@ -105,12 +102,12 @@ export default function CustomersScreen() {
               setAddOpen(true);
             }}
             hitSlop={12}
-            className="flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
+            className="flex-row items-center rounded-full bg-brand-500/15 px-3 py-1.5 active:opacity-80"
             accessibilityRole="button"
             accessibilityLabel="Add customer"
           >
-            <Ionicons name="add" size={22} color="#34d399" />
-            <Text className="ml-1 text-sm font-semibold text-emerald-400">Add</Text>
+            <Ionicons name="add" size={22} color={BRAND_ACCENT_HEX} />
+            <Text className="ml-1 text-sm font-semibold text-brand-400">Add</Text>
           </Pressable>,
         ),
     });
@@ -197,14 +194,14 @@ export default function CustomersScreen() {
 
   if (loading && rows.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-neutral-950">
-        <ActivityIndicator size="large" color="#34d399" />
+      <View className={screenCenterRootClass(resolved)}>
+        <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-neutral-950">
+    <View className={scrollCanvasClass(resolved)}>
       {error ? <ErrorBannerWithSupport message={error} /> : null}
 
       <FlatList
@@ -212,7 +209,7 @@ export default function CustomersScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: bottomPad + 8, paddingHorizontal: 16 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#34d399" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={BRAND_ACCENT_HEX} />
         }
         ListHeaderComponent={
           <View className="pb-2 pt-2">
@@ -222,7 +219,7 @@ export default function CustomersScreen() {
               placeholder="Search name, phone, or email"
               accessibilityLabel="Search customers"
             />
-            <Text className="mt-2 text-xs text-neutral-500">
+            <Text className={`mt-2 text-xs ${textMutedClass(resolved)}`}>
               {filtered.length === rows.length
                 ? `${rows.length} contact${rows.length === 1 ? "" : "s"}`
                 : `${filtered.length} of ${rows.length} shown`}
@@ -232,10 +229,10 @@ export default function CustomersScreen() {
         ListEmptyComponent={
           <View className="items-center px-4 py-12">
             <Ionicons name="people-outline" size={48} color="#525252" />
-            <Text className="mt-4 text-center text-base font-medium text-neutral-300">
+            <Text className={`mt-4 text-center text-base font-medium ${textFieldLabelClass(resolved)}`}>
               {query.trim() ? "No matches" : "No customers yet"}
             </Text>
-            <Text className="mt-2 text-center text-sm leading-5 text-neutral-500">
+            <Text className={`mt-2 text-center text-sm leading-5 ${textMutedClass(resolved)}`}>
               {query.trim()
                 ? "Try a different search."
                 : "Tap Add to save someone you sell to on credit or at the counter."}
@@ -247,16 +244,16 @@ export default function CustomersScreen() {
           return (
             <Pressable
               onPress={() => setDetail(item)}
-              className="mb-2 rounded-2xl border border-neutral-800 bg-neutral-900/90 px-4 py-4 active:opacity-90"
+              className={listEntityCardClass(resolved)}
             >
               <View className="flex-row items-start justify-between gap-3">
                 <View className="min-w-0 flex-1">
-                  <Text className="text-base font-semibold text-neutral-100">{item.name}</Text>
+                  <Text className={`text-base font-semibold ${textStrongOnSurfaceClass(resolved)}`}>{item.name}</Text>
                   {item.phone ? (
-                    <Text className="mt-1 text-sm text-neutral-400">{item.phone}</Text>
+                    <Text className={`mt-1 text-sm ${textSubtleClass(resolved)}`}>{item.phone}</Text>
                   ) : null}
                   <View className="mt-2 flex-row flex-wrap items-center gap-2">
-                    <Text className="text-xs text-neutral-500">{customerTypeLabel(item.type)}</Text>
+                    <Text className={`text-xs ${textMutedClass(resolved)}`}>{customerTypeLabel(item.type)}</Text>
                     {!item.is_active ? (
                       <Text className="text-xs font-medium uppercase text-amber-500">Inactive</Text>
                     ) : null}
@@ -266,12 +263,12 @@ export default function CustomersScreen() {
                   <View className="items-end">
                     <Text
                       className={`text-base font-semibold tabular-nums ${
-                        outstanding ? "text-amber-400" : "text-neutral-500"
+                        outstanding ? "text-amber-400" : textMutedClass(resolved)
                       }`}
                     >
                       {formatPkr(item.outstanding_balance)}
                     </Text>
-                    <Text className="mt-0.5 text-[10px] uppercase text-neutral-600">Due</Text>
+                    <Text className={`mt-0.5 text-[10px] uppercase ${textSubtleClass(resolved)}`}>Due</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color="#525252" />
                 </View>
@@ -283,14 +280,14 @@ export default function CustomersScreen() {
 
       <Modal visible={addOpen} animationType="slide" transparent onRequestClose={() => setAddOpen(false)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className="max-h-[92%] rounded-t-2xl bg-neutral-950 px-4 pb-8 pt-4">
+          <View className={`max-h-[92%] px-4 pb-8 pt-4 ${bottomSheetContainerClass(resolved)}`}>
             <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-lg font-semibold text-neutral-100">New customer</Text>
+              <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>New customer</Text>
               <Pressable onPress={() => setAddOpen(false)} hitSlop={12} accessibilityLabel="Close">
                 <Ionicons name="close" size={26} color="#a3a3a3" />
               </Pressable>
             </View>
-            <Text className="text-sm text-neutral-500">
+            <Text className={`text-sm ${textMutedClass(resolved)}`}>
               Track who buys from you, credit limits, and what they owe.
             </Text>
             <ScrollView keyboardShouldPersistTaps="handled" className="mt-4">
@@ -317,7 +314,7 @@ export default function CustomersScreen() {
                 placeholder="Optional"
                 multiline
               />
-              <Text className="mb-2 text-sm font-medium text-neutral-300">Type</Text>
+              <Text className={`mb-2 text-sm font-medium ${textFieldLabelClass(resolved)}`}>Type</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -331,10 +328,10 @@ export default function CustomersScreen() {
                       key={t.value}
                       onPress={() => setType(t.value)}
                       className={`mr-2 rounded-full border px-3 py-2 ${
-                        active ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                        active ? "border-brand-500 bg-brand-500/15" : chipInactiveBorder(resolved)
                       }`}
                     >
-                      <Text className={`text-sm ${active ? "text-emerald-400" : "text-neutral-300"}`}>
+                      <Text className={`text-sm ${active ? "text-brand-400" : chipInactiveText(resolved)}`}>
                         {t.label}
                       </Text>
                     </Pressable>
@@ -358,79 +355,27 @@ export default function CustomersScreen() {
               {saveError ? <ErrorBannerWithSupport message={saveError} variant="compact" /> : null}
               <PrimaryButton label="Save customer" onPress={() => void onSaveCustomer()} loading={saving} />
               <Pressable onPress={() => setAddOpen(false)} className="mt-3 py-3">
-                <Text className="text-center text-base text-neutral-400">Cancel</Text>
+                <Text className={`text-center text-base ${textSubtleClass(resolved)}`}>Cancel</Text>
               </Pressable>
             </ScrollView>
           </View>
         </View>
       </Modal>
 
-      <Modal visible={detail !== null} animationType="slide" transparent onRequestClose={() => setDetail(null)}>
-        <View className="flex-1 justify-end bg-black/60">
-          <View className="max-h-[90%] rounded-t-2xl bg-neutral-950 px-4 pb-10 pt-4">
-            {detail ? (
-              <ScrollView keyboardShouldPersistTaps="handled">
-                <View className="flex-row items-start justify-between gap-2">
-                  <Text className="flex-1 text-lg font-semibold text-neutral-100">{detail.name}</Text>
-                  <Pressable onPress={() => setDetail(null)} hitSlop={12} accessibilityLabel="Close">
-                    <Ionicons name="close" size={26} color="#a3a3a3" />
-                  </Pressable>
-                </View>
-                <View className="mt-2 flex-row flex-wrap items-center gap-2">
-                  <View
-                    className={`rounded-full px-2.5 py-0.5 ${
-                      detail.is_active ? "bg-emerald-950" : "bg-neutral-800"
-                    }`}
-                  >
-                    <Text
-                      className={`text-xs font-semibold ${
-                        detail.is_active ? "text-emerald-400" : "text-neutral-400"
-                      }`}
-                    >
-                      {detail.is_active ? "Active" : "Inactive"}
-                    </Text>
-                  </View>
-                  <View className="rounded-full bg-neutral-800 px-2.5 py-0.5">
-                    <Text className="text-xs font-semibold text-neutral-300">
-                      {customerTypeLabel(detail.type)}
-                    </Text>
-                  </View>
-                </View>
-
-                <Text className="mt-5 text-3xl font-semibold tabular-nums text-amber-400/95">
-                  {formatPkr(detail.outstanding_balance)}
-                </Text>
-                <Text className="mt-1 text-sm text-neutral-500">Outstanding balance</Text>
-                <Text className="mt-0.5 text-sm text-neutral-500">
-                  Credit limit {formatPkr(detail.credit_limit)}
-                </Text>
-
-                <View className="mt-6 gap-0">
-                  <DetailRow label="Phone" value={detail.phone ?? "—"} />
-                  <DetailRow label="Email" value={detail.email ?? "—"} />
-                  <DetailRow label="Address" value={detail.address?.trim() ? detail.address : "—"} />
-                  <DetailRow label="Notes" value={detail.notes?.trim() ? detail.notes : "—"} />
-                </View>
-
-                <Pressable onPress={() => setDetail(null)} className="mt-6 rounded-xl bg-neutral-800 py-3">
-                  <Text className="text-center text-base font-medium text-neutral-100">Close</Text>
-                </Pressable>
-              </ScrollView>
-            ) : null}
-          </View>
-        </View>
-      </Modal>
-    </View>
-  );
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View className="flex-row justify-between gap-4 border-b border-neutral-800 py-3">
-      <Text className="text-sm text-neutral-500">{label}</Text>
-      <Text className="max-w-[65%] flex-shrink text-right text-sm leading-5 text-neutral-200">
-        {value}
-      </Text>
+      <CustomerEditBottomSheet
+        visible={detail !== null}
+        customer={detail}
+        businessId={businessId}
+        isOwner={isOwner}
+        onClose={() => setDetail(null)}
+        onCustomerUpdated={(row) => {
+          setDetail(row);
+          setRows((prev) => prev.map((r) => (r.id === row.id ? row : r)));
+        }}
+        onCustomerDeleted={() => {
+          void load();
+        }}
+      />
     </View>
   );
 }

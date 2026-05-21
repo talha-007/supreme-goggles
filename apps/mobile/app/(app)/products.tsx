@@ -14,6 +14,8 @@ import {
   View,
 } from "react-native";
 
+import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
+
 import { ErrorBannerWithSupport } from "../../src/components/ErrorBannerWithSupport";
 import { headerRightWithSupport } from "../../src/components/SupportHeaderButton";
 import { FormField } from "../../src/components/FormField";
@@ -26,6 +28,19 @@ import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPad
 import { formatPkr } from "../../src/lib/format-money";
 import { deleteProductImageByUrl, uploadProductImageFromUri } from "../../src/lib/product-images";
 import { supabase } from "../../src/lib/supabase";
+import {
+  bottomSheetContainerClass,
+  chipInactiveBorder,
+  chipInactiveText,
+  compactPressableFieldClass,
+  listEntityCardClass,
+  screenCenterRootClass,
+  scrollCanvasClass,
+  textFieldLabelClass,
+  textStrongOnSurfaceClass,
+  textSubtleClass,
+} from "../../src/theme/semantic";
+import { useTheme } from "../../src/contexts/theme-context";
 import { PRODUCT_UNITS, type ProductRow, type ProductUnit } from "../../src/types/product";
 
 function roundMoney(n: number): number {
@@ -75,6 +90,7 @@ export default function ProductsScreen() {
   const bottomPad = useTabScreenBottomPadding();
   const { businessId, user } = useAuth();
   const { refreshGeneration } = useRealtimeNotifications();
+  const { resolved } = useTheme();
 
   const [rows, setRows] = useState<ProductRow[]>([]);
   const [query, setQuery] = useState("");
@@ -172,12 +188,12 @@ export default function ProductsScreen() {
               setFormOpen(true);
             }}
             hitSlop={12}
-            className="flex-row items-center rounded-full bg-emerald-500/15 px-3 py-1.5 active:opacity-80"
+            className="flex-row items-center rounded-full bg-brand-500/15 px-3 py-1.5 active:opacity-80"
             accessibilityRole="button"
             accessibilityLabel="Add product"
           >
-            <Ionicons name="add" size={22} color="#34d399" />
-            <Text className="ml-1 text-sm font-semibold text-emerald-400">Add</Text>
+            <Ionicons name="add" size={22} color={BRAND_ACCENT_HEX} />
+            <Text className="ml-1 text-sm font-semibold text-brand-400">Add</Text>
           </Pressable>,
         ),
     });
@@ -376,14 +392,14 @@ export default function ProductsScreen() {
 
   if (loading && rows.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-neutral-950">
-        <ActivityIndicator size="large" color="#34d399" />
+      <View className={screenCenterRootClass(resolved)}>
+        <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-neutral-950">
+    <View className={scrollCanvasClass(resolved)}>
       {error ? <ErrorBannerWithSupport message={error} /> : null}
 
       <FlatList
@@ -391,7 +407,7 @@ export default function ProductsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: bottomPad + 8, paddingHorizontal: 16 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#34d399" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={BRAND_ACCENT_HEX} />
         }
         ListHeaderComponent={
           <View className="pb-2 pt-2">
@@ -418,11 +434,11 @@ export default function ProductsScreen() {
                     key={f.key}
                     onPress={() => setStockFilter(f.key)}
                     className={`mr-2 rounded-full border px-3.5 py-2 ${
-                      active ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                      active ? "border-brand-500 bg-brand-500/15" : chipInactiveBorder(resolved)
                     }`}
                   >
                     <Text
-                      className={`text-sm font-medium ${active ? "text-emerald-400" : "text-neutral-400"}`}
+                      className={`text-sm font-medium ${active ? "text-brand-400" : chipInactiveText(resolved)}`}
                     >
                       {f.label}
                     </Text>
@@ -438,7 +454,7 @@ export default function ProductsScreen() {
                   : null}
               </Text>
               {loading && rows.length > 0 ? (
-                <ActivityIndicator size="small" color="#34d399" />
+                <ActivityIndicator size="small" color={BRAND_ACCENT_HEX} />
               ) : null}
             </View>
           </View>
@@ -446,7 +462,7 @@ export default function ProductsScreen() {
         ListEmptyComponent={
           <View className="items-center px-4 py-12">
             <Ionicons name="cube-outline" size={48} color="#525252" />
-            <Text className="mt-4 text-center text-base font-medium text-neutral-300">
+            <Text className={`mt-4 text-center text-base font-medium ${textFieldLabelClass(resolved)}`}>
               {query.trim() || lowStockOnly ? "No products match" : "No products yet"}
             </Text>
             <Text className="mt-2 text-center text-sm leading-5 text-neutral-500">
@@ -461,12 +477,12 @@ export default function ProductsScreen() {
           return (
             <Pressable
               onPress={() => setDetail(item)}
-              className="mb-2 rounded-2xl border border-neutral-800 bg-neutral-900/90 px-4 py-4 active:opacity-90"
+              className={listEntityCardClass(resolved)}
             >
               <View className="flex-row items-start justify-between gap-3">
                 <ProductThumbnail imageUrl={item.image_url} size={56} />
                 <View className="min-w-0 flex-1">
-                  <Text className="text-base font-semibold text-neutral-100" numberOfLines={2}>
+                  <Text className={`text-base font-semibold ${textStrongOnSurfaceClass(resolved)}`} numberOfLines={2}>
                     {item.name}
                   </Text>
                   {item.sku ? (
@@ -483,7 +499,7 @@ export default function ProductsScreen() {
                   <View className="items-end">
                     <Text
                       className={`text-lg font-semibold tabular-nums ${
-                        low ? "text-amber-400" : "text-emerald-400/95"
+                        low ? "text-amber-400" : "text-brand-400/95"
                       }`}
                     >
                       {item.current_stock}
@@ -505,9 +521,9 @@ export default function ProductsScreen() {
 
       <Modal visible={formOpen} animationType="slide" transparent onRequestClose={() => setFormOpen(false)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className="max-h-[92%] rounded-t-2xl bg-neutral-950 px-4 pb-8 pt-4">
+          <View className={`max-h-[92%] px-4 pb-8 pt-4 ${bottomSheetContainerClass(resolved)}`}>
             <View className="mb-2 flex-row items-center justify-between">
-              <Text className="text-lg font-semibold text-neutral-100">
+              <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>
                 {editingId ? "Edit product" : "New product"}
               </Text>
               <Pressable onPress={() => setFormOpen(false)} hitSlop={12} accessibilityLabel="Close">
@@ -520,7 +536,7 @@ export default function ProductsScreen() {
                 : "Add to your catalog to sell and track inventory."}
             </Text>
             <ScrollView keyboardShouldPersistTaps="handled" className="mt-4">
-              <Text className="mb-2 text-sm font-medium text-neutral-300">Photo</Text>
+              <Text className={`mb-2 text-sm font-medium ${textFieldLabelClass(resolved)}`}>Photo</Text>
               <View className="mb-4 flex-row flex-wrap items-center gap-3">
                 <ProductThumbnail
                   imageUrl={
@@ -532,9 +548,9 @@ export default function ProductsScreen() {
                 <View className="min-w-0 flex-1 gap-2">
                   <Pressable
                     onPress={() => void pickProductImage()}
-                    className="rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2.5 active:opacity-90"
+                    className={compactPressableFieldClass(resolved)}
                   >
-                    <Text className="text-center text-sm font-medium text-emerald-400">
+                    <Text className="text-center text-sm font-medium text-brand-400">
                       {pendingImageUri || existingImageUrl ? "Change photo" : "Add photo"}
                     </Text>
                   </Pressable>
@@ -575,7 +591,7 @@ export default function ProductsScreen() {
                 placeholder="e.g. Nestlé"
                 autoCapitalize="words"
               />
-              <Text className="mb-2 text-sm font-medium text-neutral-300">Unit</Text>
+              <Text className={`mb-2 text-sm font-medium ${textFieldLabelClass(resolved)}`}>Unit</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -589,10 +605,10 @@ export default function ProductsScreen() {
                       key={u}
                       onPress={() => setUnit(u)}
                       className={`mr-2 rounded-full border px-3 py-2 ${
-                        active ? "border-emerald-500 bg-emerald-500/15" : "border-neutral-700 bg-neutral-900"
+                        active ? "border-brand-500 bg-brand-500/15" : chipInactiveBorder(resolved)
                       }`}
                     >
-                      <Text className={`text-sm ${active ? "text-emerald-400" : "text-neutral-300"}`}>
+                      <Text className={`text-sm ${active ? "text-brand-400" : chipInactiveText(resolved)}`}>
                         {u}
                       </Text>
                     </Pressable>
@@ -646,7 +662,7 @@ export default function ProductsScreen() {
                 loading={saving}
               />
               <Pressable onPress={() => setFormOpen(false)} className="mt-3 py-3">
-                <Text className="text-center text-base text-neutral-400">Cancel</Text>
+                <Text className={`text-center text-base ${textSubtleClass(resolved)}`}>Cancel</Text>
               </Pressable>
             </ScrollView>
           </View>
@@ -655,13 +671,13 @@ export default function ProductsScreen() {
 
       <Modal visible={detail !== null} animationType="slide" transparent onRequestClose={() => setDetail(null)}>
         <View className="flex-1 justify-end bg-black/60">
-          <View className="max-h-[88%] rounded-t-2xl bg-neutral-950 px-4 pb-10 pt-4">
+          <View className={`max-h-[88%] px-4 pb-10 pt-4 ${bottomSheetContainerClass(resolved)}`}>
             {detail ? (
               <ScrollView keyboardShouldPersistTaps="handled">
                 <View className="flex-row items-start justify-between gap-2">
                   <View className="min-w-0 flex-1 flex-row items-start gap-3">
                     <ProductThumbnail imageUrl={detail.image_url} size={88} />
-                    <Text className="flex-1 text-lg font-semibold text-neutral-100">{detail.name}</Text>
+                    <Text className={`flex-1 text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>{detail.name}</Text>
                   </View>
                   <Pressable onPress={() => setDetail(null)} hitSlop={12} accessibilityLabel="Close">
                     <Ionicons name="close" size={26} color="#a3a3a3" />
@@ -670,7 +686,11 @@ export default function ProductsScreen() {
                 <View className="mt-2 flex-row flex-wrap items-center gap-2">
                   <View
                     className={`rounded-full px-2.5 py-0.5 ${
-                      detail.is_active ? "bg-emerald-950 text-emerald-400" : "bg-neutral-800 text-neutral-400"
+                      detail.is_active
+                        ? "bg-brand-950 text-brand-400"
+                        : resolved === "dark"
+                          ? "bg-neutral-800 text-neutral-400"
+                          : "bg-zinc-200 text-zinc-600"
                     }`}
                   >
                     <Text className="text-xs font-semibold">
@@ -684,7 +704,7 @@ export default function ProductsScreen() {
                   ) : null}
                 </View>
 
-                <Text className="mt-4 text-3xl font-semibold tabular-nums text-emerald-400/95">
+                <Text className="mt-4 text-3xl font-semibold tabular-nums text-brand-400/95">
                   {detail.current_stock}{" "}
                   <Text className="text-lg font-medium text-neutral-500">{detail.unit}</Text>
                 </Text>
@@ -703,12 +723,12 @@ export default function ProductsScreen() {
 
                 <Pressable
                   onPress={() => openFormForEdit(detail)}
-                  className="mt-6 rounded-xl bg-emerald-600 py-3.5 active:opacity-90"
+                  className="mt-6 rounded-xl bg-brand-600 py-3.5 active:opacity-90"
                 >
                   <Text className="text-center text-base font-semibold text-white">Edit product</Text>
                 </Pressable>
                 <Pressable onPress={() => setDetail(null)} className="mt-3 rounded-xl bg-neutral-800 py-3">
-                  <Text className="text-center text-base font-medium text-neutral-100">Close</Text>
+                  <Text className={`text-center text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>Close</Text>
                 </Pressable>
               </ScrollView>
             ) : null}

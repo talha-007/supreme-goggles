@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { router } from "expo-router";
 import { ActivityIndicator, Pressable, ScrollView, Switch, Text, View } from "react-native";
+import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
 
 import { ConfirmDialog } from "../../src/components/ConfirmDialog";
 import { ErrorBannerWithSupport } from "../../src/components/ErrorBannerWithSupport";
@@ -12,6 +13,8 @@ import { PrimaryButton } from "../../src/components/PrimaryButton";
 import { ProductThumbnail } from "../../src/components/ProductThumbnail";
 import { useAuth } from "../../src/contexts/auth-context";
 import { useRealtimeNotifications } from "../../src/contexts/realtime-notifications-context";
+import type { ThemePreference } from "../../src/contexts/theme-context";
+import { useTheme } from "../../src/contexts/theme-context";
 import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
 import {
   deleteBusinessLogoByUrl,
@@ -20,10 +23,12 @@ import {
 import { IN_APP_DATA_PROCESSING_SUMMARY } from "../../src/lib/privacy-config";
 import { openSupportWhatsApp, SUPPORT_PHONE_DISPLAY } from "../../src/lib/support-contact";
 import { supabase } from "../../src/lib/supabase";
+import { screenRootClass, insetPanelClass, insetPanelRowClass, settingsWideRowClass } from "../../src/theme/semantic";
 
 export default function SettingsScreen() {
   const bottomPad = useTabScreenBottomPadding();
   const { user, businessId, signOut } = useAuth();
+  const { preference, resolved, setPreference } = useTheme();
   const { prefs, setPrefs, prefsReady } = useRealtimeNotifications();
   const [signOutOpen, setSignOutOpen] = useState(false);
 
@@ -226,7 +231,7 @@ export default function SettingsScreen() {
   return (
     <>
       <ScrollView
-        className="flex-1 bg-neutral-950"
+        className={screenRootClass(resolved)}
         contentContainerClassName="px-4 pt-4"
         contentContainerStyle={{ paddingBottom: bottomPad }}
       >
@@ -234,8 +239,43 @@ export default function SettingsScreen() {
           Account, shop info, and how the app tells you when data changes.
         </Text>
 
+        <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">Appearance</Text>
+        <Text className="mt-1 text-xs text-neutral-500">
+          Match the shell to the system, or lock to light or dark. Tab bar and headers follow this choice.
+        </Text>
+        <View className="mt-3 flex-row gap-2">
+          {(["system", "light", "dark"] as ThemePreference[]).map((p) => {
+            const active = preference === p;
+            return (
+              <Pressable
+                key={p}
+                onPress={() => setPreference(p)}
+                className={`flex-1 rounded-xl border px-2 py-3 ${
+                  active
+                    ? "border-violet-500 bg-violet-500/15"
+                    : resolved === "dark"
+                      ? "border-neutral-700 bg-neutral-900"
+                      : "border-zinc-300 bg-white"
+                }`}
+              >
+                <Text
+                  className={`text-center text-xs font-semibold ${
+                    active
+                      ? "text-violet-300"
+                      : resolved === "dark"
+                        ? "text-neutral-300"
+                        : "text-zinc-700"
+                  }`}
+                >
+                  {p === "system" ? "System" : p === "light" ? "Light" : "Dark"}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
         {user?.email ? (
-          <View className="mt-6 rounded-xl border border-neutral-800 bg-neutral-900/80 px-4 py-3">
+          <View className={`mt-6 ${insetPanelClass(resolved)}`}>
             <Text className="text-xs font-medium uppercase tracking-wide text-neutral-500">
               Signed in as
             </Text>
@@ -246,9 +286,9 @@ export default function SettingsScreen() {
         <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">
           Your shop
         </Text>
-        <View className="mt-3 rounded-xl border border-neutral-800 bg-neutral-900/80 px-4 py-3">
+        <View className={`mt-3 ${insetPanelClass(resolved)}`}>
           {profileLoading ? (
-            <ActivityIndicator color="#34d399" />
+            <ActivityIndicator color={BRAND_ACCENT_HEX} />
           ) : (
             <>
               {!canManageShop ? (
@@ -281,11 +321,11 @@ export default function SettingsScreen() {
                   <Pressable
                     onPress={() => void pickShopLogo()}
                     disabled={!canManageShop}
-                    className="rounded-xl border border-emerald-700/50 bg-emerald-950/25 px-3 py-2.5 active:opacity-90 disabled:opacity-50"
+                    className="rounded-xl border border-brand-700/50 bg-brand-950/25 px-3 py-2.5 active:opacity-90 disabled:opacity-50"
                     accessibilityRole="button"
                     accessibilityLabel="Choose logo image"
                   >
-                    <Text className="text-center text-sm font-semibold text-emerald-400">
+                    <Text className="text-center text-sm font-semibold text-brand-400">
                       {pendingLogoUri ? "Change chosen image" : "Choose image"}
                     </Text>
                   </Pressable>
@@ -313,7 +353,7 @@ export default function SettingsScreen() {
                       disabled={!canManageShop}
                       className="rounded-xl border border-neutral-700 px-3 py-2.5 active:opacity-90 disabled:opacity-50"
                     >
-                      <Text className="text-center text-sm font-medium text-emerald-400">Undo remove</Text>
+                      <Text className="text-center text-sm font-medium text-brand-400">Undo remove</Text>
                     </Pressable>
                   ) : null}
                 </View>
@@ -327,7 +367,7 @@ export default function SettingsScreen() {
                 </Text>
               ) : null}
               {profileSavedAt != null && !profileSaveError ? (
-                <Text className="mt-2 text-sm text-emerald-400">Shop profile saved.</Text>
+                <Text className="mt-2 text-sm text-brand-400">Shop profile saved.</Text>
               ) : null}
               <PrimaryButton
                 label={savingProfile ? "Saving…" : "Save shop name & logo"}
@@ -346,9 +386,9 @@ export default function SettingsScreen() {
           Used for Quick sale and new invoices. Invoice discount is a fixed PKR amount off each new bill; line discount
           is a default % on new lines.
         </Text>
-        <View className="mt-3 rounded-xl border border-neutral-800 bg-neutral-900/80 px-4 py-3">
+        <View className={`mt-3 ${insetPanelClass(resolved)}`}>
           {profileLoading ? (
-            <ActivityIndicator color="#34d399" />
+            <ActivityIndicator color={BRAND_ACCENT_HEX} />
           ) : (
             <>
               {!canManageShop ? (
@@ -409,7 +449,7 @@ export default function SettingsScreen() {
               </Text>
               {defaultsError ? <ErrorBannerWithSupport message={defaultsError} variant="compact" /> : null}
               {defaultsSavedAt != null && !defaultsError ? (
-                <Text className="mb-2 text-sm text-emerald-400">Saved.</Text>
+                <Text className="mb-2 text-sm text-brand-400">Saved.</Text>
               ) : null}
               <PrimaryButton
                 label={savingDefaults ? "Saving…" : "Save bill defaults"}
@@ -430,11 +470,11 @@ export default function SettingsScreen() {
 
         {!prefsReady ? (
           <View className="mt-4 py-4">
-            <ActivityIndicator color="#34d399" />
+            <ActivityIndicator color={BRAND_ACCENT_HEX} />
           </View>
         ) : (
           <View className="mt-4 gap-4">
-            <View className="flex-row items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900/80 px-4 py-3">
+            <View className={insetPanelRowClass(resolved)}>
               <View className="min-w-0 flex-1 pr-2">
                 <Text className="text-base font-medium text-neutral-100">Live updates</Text>
                 <Text className="mt-1 text-xs text-neutral-500">
@@ -445,11 +485,11 @@ export default function SettingsScreen() {
                 value={prefs.realtimeEnabled}
                 onValueChange={(v) => void setPrefs({ realtimeEnabled: v })}
                 trackColor={{ false: "#404040", true: "#065f46" }}
-                thumbColor={prefs.realtimeEnabled ? "#34d399" : "#a3a3a3"}
+                thumbColor={prefs.realtimeEnabled ? "BRAND_ACCENT_HEX" : "#a3a3a3"}
               />
             </View>
 
-            <View className="flex-row items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900/80 px-4 py-3">
+            <View className={insetPanelRowClass(resolved)}>
               <View className="min-w-0 flex-1 pr-2">
                 <Text className="text-base font-medium text-neutral-100">Banner message</Text>
                 <Text className="mt-1 text-xs text-neutral-500">
@@ -461,11 +501,11 @@ export default function SettingsScreen() {
                 onValueChange={(v) => void setPrefs({ showBannerOnChange: v })}
                 disabled={!prefs.realtimeEnabled}
                 trackColor={{ false: "#404040", true: "#065f46" }}
-                thumbColor={prefs.showBannerOnChange ? "#34d399" : "#a3a3a3"}
+                thumbColor={prefs.showBannerOnChange ? "BRAND_ACCENT_HEX" : "#a3a3a3"}
               />
             </View>
 
-            <View className="flex-row items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900/80 px-4 py-3">
+            <View className={insetPanelRowClass(resolved)}>
               <View className="min-w-0 flex-1 pr-2">
                 <Text className="text-base font-medium text-neutral-100">Buzz on alert</Text>
                 <Text className="mt-1 text-xs text-neutral-500">
@@ -477,7 +517,7 @@ export default function SettingsScreen() {
                 onValueChange={(v) => void setPrefs({ vibrateOnNotify: v })}
                 disabled={!prefs.realtimeEnabled}
                 trackColor={{ false: "#404040", true: "#065f46" }}
-                thumbColor={prefs.vibrateOnNotify ? "#34d399" : "#a3a3a3"}
+                thumbColor={prefs.vibrateOnNotify ? "BRAND_ACCENT_HEX" : "#a3a3a3"}
               />
             </View>
           </View>
@@ -491,7 +531,7 @@ export default function SettingsScreen() {
           onPress={() => router.push("/privacy-policy")}
           accessibilityRole="button"
           accessibilityLabel="Open privacy policy"
-          className="mt-4 flex-row items-center justify-between gap-3 rounded-xl border border-neutral-800 bg-neutral-900/80 px-4 py-3.5 active:opacity-90"
+          className={settingsWideRowClass(resolved)}
         >
           <View className="min-w-0 flex-1">
             <Text className="text-base font-semibold text-sky-400">Privacy policy</Text>
@@ -513,11 +553,11 @@ export default function SettingsScreen() {
           onPress={() => void openSupportWhatsApp()}
           accessibilityRole="button"
           accessibilityLabel="Open WhatsApp app support"
-          className="mt-3 flex-row items-center gap-3 rounded-xl border border-emerald-800/50 bg-emerald-950/35 px-4 py-3.5 active:opacity-90"
+          className="mt-3 flex-row items-center gap-3 rounded-xl border border-brand-800/50 bg-brand-950/35 px-4 py-3.5 active:opacity-90"
         >
-          <Ionicons name="logo-whatsapp" size={28} color="#4ade80" />
+          <Ionicons name="logo-whatsapp" size={28} color={BRAND_ACCENT_HEX} />
           <View className="min-w-0 flex-1">
-            <Text className="text-base font-semibold text-emerald-400">WhatsApp support</Text>
+            <Text className="text-base font-semibold text-brand-400">WhatsApp support</Text>
             <Text className="mt-0.5 text-sm text-neutral-400">{SUPPORT_PHONE_DISPLAY}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#737373" />
