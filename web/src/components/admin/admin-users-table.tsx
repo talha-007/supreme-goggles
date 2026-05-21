@@ -1,9 +1,11 @@
 "use client";
 
+import { adminDeleteUserAndOwnedBusinesses } from "@/lib/admin/admin-actions";
 import { canonicalSubscriptionStatus } from "@/lib/admin/subscription-types";
 import type { AdminUserRow } from "@/lib/admin/panel-types";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 type Props = {
   initialRows: AdminUserRow[];
@@ -11,12 +13,20 @@ type Props = {
 
 export function AdminUsersTable({ initialRows }: Props) {
   const t = useTranslations("admin");
+  const router = useRouter();
   const [query, setQuery] = useState("");
+  const [rows, setRows] = useState(initialRows);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setRows(initialRows);
+  }, [initialRows]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return initialRows;
-    return initialRows.filter((r) => {
+    if (!q) return rows;
+    return rows.filter((r) => {
       const hay = [
         r.email,
         r.id,
@@ -31,10 +41,33 @@ export function AdminUsersTable({ initialRows }: Props) {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [initialRows, query]);
+  }, [rows, query]);
+
+  async function onDeleteUser(row: AdminUserRow) {
+    if (!window.confirm(t("deleteConfirm"))) return;
+    setActionError(null);
+    setDeletingId(row.id);
+    try {
+      const result = await adminDeleteUserAndOwnedBusinesses(row.id);
+      if (!result.ok) {
+        setActionError(result.error);
+        return;
+      }
+      setRows((prev) => prev.filter((r) => r.id !== row.id));
+      router.refresh();
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <div className="space-y-4">
+      {actionError ? (
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900">
+          <span className="font-medium">{t("deleteErrorPrefix")}</span> {actionError}
+        </p>
+      ) : null}
+
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <label className="text-sm text-zinc-600">
           <span className="sr-only">{t("searchLabel")}</span>
@@ -47,12 +80,12 @@ export function AdminUsersTable({ initialRows }: Props) {
           />
         </label>
         <p className="text-sm text-zinc-500">
-          {t("usersRowCount", { count: filtered.length, total: initialRows.length })}
+          {t("usersRowCount", { count: filtered.length, total: rows.length })}
         </p>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
-        <table className="w-full min-w-[1024px] text-left text-sm">
+        <table className="w-full min-w-[1080px] text-left text-sm">
           <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase text-zinc-600">
             <tr>
               <th className="px-4 py-3">{t("colEmail")}</th>
@@ -63,6 +96,7 @@ export function AdminUsersTable({ initialRows }: Props) {
               <th className="px-4 py-3">{t("colRole")}</th>
               <th className="px-4 py-3">{t("colSubscription")}</th>
               <th className="px-4 py-3">{t("colSubscriptionEnds")}</th>
+              <th className="px-4 py-3 text-right">{t("colActions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200">
@@ -105,6 +139,16 @@ export function AdminUsersTable({ initialRows }: Props) {
                 </td>
                 <td className="px-4 py-3 tabular-nums text-zinc-600">
                   {row.business_subscription_ends_at ? formatDate(row.business_subscription_ends_at) : "—"}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <button
+                    type="button"
+                    className="rounded-md border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-800 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={deletingId !== null}
+                    onClick={() => void onDeleteUser(row)}
+                  >
+                    {deletingId === row.id ? t("deleteRunning") : t("deleteUser")}
+                  </button>
                 </td>
               </tr>
             ))}

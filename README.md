@@ -47,6 +47,8 @@ Optional — npm workspaces from repo root: `npm install` then `npm run pos` (se
 
    For **spare parts / auto parts** businesses (extra catalog fields + POS search), apply newer migrations too — e.g. [`20260518140000_spare_parts_business_type_and_product_fields.sql`](../supabase/migrations/20260518140000_spare_parts_business_type_and_product_fields.sql). Details: [`docs/pos-spare-parts-shop-plan.md`](docs/pos-spare-parts-shop-plan.md).
 
+   Apply [`20260521170000_create_business_with_owner_single_membership_guard.sql`](../supabase/migrations/20260521170000_create_business_with_owner_single_membership_guard.sql) so the onboarding RPC refuses a second `business_members` row for the same user (one business profile per account).
+
 5. Install and run:
 
    ```bash

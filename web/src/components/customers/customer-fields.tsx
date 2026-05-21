@@ -1,33 +1,19 @@
 "use client";
 
-import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import type { CustomerRow } from "@/types/customer";
 import { CUSTOMER_TYPES } from "@/types/customer";
-import { useLocale, useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 type Props = {
   defaultValues?: Partial<CustomerRow>;
-  /** When set, show read-only balance (from invoices / payments). */
-  showOutstandingReadOnly?: boolean;
+  /** Edit screen: allow owner to set outstanding (e.g. cash loan) in addition to invoice-driven changes. */
+  editableOutstanding?: boolean;
 };
 
-export function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props) {
+export function CustomerFields({ defaultValues, editableOutstanding }: Props) {
   const t = useTranslations("customerFields");
   const tType = useTranslations("customerType");
-  const locale = useLocale();
   const d = defaultValues ?? {};
-
-  const money = useMemo(
-    () =>
-      new Intl.NumberFormat(intlLocaleTag(locale), {
-        style: "currency",
-        currency: "PKR",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-    [locale],
-  );
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -111,15 +97,20 @@ export function CustomerFields({ defaultValues, showOutstandingReadOnly }: Props
           className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
         />
       </div>
-      {showOutstandingReadOnly && d.outstanding_balance !== undefined ? (
-        <div className="sm:col-span-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+      {editableOutstanding ? (
+        <div className="flex flex-col gap-1 sm:col-span-2">
+          <label htmlFor="outstanding_balance" className="text-sm font-medium text-zinc-700">
             {t("outstandingBalance")}
-          </p>
-          <p className="mt-1 text-sm tabular-nums text-zinc-900">
-            {money.format(d.outstanding_balance)}
-          </p>
-          <p className="mt-1 text-xs text-zinc-500">{t("outstandingHint")}</p>
+          </label>
+          <input
+            id="outstanding_balance"
+            name="outstanding_balance"
+            type="number"
+            step="0.01"
+            defaultValue={d.outstanding_balance ?? 0}
+            className="max-w-xs rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
+          />
+          <p className="text-xs text-zinc-500">{t("outstandingEditableHint")}</p>
         </div>
       ) : null}
       <div className="sm:col-span-2 flex flex-col gap-1">

@@ -20,7 +20,7 @@ export function CustomerEditForm({ customer }: { customer: CustomerRow }) {
 
   return (
     <form action={formAction} className="flex flex-col gap-6">
-      <CustomerFields defaultValues={customer} showOutstandingReadOnly />
+      <CustomerFields defaultValues={customer} editableOutstanding />
       {state.error ? (
         <p className="text-sm text-red-600" role="alert">
           {state.error}

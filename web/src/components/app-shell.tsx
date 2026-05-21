@@ -3,6 +3,7 @@
 import { AppSidebarDesktop, SidebarNav } from "@/components/app-sidebar";
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import type { AppLocale } from "@/i18n/routing";
 import type { BusinessCapabilities } from "@/lib/business/capabilities";
@@ -240,6 +241,7 @@ export function AppShell({
               {businessName}
             </span>
           </div>
+          <ThemeSwitcher />
           <LanguageSwitcher locale={locale} languageLabel={shellLabels.language} />
           <SignOutButton label={shellLabels.signOut} loadingLabel={shellLabels.signingOut} />
         </header>

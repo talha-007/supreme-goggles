@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  /** Light-only UI: never add `.dark` on `<html>`; `dark:` variants never apply. */
+  /** `class` strategy: `next-themes` toggles `dark` on `<html>`. See `dark-theme-bridge.css`. */
   darkMode: "class",
 };

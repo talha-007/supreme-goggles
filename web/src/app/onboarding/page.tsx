@@ -1,4 +1,4 @@
-import { LanguageSwitcher } from "@/components/language-switcher";
+import { AuthTopBar } from "@/components/auth/auth-top-bar";
 import { createClient } from "@/lib/supabase/server";
 import { defaultLocale, isAppLocale, type AppLocale } from "@/i18n/routing";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -38,9 +38,7 @@ export default async function OnboardingPage() {
 
   return (
     <div className="relative flex min-h-full flex-1 flex-col bg-zinc-50">
-      <div className="absolute end-4 top-4 z-10">
-        <LanguageSwitcher locale={locale} languageLabel={tCommon("language")} />
-      </div>
+      <AuthTopBar locale={locale} languageLabel={tCommon("language")} />
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-16">
         <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
           <h1 className="text-xl font-semibold tracking-tight text-zinc-900">

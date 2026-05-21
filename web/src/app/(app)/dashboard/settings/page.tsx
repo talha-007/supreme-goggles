@@ -1,3 +1,4 @@
+import { AppearanceSettings } from "@/components/settings/appearance-settings";
 import { BusinessProfileForm } from "@/components/settings/business-profile-form";
 import { InvoiceDefaultsForm } from "@/components/settings/invoice-defaults-form";
 import { WhatsappSettingsForm } from "@/components/settings/whatsapp-settings-form";
@@ -71,6 +72,8 @@ export default async function SettingsPage() {
           <p className="mt-1 text-sm text-violet-900/90">{t("adminConsoleDesc")}</p>
         </section>
       ) : null}
+
+      <AppearanceSettings />
 
       <section className="mt-10 rounded-xl border border-zinc-200 bg-white p-6">
         <h2 className="text-sm font-semibold text-zinc-900">{t("profileSection")}</h2>

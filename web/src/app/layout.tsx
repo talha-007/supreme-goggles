@@ -1,7 +1,8 @@
+import { ThemeProvider } from "@/components/theme-provider";
+import { buildRootMetadata } from "@/lib/seo/site";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import { buildRootMetadata } from "@/lib/seo/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,14 +30,15 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={dir}
-      className={`${geistSans.variable} ${geistMono.variable} h-full bg-white antialiased`}
-      style={{ colorScheme: "light" }}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col bg-white text-zinc-900" suppressHydrationWarning>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
-        </NextIntlClientProvider>
+      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900" suppressHydrationWarning>
+        <ThemeProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            {children}
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

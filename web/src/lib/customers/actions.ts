@@ -69,6 +69,10 @@ export async function updateCustomer(
 
   const type = String(formData.get("type") ?? "retail") as CustomerType;
 
+  const outstandingRaw = formData.get("outstanding_balance");
+  const outstandingUpdate =
+    typeof outstandingRaw === "string" ? parseMoney(outstandingRaw) : undefined;
+
   const supabase = await createClient();
 
   const { data: existing } = await supabase
@@ -90,6 +94,7 @@ export async function updateCustomer(
       address: String(formData.get("address") ?? "").trim() || null,
       type,
       credit_limit: parseMoney(formData.get("credit_limit")),
+      ...(outstandingUpdate !== undefined ? { outstanding_balance: outstandingUpdate } : {}),
       notes: String(formData.get("notes") ?? "").trim() || null,
       is_active: formData.get("is_active") === "on",
     })

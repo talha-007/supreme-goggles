@@ -22,6 +22,9 @@ export default async function AdminUsersPage() {
         {t("usersTitle")}
       </h1>
       <p className="mt-2 max-w-3xl text-sm text-zinc-600">{t("usersIntro")}</p>
+      <p className="mt-3 max-w-3xl rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+        {t("usersDeleteWarning")}
+      </p>
 
       <div className="mt-8">
         <AdminUsersTable initialRows={result.rows} />

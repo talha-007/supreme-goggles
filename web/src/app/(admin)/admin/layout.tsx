@@ -1,3 +1,4 @@
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { AdminNav } from "@/components/admin/admin-nav";
 import { isSuperadminUser } from "@/lib/auth/superadmin";
 import { createClient } from "@/lib/supabase/server";
@@ -43,7 +44,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span className="hidden text-zinc-300 sm:inline">|</span>
             <span className="text-sm font-semibold text-zinc-900">{t("title")}</span>
           </div>
-          <span className="max-w-[60vw] truncate text-xs text-zinc-500">{user.email}</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <ThemeSwitcher />
+            <span className="max-w-[60vw] truncate text-xs text-zinc-500">{user.email}</span>
+          </div>
         </div>
         <div className="mx-auto max-w-7xl">
           <AdminNav />
