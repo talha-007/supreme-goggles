@@ -1,4 +1,4 @@
-/** Keys under `pdf` in messages — passed into thermal PDF generation. */
+/** Keys under `pdf` in messages - passed into thermal PDF generation. */
 export type InvoicePdfLabels = {
   invoiceHash: string;
   copyLabelCustomer: string;

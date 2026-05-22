@@ -136,7 +136,7 @@ export default function SignupScreen() {
 
           <Text className={`text-3xl font-bold ${textPageTitleClass(resolved)}`}>Create account</Text>
           <Text className={`mt-2 text-base ${textMutedClass(resolved)}`}>
-            Use a real email you can access — temporary inboxes are not allowed.
+            Use a real email you can access - temporary inboxes are not allowed.
           </Text>
 
           <View className="mt-8">

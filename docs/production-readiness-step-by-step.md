@@ -25,7 +25,7 @@ For each step:
 
 ---
 
-## Step 1 — Fix `invitations` RLS policies
+## Step 1 - Fix `invitations` RLS policies
 
 ### Why this matters
 RLS is enabled on `public.invitations` but no policies exist. That is an inconsistent security state and can break access or cause rushed unsafe fixes later.
@@ -46,7 +46,7 @@ RLS is enabled on `public.invitations` but no policies exist. That is an inconsi
 
 ---
 
-## Step 2 — Remove/replace risky `SECURITY DEFINER` views
+## Step 2 - Remove/replace risky `SECURITY DEFINER` views
 
 Affected views:
 - `public.v_customer_balances`
@@ -71,7 +71,7 @@ Affected views:
 
 ---
 
-## Step 3 — Lock function `search_path`
+## Step 3 - Lock function `search_path`
 
 Functions flagged:
 - `get_my_business_ids`
@@ -96,7 +96,7 @@ Mutable `search_path` is a known hardening gap for SQL functions.
 
 ---
 
-## Step 4 — Enable leaked password protection (Auth setting)
+## Step 4 - Enable leaked password protection (Auth setting)
 
 ### Why this matters
 Blocks known compromised passwords and reduces account takeover risk.
@@ -112,7 +112,7 @@ Blocks known compromised passwords and reduces account takeover risk.
 
 ---
 
-## Step 5 — Address performance advisories (FK indexes)
+## Step 5 - Address performance advisories (FK indexes)
 
 ### Why this matters
 Missing FK indexes can hurt joins/deletes/updates as data grows.
@@ -130,7 +130,7 @@ Missing FK indexes can hurt joins/deletes/updates as data grows.
 
 ---
 
-## Step 6 — Final Production Readiness Gate
+## Step 6 - Final Production Readiness Gate
 
 ### Checklist
 - [x] All steps above complete (Step 4 accepted risk)

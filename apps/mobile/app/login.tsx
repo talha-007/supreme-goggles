@@ -121,7 +121,7 @@ export default function LoginScreen() {
             <View className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
               <Text className="text-sm text-amber-200" accessibilityRole="text">
                 This confirmation link is invalid or was opened in a different app than the one that
-                started an older sign-up. Request a new confirmation email, or sign up again — then
+                started an older sign-up. Request a new confirmation email, or sign up again - then
                 open the new link on this device.
               </Text>
             </View>

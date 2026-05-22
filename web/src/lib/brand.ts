@@ -19,7 +19,7 @@ export const BRAND_LOGO = {
 /**
  * Tab icon path. The actual file must live at `src/app/favicon.ico` (Next App Router
  * convention) so the `<link rel="icon">` stays same-origin. Do not set `icons` in
- * metadata with only this path while `metadataBase` is a production URL — Next would
+ * metadata with only this path while `metadataBase` is a production URL - Next would
  * resolve it to that host and break the icon on localhost.
  */
 export const BRAND_FAVICON = "/favicon.ico";

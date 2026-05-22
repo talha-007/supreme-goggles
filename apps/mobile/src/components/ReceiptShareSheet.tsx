@@ -1,4 +1,5 @@
 import { Modal, Platform, Pressable, ScrollView, Share, Text, useWindowDimensions, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "../contexts/theme-context";
 import {
@@ -19,6 +20,7 @@ type Props = {
 
 export function ReceiptShareSheet({ visible, title = "Receipt", receiptText, onClose }: Props) {
   const { resolved } = useTheme();
+  const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const padX = 10;
   /** Max paper fits modal; inner area is for exactly 42 monospace columns. */
@@ -26,7 +28,7 @@ export function ReceiptShareSheet({ visible, title = "Receipt", receiptText, onC
   const maxInnerW = Math.max(1, maxPaperW - padX * 2);
   /**
    * Use a slightly wide px/char estimate so the Text box is not narrower than 42
-   * rendered monospace glyphs — otherwise RN clips the right side (amount digits).
+   * rendered monospace glyphs - otherwise RN clips the right side (amount digits).
    */
   const charW = Platform.OS === "android" ? 0.62 : 0.64;
   let fontSize = Math.min(12, maxInnerW / (THERMAL_CHARS * charW));
@@ -49,21 +51,22 @@ export function ReceiptShareSheet({ visible, title = "Receipt", receiptText, onC
 
   const lines = receiptText.split("\n");
 
-  const sheetMaxH = Math.min(screenHeight * 0.62, 520);
+  const sheetHeight = Math.min(screenHeight * 0.72, 720);
+  const previewMaxH = Math.min(260, Math.max(140, sheetHeight * 0.48));
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/70">
         <View
           className={receiptSheetSurfaceClass(resolved)}
-          style={{ maxHeight: sheetMaxH }}
+          style={{ height: sheetHeight, paddingBottom: Math.max(12, insets.bottom + 6) }}
         >
           <Text className={`text-lg font-semibold ${textPageTitleClass(resolved)}`}>{title}</Text>
           <Text className={`mt-1 text-xs ${textMutedClass(resolved)}`}>
             Thermal-width preview (~{THERMAL_CHARS} columns). Share sends this text to your printer app.
           </Text>
 
-          <View className="mt-4 items-center">
+          <View className="mt-4 flex-1 items-center">
             <View
               className="rounded-sm border border-neutral-600 shadow-lg"
               style={{
@@ -78,7 +81,7 @@ export function ReceiptShareSheet({ visible, title = "Receipt", receiptText, onC
               }}
             >
               <ScrollView
-                style={{ maxHeight: Math.min(280, screenHeight * 0.32) }}
+                style={{ maxHeight: previewMaxH }}
                 nestedScrollEnabled
                 showsVerticalScrollIndicator
               >
@@ -115,15 +118,17 @@ export function ReceiptShareSheet({ visible, title = "Receipt", receiptText, onC
             </View>
           </View>
 
-          <Pressable
-            onPress={() => void Share.share({ message: receiptText, title: "Receipt" })}
-            className="mt-4 rounded-xl bg-brand-600 py-3.5 active:opacity-90"
-          >
-            <Text className="text-center text-base font-semibold text-white">Share / print</Text>
-          </Pressable>
-          <Pressable onPress={onClose} className={`mt-3 ${modalSecondaryButtonClass(resolved)}`}>
-            <Text className={`text-center text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>Done</Text>
-          </Pressable>
+          <View className="pt-3">
+            <Pressable
+              onPress={() => void Share.share({ message: receiptText, title: "Receipt" })}
+              className="rounded-xl bg-brand-600 py-3.5 active:opacity-90"
+            >
+              <Text className="text-center text-base font-semibold text-white">Share / print</Text>
+            </Pressable>
+            <Pressable onPress={onClose} className={`mt-3 ${modalSecondaryButtonClass(resolved)}`}>
+              <Text className={`text-center text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>Done</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
     </Modal>

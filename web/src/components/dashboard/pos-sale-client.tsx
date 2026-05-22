@@ -984,7 +984,7 @@ export function PosSaleClient({
                                 className="rounded p-1 text-lg leading-none text-red-600 hover:bg-red-50"
                                 aria-label={tp("removeLine")}
                               >
-                                Ã—
+                                Ã-
                               </button>
                             </td>
                           </tr>
@@ -1018,7 +1018,7 @@ export function PosSaleClient({
                               </p>
                             ) : null}
                             <p className="text-xs text-zinc-500">
-                              {pkr.format(line.unit_price)} Ã— {line.quantity}
+                              {pkr.format(line.unit_price)} Ã- {line.quantity}
                             </p>
                           </div>
                           <div className="flex items-center gap-0.5 sm:gap-1">

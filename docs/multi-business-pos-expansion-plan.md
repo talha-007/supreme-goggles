@@ -24,7 +24,7 @@ This avoids duplicated codebases and keeps operations simpler.
 
 ---
 
-## Phase 1 — Foundation (Business Type + Config)
+## Phase 1 - Foundation (Business Type + Config)
 
 ## Objectives
 - Add business type metadata and configuration at business level.
@@ -49,7 +49,7 @@ This avoids duplicated codebases and keeps operations simpler.
 
 ---
 
-## Phase 2 — Capability Model
+## Phase 2 - Capability Model
 
 ## Objectives
 - Define what each vertical needs and map to reusable capabilities.
@@ -67,7 +67,7 @@ This avoids duplicated codebases and keeps operations simpler.
 
 ---
 
-## Phase 3 — Vertical UX Tracks
+## Phase 3 - Vertical UX Tracks
 
 ## 3.1 Restaurants
 - Menu-first catalog (categories, combos, modifiers/add-ons)
@@ -89,7 +89,7 @@ This avoids duplicated codebases and keeps operations simpler.
 
 ---
 
-## Phase 4 — Data Model Extensions
+## Phase 4 - Data Model Extensions
 
 ## New Tables (proposed)
 - `product_batches` (product_id, batch_no, expiry_date, qty, cost)
@@ -114,7 +114,7 @@ This avoids duplicated codebases and keeps operations simpler.
 
 ---
 
-## Phase 5 — API / Server Action Refactor
+## Phase 5 - API / Server Action Refactor
 
 ## Objectives
 - Keep one unified flow but route vertical rules through strategy functions.
@@ -133,7 +133,7 @@ This avoids duplicated codebases and keeps operations simpler.
 
 ---
 
-## Phase 6 — Frontend Architecture
+## Phase 6 - Frontend Architecture
 
 ## Objectives
 - Reduce conditional sprawl in components.
@@ -150,7 +150,7 @@ This avoids duplicated codebases and keeps operations simpler.
 
 ---
 
-## Phase 7 — Security and Compliance
+## Phase 7 - Security and Compliance
 
 ## Objectives
 - Ensure new vertical data is properly scoped and auditable.
@@ -163,7 +163,7 @@ This avoids duplicated codebases and keeps operations simpler.
 
 ---
 
-## Phase 8 — Rollout Plan
+## Phase 8 - Rollout Plan
 
 ## Stepwise rollout
 1. Internal alpha on one test business per vertical

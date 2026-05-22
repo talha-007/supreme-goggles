@@ -66,8 +66,8 @@ export default async function SuppliersPage() {
               {suppliers.map((s) => (
                 <tr key={s.id} className="hover:bg-zinc-50">
                   <td className="px-4 py-3 font-medium text-zinc-900">{s.name}</td>
-                  <td className="px-4 py-3 text-zinc-700">{s.phone ?? "—"}</td>
-                  <td className="px-4 py-3 text-zinc-700">{s.email ?? "—"}</td>
+                  <td className="px-4 py-3 text-zinc-700">{s.phone ?? "-"}</td>
+                  <td className="px-4 py-3 text-zinc-700">{s.email ?? "-"}</td>
                   <td className="px-4 py-3 text-zinc-600">
                     {s.is_active ? "Yes" : "No"}
                   </td>

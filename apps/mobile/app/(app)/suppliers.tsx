@@ -259,8 +259,8 @@ export default function SuppliersScreen() {
             <View className={`rounded-t-2xl px-4 pb-10 pt-4 ${bottomSheetContainerClass(resolved)}`}>
               <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>{detail.name}</Text>
               <View className="mt-4 gap-2">
-                <Row label="Phone" value={detail.phone ?? "—"} />
-                <Row label="Email" value={detail.email ?? "—"} />
+                <Row label="Phone" value={detail.phone ?? "-"} />
+                <Row label="Email" value={detail.email ?? "-"} />
                 <Row label="Status" value={detail.is_active ? "Active" : "Inactive"} />
               </View>
               <Pressable onPress={() => setDetail(null)} className="mt-6 rounded-xl bg-neutral-800 py-3">

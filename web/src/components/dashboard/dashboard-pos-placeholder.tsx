@@ -1,5 +1,5 @@
 /**
- * Shown while the split POS chunk loads — keeps layout height stable to limit CLS in Lighthouse.
+ * Shown while the split POS chunk loads - keeps layout height stable to limit CLS in Lighthouse.
  */
 export function DashboardPosPlaceholder() {
   return (

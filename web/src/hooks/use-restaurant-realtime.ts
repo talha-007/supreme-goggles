@@ -9,7 +9,7 @@ import { useEffect, useRef } from "react";
  * On any INSERT / UPDATE / DELETE the page is refreshed once (debounced 2 s,
  * only while the tab is visible, at most one refresh in-flight at a time).
  *
- * RLS already restricts the stream to the user's own business — no client-side
+ * RLS already restricts the stream to the user's own business - no client-side
  * filter needed. The table has REPLICA IDENTITY FULL so every column is present
  * in change payloads.
  */
@@ -40,7 +40,7 @@ export function useRestaurantRealtime(businessId: string) {
       .channel(`ro:${businessId}`)
       .on(
         "postgres_changes",
-        // No filter here — RLS scopes events to the signed-in user's business.
+        // No filter here - RLS scopes events to the signed-in user's business.
         { event: "*", schema: "public", table: "restaurant_orders" },
         () => scheduleRefresh(),
       )

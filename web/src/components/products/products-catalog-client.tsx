@@ -99,7 +99,7 @@ export function ProductsCatalogClient({
   const skippedSsrDuplicate = useRef(false);
   const initialRowsRef = useRef(initialProducts);
 
-  /** Debounced server search — no full-page navigation. */
+  /** Debounced server search - no full-page navigation. */
   useEffect(() => {
     const ac = new AbortController();
     const debounceTimer = window.setTimeout(async () => {

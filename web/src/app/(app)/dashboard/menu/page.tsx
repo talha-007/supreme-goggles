@@ -77,7 +77,7 @@ export default async function MenuPage() {
               items.map((item) => (
                 <tr key={item.id}>
                   <td className="px-4 py-3 font-medium text-zinc-900">{item.name}</td>
-                  <td className="px-4 py-3 text-zinc-700">{item.category ?? "—"}</td>
+                  <td className="px-4 py-3 text-zinc-700">{item.category ?? "-"}</td>
                   <td className="px-4 py-3 text-zinc-700">PKR {Number(item.sale_price).toFixed(2)}</td>
                   <td className="px-4 py-3 text-zinc-700">
                     <Link href={`/dashboard/products/${item.id}/edit?menu=1`} className="underline">

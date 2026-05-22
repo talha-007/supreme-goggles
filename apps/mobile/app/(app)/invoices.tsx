@@ -181,12 +181,13 @@ function newLine(): LineDraft {
   };
 }
 
-type BillFilter = "all" | "draft" | "open" | "paid" | "cancelled";
+type BillFilter = "all" | "draft" | "open" | "credit" | "paid" | "cancelled";
 
 const BILL_FILTERS: { key: BillFilter; label: string }[] = [
   { key: "all", label: "All" },
   { key: "draft", label: "Draft" },
   { key: "open", label: "Open" },
+  { key: "credit", label: "Credit" },
   { key: "paid", label: "Paid" },
   { key: "cancelled", label: "Cancelled" },
 ];
@@ -195,6 +196,7 @@ function matchesBillFilter(status: InvoiceStatus, key: BillFilter): boolean {
   if (key === "all") return true;
   if (key === "draft") return status === "draft";
   if (key === "open") return status === "unpaid" || status === "partial";
+  if (key === "credit") return status === "unpaid" || status === "partial";
   if (key === "paid") return status === "paid";
   if (key === "cancelled") return status === "cancelled";
   return true;
@@ -242,10 +244,11 @@ function normalizeInvoiceRow(raw: Record<string, unknown>): InvoiceRow {
 export default function InvoicesScreen() {
   const navigation = useNavigation();
   const bottomPad = useTabScreenBottomPadding();
-  const { businessId, user } = useAuth();
+  const { businessId, user, memberRole } = useAuth();
   const params = useLocalSearchParams<{ invoiceId?: string | string[]; invoiceFocus?: string | string[] }>();
   const { refreshGeneration } = useRealtimeNotifications();
   const { resolved } = useTheme();
+  const ownerCanDiscount = memberRole === "owner";
 
   const [rows, setRows] = useState<InvoiceListRow[]>([]);
   const [query, setQuery] = useState("");
@@ -600,12 +603,12 @@ export default function InvoicesScreen() {
     }
 
     const tax = Number(String(taxRateStr).replace(",", "."));
-    const invDisc = Number(String(invoiceDiscountStr).replace(",", "."));
+    const invDisc = ownerCanDiscount ? Number(String(invoiceDiscountStr).replace(",", ".")) : 0;
     if (!Number.isFinite(tax) || tax < 0 || tax > 100) {
       setSaveError("Enter a valid tax rate (0–100).");
       return null;
     }
-    if (!Number.isFinite(invDisc) || invDisc < 0) {
+    if (ownerCanDiscount && (!Number.isFinite(invDisc) || invDisc < 0)) {
       setSaveError("Enter a valid invoice discount.");
       return null;
     }
@@ -704,7 +707,7 @@ export default function InvoicesScreen() {
     }
   };
 
-  /** Draft only — finish payment later from Bill or web. */
+  /** Draft only - finish payment later from Bill or web. */
   const onSaveDraftOnly = async () => {
     if (!businessId) return;
     const prep = await prepareBillLines();
@@ -953,7 +956,7 @@ export default function InvoicesScreen() {
               filter === "all" &&
               datePreset === "all"
                 ? "Tap New to create a draft, then finalize when the customer pays cash."
-                : "Adjust search, status, or date — then pull to refresh the list."}
+                : "Adjust search, status, or date - then pull to refresh the list."}
             </Text>
           </View>
         }
@@ -1076,9 +1079,15 @@ export default function InvoicesScreen() {
                     onChangeText={setInvoiceDiscountStr}
                     placeholder="0"
                     keyboardType="decimal-pad"
+                    editable={ownerCanDiscount}
                   />
                 </View>
               </View>
+              {!ownerCanDiscount ? (
+                <Text className={`-mt-1 mb-2 text-xs ${textMutedClass(resolved)}`}>
+                  Only owner can apply bill discounts.
+                </Text>
+              ) : null}
 
               <FormField label="Notes (optional)" value={notes} onChangeText={setNotes} placeholder="Terms, reference" />
 
@@ -1358,7 +1367,7 @@ export default function InvoicesScreen() {
                       {receiptFetchBusy ? "Loading receipt…" : "Share or print receipt"}
                     </Text>
                     <Text className={`mt-1 px-1 text-center text-[11px] leading-4 ${textMutedClass(resolved)}`}>
-                      Opens a preview — use Share to send to WhatsApp, email, or a printer app.
+                      Opens a preview - use Share to send to WhatsApp, email, or a printer app.
                     </Text>
                   </Pressable>
                 ) : null}

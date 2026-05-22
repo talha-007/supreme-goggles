@@ -10,7 +10,7 @@ This repo does **not** enforce signup/email limits in app code. Throttling comes
 
 Optional for **dev-only** projects:
 
-- **Authentication → Providers → Email** — you can turn **off** “Confirm email” so accounts work without inbox delivery (still not recommended for production).
+- **Authentication → Providers → Email** - you can turn **off** “Confirm email” so accounts work without inbox delivery (still not recommended for production).
 
 ## Local Supabase (`supabase start`)
 

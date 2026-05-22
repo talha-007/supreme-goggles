@@ -15,7 +15,7 @@ const KB_HIDE = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
  */
 export function FloatingTabBar(props: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const bottom = Math.max(insets.bottom, 10);
+  const bottom = Math.max(insets.bottom, 8);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const { resolved } = useTheme();
   const isDark = resolved === "dark";
@@ -40,16 +40,16 @@ export function FloatingTabBar(props: BottomTabBarProps) {
         style={[
           styles.pill,
           {
-            backgroundColor: isDark ? "#171717" : "#ffffff",
-            borderColor: isDark ? "#262626" : "#e4e4e7",
+            backgroundColor: isDark ? "#141414" : "#ffffff",
+            borderColor: "transparent",
             ...Platform.select({
               ios: {
                 shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: isDark ? 0.18 : 0.1,
-                shadowRadius: 10,
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: isDark ? 0.22 : 0.08,
+                shadowRadius: 16,
               },
-              android: { elevation: isDark ? 6 : 4 },
+              android: { elevation: isDark ? 8 : 4 },
             }),
           },
         ]}
@@ -62,14 +62,16 @@ export function FloatingTabBar(props: BottomTabBarProps) {
 
 const styles = StyleSheet.create({
   outer: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingHorizontal: 12,
+    paddingTop: 6,
     backgroundColor: "transparent",
   },
   pill: {
     width: "100%",
-    alignSelf: "stretch",
-    borderRadius: 28,
-    borderWidth: 1,
+    maxWidth: 560,
+    alignSelf: "center",
+    borderRadius: 22,
+    borderWidth: 0,
+    overflow: "hidden",
   },
 });

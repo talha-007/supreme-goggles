@@ -189,11 +189,11 @@ export default async function InvoiceDetailPage({
               <div className="mt-3 grid gap-2 text-sm text-zinc-700 sm:grid-cols-2">
                 <p>
                   <span className="text-zinc-500">Table: </span>
-                  {tableName ?? "—"}
+                  {tableName ?? "-"}
                 </p>
                 <p>
                   <span className="text-zinc-500">Waiter: </span>
-                  {waiterName ?? "—"}
+                  {waiterName ?? "-"}
                 </p>
                 <p className="capitalize">
                   <span className="text-zinc-500">Service: </span>

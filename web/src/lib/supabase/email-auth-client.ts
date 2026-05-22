@@ -8,7 +8,7 @@ import { createClient } from "@supabase/supabase-js";
  * The default `createClient` from `@/lib/supabase/client` uses
  * `createBrowserClient` which forces `flowType: "pkce"`. PKCE requires the
  * one-time `code` to be exchanged with a `code_verifier` stored in the same
- * browser session — that breaks for password-reset links opened on another
+ * browser session - that breaks for password-reset links opened on another
  * device or in the system browser.
  *
  * Implicit flow returns `access_token` + `refresh_token` in the URL **hash**;

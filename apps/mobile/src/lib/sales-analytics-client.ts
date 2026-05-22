@@ -103,11 +103,11 @@ export async function fetchSalesSnapshot(
   const byKey = new Map<string, { name: string; revenue: number; quantity: number }>();
   for (const it of itemRows) {
     const key = it.product_id != null && String(it.product_id).length > 0 ? `p:${it.product_id}` : `n:${it.product_name}`;
-    const name = (it.product_name && String(it.product_name).trim()) || "—";
+    const name = (it.product_name && String(it.product_name).trim()) || "-";
     const r = Number(it.line_total) || 0;
     const q = Number(it.quantity) || 0;
     const cur = byKey.get(key) ?? { name, revenue: 0, quantity: 0 };
-    if (name !== "—") cur.name = name;
+    if (name !== "-") cur.name = name;
     cur.revenue += r;
     cur.quantity += q;
     byKey.set(key, cur);

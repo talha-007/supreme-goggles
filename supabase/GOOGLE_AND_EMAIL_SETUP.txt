@@ -1,4 +1,4 @@
-Taplite — Google sign-in and auth email templates
+Taplite - Google sign-in and auth email templates
 ==================================================
 
 Project ref: qqplffyjlpdhqwegbtea
@@ -43,7 +43,7 @@ API URL: https://qqplffyjlpdhqwegbtea.supabase.co
     NEXT_PUBLIC_SUPABASE_URL=https://qqplffyjlpdhqwegbtea.supabase.co
 - In Authentication → URL configuration, ensure http://localhost:3000/** is in
   “Additional redirect URLs” (in addition to production).
-- You do not add localhost to the Google Cloud “Authorized redirect URIs” — the
+- You do not add localhost to the Google Cloud “Authorized redirect URIs” - the
   redirect to Google still goes to …supabase.co/auth/v1/callback, same as production.
 - From web/: npm run dev, open http://localhost:3000/login, try “Continue with Google”.
 
@@ -52,7 +52,7 @@ API URL: https://qqplffyjlpdhqwegbtea.supabase.co
 - Browser devtools → Network: on /auth/callback, look for `error=` in the query
   or check Console for [auth/callback] logs.
 - Confirm production env does not set NEXT_PUBLIC_SITE_URL to a different host
-  than the site users use (e.g. apex in env but users use www) — the app no longer
+  than the site users use (e.g. apex in env but users use www) - the app no longer
   forces redirectTo to env for Google, but the allow list must still cover every
   real host.
 

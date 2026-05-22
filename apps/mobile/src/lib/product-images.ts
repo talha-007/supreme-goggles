@@ -52,7 +52,7 @@ export async function deleteProductImageByUrl(
 }
 
 /**
- * Read picked image bytes without `fetch(uri)` — Android `content://` URIs often fail with "Network request failed".
+ * Read picked image bytes without `fetch(uri)` - Android `content://` URIs often fail with "Network request failed".
  * Uses expo-file-system legacy API (supports content:// and file://).
  */
 export async function uploadProductImageFromUri(

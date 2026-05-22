@@ -18,7 +18,7 @@ const SLIDES = [
   {
     title: "Taplite",
     body:
-      "Point-of-sale, stock, and billing for shops and counters — built for taplite.store.",
+      "Point-of-sale, stock, and billing for shops and counters - built for taplite.store.",
     accent: "App",
   },
   {

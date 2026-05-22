@@ -103,7 +103,7 @@ export function SearchableFilterList({
       ? "right-0 left-auto w-[min(18rem,calc(100vw-1.5rem))]"
       : "left-0 right-auto w-[min(18rem,calc(100vw-1.5rem))]";
 
-  const buttonLabel = `${groupLabel}: ${selected?.label ?? "—"} (${selected?.count ?? 0})`;
+  const buttonLabel = `${groupLabel}: ${selected?.label ?? "-"} (${selected?.count ?? 0})`;
 
   return (
     <div ref={rootRef} className={`relative min-w-0 flex-1 overflow-visible ${isInline ? "max-w-[14rem]" : ""}`}>
@@ -132,7 +132,7 @@ export function SearchableFilterList({
             isInline ? "w-full" : "w-full sm:flex-1"
           } ${value !== "all" ? ring : idle}`}
         >
-          <span className="min-w-0 flex-1 truncate">{selected?.label ?? "—"}</span>
+          <span className="min-w-0 flex-1 truncate">{selected?.label ?? "-"}</span>
           <span className="shrink-0 tabular-nums text-[10px] opacity-80">{selected?.count ?? 0}</span>
           <svg
             className={`h-3.5 w-3.5 shrink-0 opacity-60 transition ${open ? "rotate-180" : ""}`}

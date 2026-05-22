@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export type AlertMode = "kitchen" | "waiter";
 
 // ---------------------------------------------------------------------------
-// Web Audio helpers — no external files needed
+// Web Audio helpers - no external files needed
 // ---------------------------------------------------------------------------
 
 function beep(ctx: AudioContext, freq: number, duration: number, start: number, vol = 0.25) {
@@ -23,14 +23,14 @@ function beep(ctx: AudioContext, freq: number, duration: number, start: number, 
   osc.stop(start + duration);
 }
 
-/** Two quick high beeps — "new order in!" for chefs */
+/** Two quick high beeps - "new order in!" for chefs */
 function playKitchenAlert(ctx: AudioContext) {
   const t = ctx.currentTime;
   beep(ctx, 880, 0.14, t);
   beep(ctx, 880, 0.14, t + 0.22);
 }
 
-/** Three ascending tones — "order ready!" for waiters */
+/** Three ascending tones - "order ready!" for waiters */
 function playWaiterAlert(ctx: AudioContext) {
   const t = ctx.currentTime;
   beep(ctx, 523, 0.10, t);

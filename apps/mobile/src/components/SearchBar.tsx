@@ -13,7 +13,7 @@ type Props = {
 };
 
 /**
- * Full-width search used below the nav header — keeps scan/search at the top (thumb-friendly, not floating mid-screen).
+ * Full-width search used below the nav header - keeps scan/search at the top (thumb-friendly, not floating mid-screen).
  */
 export function SearchBar({
   value,

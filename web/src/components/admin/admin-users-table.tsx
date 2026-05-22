@@ -104,7 +104,7 @@ export function AdminUsersTable({ initialRows }: Props) {
               <tr key={row.id}>
                 <td className="px-4 py-3">
                   <span className="font-medium text-zinc-900">
-                    {row.email ?? "—"}
+                    {row.email ?? "-"}
                   </span>
                   <p className="mt-0.5 font-mono text-xs text-zinc-500">{row.id}</p>
                 </td>
@@ -112,7 +112,7 @@ export function AdminUsersTable({ initialRows }: Props) {
                   {formatDate(row.created_at)}
                 </td>
                 <td className="px-4 py-3 tabular-nums text-zinc-600">
-                  {row.last_sign_in_at ? formatDate(row.last_sign_in_at) : "—"}
+                  {row.last_sign_in_at ? formatDate(row.last_sign_in_at) : "-"}
                 </td>
                 <td className="px-4 py-3 text-zinc-600">
                   {row.email_confirmed_at ? t("yes") : t("no")}
@@ -130,15 +130,15 @@ export function AdminUsersTable({ initialRows }: Props) {
                   )}
                 </td>
                 <td className="px-4 py-3 capitalize text-zinc-700">
-                  {row.member_role ?? "—"}
+                  {row.member_role ?? "-"}
                 </td>
                 <td className="px-4 py-3 text-zinc-700">
                   {row.business_id
                     ? subscriptionLabel(canonicalSubscriptionStatus(row.business_subscription), t)
-                    : (row.business_subscription ?? "—")}
+                    : (row.business_subscription ?? "-")}
                 </td>
                 <td className="px-4 py-3 tabular-nums text-zinc-600">
-                  {row.business_subscription_ends_at ? formatDate(row.business_subscription_ends_at) : "—"}
+                  {row.business_subscription_ends_at ? formatDate(row.business_subscription_ends_at) : "-"}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <button

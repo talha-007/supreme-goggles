@@ -37,7 +37,7 @@ function formatDate(iso: string | null, intlTag: string, dash: string) {
 export function buildInvoiceReceiptPrintHtml(p: InvoicePrintPayload): string {
   const { invoice, business, customer, items, labels, locale, copyLabel } = p;
   const intlTag = intlLocaleTag(locale);
-  const dash = "—";
+  const dash = "-";
   const rtl = isRtlLocale(locale);
   const statusLabel =
     invoice.status === "paid"

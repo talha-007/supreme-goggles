@@ -600,7 +600,7 @@ export async function reverseInvoice(invoiceId: string): Promise<InvoiceActionSt
 
   if (error) return { error: error.message };
 
-  // Invalidate the whole dashboard tree (products, invoices, etc.) — production can cache RSC more than dev.
+  // Invalidate the whole dashboard tree (products, invoices, etc.) - production can cache RSC more than dev.
   revalidatePath("/dashboard", "layout");
   revalidatePath(`/dashboard/invoices/${invoiceId}`);
   return {};

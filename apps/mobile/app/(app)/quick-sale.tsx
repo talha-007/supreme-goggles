@@ -5,6 +5,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "reac
 import {
   ActivityIndicator,
   FlatList,
+  LayoutChangeEvent,
   Pressable,
   ScrollView,
   Text,
@@ -64,16 +65,23 @@ function normalizeCatalog(row: Record<string, unknown>): CatalogRow {
   };
 }
 
-/** Space for sticky checkout (totals + optional error line + button + hint). */
-/** Sticky footer: totals + optional error + two checkout actions + hint. */
-const CHECKOUT_OVERLAY_PAD = 188;
+function creditSaleButtonClass(resolved: "light" | "dark"): string {
+  return resolved === "dark"
+    ? "rounded-xl border border-amber-600/50 bg-amber-950/25 py-3.5 active:opacity-90 disabled:opacity-50"
+    : "rounded-xl border border-amber-400/70 bg-amber-50 py-3.5 active:opacity-90 disabled:opacity-50";
+}
+
+function creditSaleButtonTextClass(resolved: "light" | "dark"): string {
+  return resolved === "dark" ? "text-amber-300" : "text-amber-900";
+}
 
 export default function QuickSaleScreen() {
   const navigation = useNavigation();
   const bottomPad = useTabScreenBottomPadding();
-  const { businessId, user } = useAuth();
+  const { businessId, user, memberRole } = useAuth();
   const { refreshGeneration } = useRealtimeNotifications();
   const { resolved } = useTheme();
+  const ownerCanDiscount = memberRole === "owner";
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -117,6 +125,7 @@ export default function QuickSaleScreen() {
   const [checkoutBusy, setCheckoutBusy] = useState<"cash" | "credit" | null>(null);
   const saving = checkoutBusy !== null;
   const [saleError, setSaleError] = useState<string | null>(null);
+  const [footerHeight, setFooterHeight] = useState(0);
 
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [receiptText, setReceiptText] = useState("");
@@ -224,9 +233,9 @@ export default function QuickSaleScreen() {
       lineTotal(c.quantity, c.unit_price, 0),
     );
     const tax = Number(String(taxRateStr).replace(",", ".")) || 0;
-    const disc = Number(String(invoiceDiscountStr).replace(",", ".")) || 0;
+    const disc = ownerCanDiscount ? Number(String(invoiceDiscountStr).replace(",", ".")) || 0 : 0;
     return invoiceTotals(lineTotals, disc, tax);
-  }, [cart, taxRateStr, invoiceDiscountStr]);
+  }, [cart, taxRateStr, invoiceDiscountStr, ownerCanDiscount]);
 
   const onCompleteSale = async () => {
     if (!businessId || cart.length === 0) {
@@ -242,7 +251,7 @@ export default function QuickSaleScreen() {
       return;
     }
     const tax = Number(String(taxRateStr).replace(",", "."));
-    const disc = Number(String(invoiceDiscountStr).replace(",", "."));
+    const disc = ownerCanDiscount ? Number(String(invoiceDiscountStr).replace(",", ".")) : 0;
     if (!Number.isFinite(tax) || tax < 0 || tax > 100) {
       setSaleError("Invalid tax %.");
       return;
@@ -303,7 +312,7 @@ export default function QuickSaleScreen() {
       return;
     }
     const tax = Number(String(taxRateStr).replace(",", "."));
-    const disc = Number(String(invoiceDiscountStr).replace(",", "."));
+    const disc = ownerCanDiscount ? Number(String(invoiceDiscountStr).replace(",", ".")) : 0;
     if (!Number.isFinite(tax) || tax < 0 || tax > 100) {
       setSaleError("Invalid tax %.");
       return;
@@ -463,12 +472,18 @@ export default function QuickSaleScreen() {
               onChangeText={setInvoiceDiscountStr}
               placeholder="0"
               keyboardType="decimal-pad"
+              editable={ownerCanDiscount}
             />
           </View>
         </View>
+        {!ownerCanDiscount ? (
+          <Text className={`-mt-2 text-xs ${textMutedClass(resolved)}`}>
+            Only owner can apply a sale discount.
+          </Text>
+        ) : null}
       </View>
     ),
-    [cart, taxRateStr, invoiceDiscountStr, setQty],
+    [cart, taxRateStr, invoiceDiscountStr, setQty, ownerCanDiscount, resolved],
   );
 
   const renderProduct = useCallback(
@@ -492,8 +507,12 @@ export default function QuickSaleScreen() {
     [addToCart],
   );
 
-  const listBottomPadding =
-    bottomPad + CHECKOUT_OVERLAY_PAD + (saleError ? 52 : 0);
+  const onFooterLayout = useCallback((event: LayoutChangeEvent) => {
+    const next = Math.ceil(event.nativeEvent.layout.height);
+    setFooterHeight((prev) => (Math.abs(prev - next) >= 1 ? next : prev));
+  }, []);
+
+  const listBottomPadding = bottomPad + footerHeight + 16;
 
   const listEmpty = useMemo(() => {
     if (catalogLoading) {
@@ -530,6 +549,7 @@ export default function QuickSaleScreen() {
       <View
         className={stickyFooterBarClass(resolved)}
         style={{ paddingBottom: bottomPad + 8 }}
+        onLayout={onFooterLayout}
       >
         <View className="flex-row items-end justify-between gap-2">
           <View className="min-w-0 flex-1">
@@ -567,11 +587,11 @@ export default function QuickSaleScreen() {
           <Pressable
             onPress={() => void onCompleteSaleCredit()}
             disabled={cart.length === 0 || saving}
-            className="rounded-xl border border-amber-600/50 bg-amber-950/25 py-3.5 active:opacity-90 disabled:opacity-50"
+            className={creditSaleButtonClass(resolved)}
             accessibilityRole="button"
             accessibilityLabel="Complete sale on credit"
           >
-            <Text className="text-center text-base font-semibold text-amber-300">
+            <Text className={`text-center text-base font-semibold ${creditSaleButtonTextClass(resolved)}`}>
               {checkoutBusy === "credit" ? "Processing…" : "Complete sale (credit / owe later)"}
             </Text>
           </Pressable>

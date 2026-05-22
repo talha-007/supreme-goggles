@@ -41,4 +41,4 @@ end;
 $$;
 
 comment on column public.businesses.subscription_status is
-  'active | trial | past_due | cancelled — used when billing enforcement is enabled.';
+  'active | trial | past_due | cancelled - used when billing enforcement is enabled.';

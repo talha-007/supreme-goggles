@@ -1,4 +1,4 @@
-/** Matches Postgres enum `subscription_status` — use `trial`, not `trialing`. */
+/** Matches Postgres enum `subscription_status` - use `trial`, not `trialing`. */
 export const SUBSCRIPTION_STATUSES = [
   "active",
   "trial",

@@ -26,7 +26,7 @@ function toDatetimeLocalValue(iso: string | null): string {
 }
 
 function formatEnds(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Date(iso).toLocaleString();
   } catch {

@@ -74,7 +74,7 @@ begin
       r.purchase_price,
       p_invoice_id,
       'invoice',
-      'Sale — ' || coalesce(v_num, ''),
+      'Sale - ' || coalesce(v_num, ''),
       auth.uid()
     );
     v_stock_touched := true;
@@ -188,7 +188,7 @@ begin
       r.purchase_price,
       p_invoice_id,
       'invoice',
-      'Sale — ' || coalesce(v_num, ''),
+      'Sale - ' || coalesce(v_num, ''),
       auth.uid()
     );
     v_stock_touched := true;

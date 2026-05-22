@@ -523,7 +523,7 @@
     "deleteConfirm": "Delete “{name}”? This cannot be undone.",
     "deleting": "Deleting…",
     "deleteFailed": "Could not delete product.",
-    "deleteSectionHint": "Permanently removes this product. If deletion is blocked, it may still be linked to invoices—remove it from drafts or deactivate it instead.",
+    "deleteSectionHint": "Permanently removes this product. If deletion is blocked, it may still be linked to invoices-remove it from drafts or deactivate it instead.",
     "deleteBlockedFk": "This product is still referenced elsewhere in the database (often past invoice lines). Apply the latest Supabase migration so those links clear when you delete, or deactivate the product instead."
   },
   "productFields": {

@@ -13,7 +13,7 @@ npx expo start
 
 See [`apps/pos-mobile/README.md`](apps/pos-mobile/README.md) and [`docs/POS_REACT_NATIVE_GUIDE.md`](docs/POS_REACT_NATIVE_GUIDE.md).
 
-Optional — npm workspaces from repo root: `npm install` then `npm run pos` (see root [`package.json`](package.json)).
+Optional - npm workspaces from repo root: `npm install` then `npm run pos` (see root [`package.json`](package.json)).
 
 ---
 
@@ -39,13 +39,13 @@ Optional — npm workspaces from repo root: `npm install` then `npm run pos` (se
 
    Without the exact callback URL, email confirmation and OAuth will fail after redirect.
 
-3. Env file must live in **`web/`** (same folder as `package.json`) so Next.js loads it — use `.env.local` or `.env` with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+3. Env file must live in **`web/`** (same folder as `package.json`) so Next.js loads it - use `.env.local` or `.env` with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
 4. Apply the SQL migration so onboarding works (creates `create_business_with_owner` RPC):
 
    Run [`../supabase/migrations/20260329120000_create_business_with_owner.sql`](../supabase/migrations/20260329120000_create_business_with_owner.sql) in the SQL Editor (or use Supabase CLI migrations).
 
-   For **spare parts / auto parts** businesses (extra catalog fields + POS search), apply newer migrations too — e.g. [`20260518140000_spare_parts_business_type_and_product_fields.sql`](../supabase/migrations/20260518140000_spare_parts_business_type_and_product_fields.sql). Details: [`docs/pos-spare-parts-shop-plan.md`](docs/pos-spare-parts-shop-plan.md).
+   For **spare parts / auto parts** businesses (extra catalog fields + POS search), apply newer migrations too - e.g. [`20260518140000_spare_parts_business_type_and_product_fields.sql`](../supabase/migrations/20260518140000_spare_parts_business_type_and_product_fields.sql). Details: [`docs/pos-spare-parts-shop-plan.md`](docs/pos-spare-parts-shop-plan.md).
 
    Apply [`20260521170000_create_business_with_owner_single_membership_guard.sql`](../supabase/migrations/20260521170000_create_business_with_owner_single_membership_guard.sql) so the onboarding RPC refuses a second `business_members` row for the same user (one business profile per account).
 
@@ -56,12 +56,12 @@ Optional — npm workspaces from repo root: `npm install` then `npm run pos` (se
    npm run dev
    ```
 
-Open [http://localhost:3000](http://localhost:3000) — you will be prompted to sign in, create a business, then land on the dashboard.
+Open [http://localhost:3000](http://localhost:3000) - you will be prompted to sign in, create a business, then land on the dashboard.
 
 ## Shop setup (first day)
 
-1. **Business:** Complete onboarding with your shop name (one business per account to start). Choose **Spare parts / auto parts** if you sell by OEM/SKU at the counter — same POS and stock as a general shop, with extra part fields and receipt lines.
-2. **Products:** Add products under **Products** — set **sale price**, **stock**, and optional **category** and **photo** (helps the dashboard POS grid). Use **barcodes** if you scan at the counter.
+1. **Business:** Complete onboarding with your shop name (one business per account to start). Choose **Spare parts / auto parts** if you sell by OEM/SKU at the counter - same POS and stock as a general shop, with extra part fields and receipt lines.
+2. **Products:** Add products under **Products** - set **sale price**, **stock**, and optional **category** and **photo** (helps the dashboard POS grid). Use **barcodes** if you scan at the counter.
 3. **Customers:** Add regular customers if you sell on credit; walk-in sales work without a customer.
 4. **Invoicing defaults:** Under **Settings**, set **tax rate** and invoice defaults so new sales match your shop.
 5. **Daily use:** Open **Dashboard** for the split **menu + cart** flow, or **Invoices** for a traditional list. Finalizing **cash** or **credit** updates stock; drafts do not.
@@ -76,7 +76,7 @@ If a page fails, use **Try again** or return to the **Dashboard**. Missing pages
 
 ## Scripts
 
-- `npm run dev` — development server
-- `npm run build` — production build (requires `.env.local` with Supabase vars)
-- `npm run start` — run production build
-- `npm run lint` — ESLint
+- `npm run dev` - development server
+- `npm run build` - production build (requires `.env.local` with Supabase vars)
+- `npm run start` - run production build
+- `npm run lint` - ESLint

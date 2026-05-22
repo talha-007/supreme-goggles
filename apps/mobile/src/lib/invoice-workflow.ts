@@ -113,7 +113,7 @@ export async function createAndFinalizeCashSale(
   const fin = await finalizeDraftInvoiceCash(supabase, businessId, userId, saved.invoiceId);
   if (fin.error) {
     return {
-      error: `${fin.error} The sale was saved as a draft — open Bill to retry or edit.`,
+      error: `${fin.error} The sale was saved as a draft - open Bill to retry or edit.`,
     };
   }
   return { invoiceId: saved.invoiceId };
@@ -216,7 +216,7 @@ export async function createAndFinalizeCreditSale(
   const fin = await finalizeDraftInvoiceCredit(supabase, businessId, userId, saved.invoiceId);
   if (fin.error) {
     return {
-      error: `${fin.error} The sale was saved as a draft — open Bill to retry or edit.`,
+      error: `${fin.error} The sale was saved as a draft - open Bill to retry or edit.`,
     };
   }
   return { invoiceId: saved.invoiceId };

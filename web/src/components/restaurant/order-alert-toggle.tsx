@@ -17,7 +17,7 @@ export function OrderAlertToggle({
       <button
         type="button"
         onClick={toggleSound}
-        title={soundOn ? "Sound on — click to mute" : "Sound muted — click to enable"}
+        title={soundOn ? "Sound on - click to mute" : "Sound muted - click to enable"}
         className={[
           "flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
           soundOn
@@ -38,7 +38,7 @@ export function OrderAlertToggle({
         <span>{soundOn ? "Sound on" : "Sound off"}</span>
       </button>
 
-      {/* Test button — only visible when sound is on */}
+      {/* Test button - only visible when sound is on */}
       {soundOn && (
         <button
           type="button"

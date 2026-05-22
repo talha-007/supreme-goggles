@@ -70,7 +70,7 @@ export default async function CounterPage() {
               bills.map((b) => {
                 const inv = Array.isArray(b.invoices) ? (b.invoices[0] ?? null) : b.invoices;
                 if (!inv) return null;
-                const table = Array.isArray(b.restaurant_tables) ? (b.restaurant_tables[0]?.name ?? "—") : (b.restaurant_tables?.name ?? "—");
+                const table = Array.isArray(b.restaurant_tables) ? (b.restaurant_tables[0]?.name ?? "-") : (b.restaurant_tables?.name ?? "-");
                 return (
                   <tr key={b.invoice_id}>
                     <td className="px-4 py-3 font-mono">{inv.invoice_number}</td>

@@ -24,8 +24,8 @@ export type KitchenItem = {
 
 function getTable(o: KitchenOrder) {
   return Array.isArray(o.restaurant_tables)
-    ? (o.restaurant_tables[0]?.name ?? "—")
-    : (o.restaurant_tables?.name ?? "—");
+    ? (o.restaurant_tables[0]?.name ?? "-")
+    : (o.restaurant_tables?.name ?? "-");
 }
 function getInv(o: KitchenOrder) {
   return Array.isArray(o.invoices) ? (o.invoices[0] ?? null) : o.invoices;
@@ -223,7 +223,7 @@ export function KitchenBoardClient({ orders }: { orders: KitchenOrder[] }) {
       {filtered.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-dashed border-zinc-200 py-14 text-center">
           <p className="text-sm font-medium text-zinc-500">
-            {orders.length === 0 ? "All clear — no orders in the kitchen." : "No orders match your filters."}
+            {orders.length === 0 ? "All clear - no orders in the kitchen." : "No orders match your filters."}
           </p>
           {orders.length === 0 && (
             <p className="mt-1 text-xs text-zinc-400">

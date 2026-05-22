@@ -4,7 +4,7 @@ import Constants from "expo-constants";
 /**
  * `emailRedirectTo` for mobile sign-up:
  *
- * - **Web** (Next.js) still uses `https://…/auth/callback` — same public URL, works in any browser.
+ * - **Web** (Next.js) still uses `https://…/auth/callback` - same public URL, works in any browser.
  * - **This app (release builds)** uses the native scheme (`pos-mobile://auth/callback`) from
  *   `createURL`, so the Supabase email “Confirm” link can open the installed app instead of
  *   only the browser. Add that exact string to Supabase → Authentication → Redirect URLs.

@@ -713,10 +713,10 @@ export default function ProductsScreen() {
                 </Text>
 
                 <View className="mt-6 gap-0">
-                  <DetailRow label="SKU" value={detail.sku ?? "—"} />
-                  <DetailRow label="Barcode" value={detail.barcode ?? "—"} />
-                  <DetailRow label="Category" value={detail.category ?? "—"} />
-                  <DetailRow label="Brand" value={detail.brand ?? "—"} />
+                  <DetailRow label="SKU" value={detail.sku ?? "-"} />
+                  <DetailRow label="Barcode" value={detail.barcode ?? "-"} />
+                  <DetailRow label="Category" value={detail.category ?? "-"} />
+                  <DetailRow label="Brand" value={detail.brand ?? "-"} />
                   <DetailRow label="Sale price" value={formatPkr(detail.sale_price)} />
                   <DetailRow label="Purchase price" value={formatPkr(detail.purchase_price)} />
                 </View>

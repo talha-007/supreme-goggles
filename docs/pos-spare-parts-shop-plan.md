@@ -1,4 +1,4 @@
-# POS for Spare Parts Shop — Step-by-Step Plan
+# POS for Spare Parts Shop - Step-by-Step Plan
 
 This document is a **concrete implementation plan** for supporting **auto / motorcycle / machinery spare parts** counters on top of the existing Taplite POS. It complements the broader roadmap in [`multi-business-pos-expansion-plan.md`](./multi-business-pos-expansion-plan.md).
 
@@ -21,7 +21,7 @@ Let a spare parts business use the same **invoice + stock + POS** stack as a gen
 
 - Full **fitment database** (year/make/model engine with ACES-style data feeds).
 - Multi-warehouse bin locations (can reuse simple `unit` / notes or add later).
-- Core returns/RMA workflow (if not already covered by void/credit notes—confirm product decision).
+- Core returns/RMA workflow (if not already covered by void/credit notes-confirm product decision).
 
 ---
 
@@ -37,7 +37,7 @@ Use this as the baseline so work is incremental, not a rewrite.
 | Product model | Already includes `sku`, `barcode`, `brand`, `category`, `unit`, `mrp`, etc. (`getPosCatalogProducts` select list). |
 | Nav | `AppShell` hides restaurant links for non-restaurant types (`web/src/components/app-shell.tsx`). |
 
-**Conclusion:** Spare parts can start as a **new `business_type` + UX/search/labels**, without a second POS engine—unless fitment later forces new tables.
+**Conclusion:** Spare parts can start as a **new `business_type` + UX/search/labels**, without a second POS engine-unless fitment later forces new tables.
 
 ---
 
@@ -62,7 +62,7 @@ Work through these once; they drive schema and UI.
 
 ## 4. Step-by-step implementation plan
 
-### Phase 0 — Discovery and alignment (0.5–1 day)
+### Phase 0 - Discovery and alignment (0.5–1 day)
 
 - [ ] Interview 1–2 spare parts shops: top 5 fields they read while selling; how they handle interchange; returns.
 - [ ] Walk through current flow: onboarding → products → dashboard POS → finalize invoice → stock.
@@ -72,7 +72,7 @@ Work through these once; they drive schema and UI.
 
 ---
 
-### Phase 1 — Database and types
+### Phase 1 - Database and types
 
 - [ ] Add new value to `public.business_type` via migration (`alter type ... add value`).  
 - [ ] Update RPC `create_business_with_owner` if signature or defaults need to know the new type (follow existing migrations that touch it).  
@@ -84,18 +84,18 @@ Work through these once; they drive schema and UI.
 
 ---
 
-### Phase 2 — App model and onboarding
+### Phase 2 - App model and onboarding
 
 - [ ] Extend `BusinessType` in `web/src/lib/business/capabilities.ts`.  
 - [ ] Add onboarding option + `messages/en.json` / `messages/ur.json` keys (`onboarding.typeSpareParts` etc.).  
 - [ ] Ensure `resolveBusinessCapabilities` treats spare parts like shop for flags **unless** you introduce spare-parts-specific toggles later.  
-- [ ] Confirm `AppShell` nav: spare parts should **not** see restaurant-only links (same as shop—verify no new branches needed).
+- [ ] Confirm `AppShell` nav: spare parts should **not** see restaurant-only links (same as shop-verify no new branches needed).
 
 **Output:** User can register a spare parts business and land on dashboard like a shop.
 
 ---
 
-### Phase 3 — Catalog UI (products)
+### Phase 3 - Catalog UI (products)
 
 - [ ] Extend product create/edit forms to show new fields when `business.type === spare_parts` (or when `spare_parts_mode` is on).  
 - [ ] Catalog list: optional columns (OEM, brand) and filters for spare parts.  
@@ -105,7 +105,7 @@ Work through these once; they drive schema and UI.
 
 ---
 
-### Phase 4 — POS UX (`PosSaleClient` and catalog loaders)
+### Phase 4 - POS UX (`PosSaleClient` and catalog loaders)
 
 - [ ] Pass business type or a derived flag (`isSparePartsPos`) from server pages into `PosSaleClient` / deferred wrapper.  
 - [ ] **Search:** implement multi-field search (barcode, SKU, OEM, name, brand) with debounced query; highlight matched field in results.  
@@ -117,7 +117,7 @@ Work through these once; they drive schema and UI.
 
 ---
 
-### Phase 5 — Invoicing, PDF, and customer defaults
+### Phase 5 - Invoicing, PDF, and customer defaults
 
 - [ ] Invoice line labels: show SKU/OEM/brand on screen for spare parts.  
 - [ ] PDF/receipt template: conditional block for spare parts (reuse invoice print pipeline).  
@@ -127,7 +127,7 @@ Work through these once; they drive schema and UI.
 
 ---
 
-### Phase 6 — Quality, docs, and rollout
+### Phase 6 - Quality, docs, and rollout
 
 - [ ] Manual test matrix: new business, add 20 parts, sell mixed basket, void, low stock, PO receive.  
 - [ ] Add a short **user-facing** note in README or in-app help: “Spare parts mode”.  
@@ -177,7 +177,7 @@ Document only; schedule after v1 is stable.
 
 1. Phase 1 (DB enum + product columns)  
 2. Phase 2 (TS types + onboarding + i18n)  
-3. Phase 4 (POS search + wiring type flag) — *can overlap lightly with Phase 3*  
+3. Phase 4 (POS search + wiring type flag) - *can overlap lightly with Phase 3*  
 4. Phase 3 (product forms + catalog filters)  
 5. Phase 5 (invoice/PDF polish)  
 6. Phase 6 (QA + pilot)

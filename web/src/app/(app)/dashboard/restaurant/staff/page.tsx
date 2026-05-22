@@ -71,8 +71,8 @@ export default async function RestaurantStaffPage() {
                 <tr key={s.id}>
                   <td className="px-4 py-3 font-medium text-zinc-900">{s.name}</td>
                   <td className="px-4 py-3 capitalize text-zinc-700">{s.role}</td>
-                  <td className="px-4 py-3 text-zinc-700">{s.phone ?? "—"}</td>
-                  <td className="px-4 py-3 text-zinc-700">{s.user_id ? (emailByUserId.get(s.user_id) ?? "—") : "—"}</td>
+                  <td className="px-4 py-3 text-zinc-700">{s.phone ?? "-"}</td>
+                  <td className="px-4 py-3 text-zinc-700">{s.user_id ? (emailByUserId.get(s.user_id) ?? "-") : "-"}</td>
                   <td className="px-4 py-3 text-zinc-700">{s.user_id ? "Linked" : "Not linked"}</td>
                   <td className="px-4 py-3 text-zinc-700">{s.is_active ? "Yes" : "No"}</td>
                   <td className="px-4 py-3 text-right">

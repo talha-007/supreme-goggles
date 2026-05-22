@@ -101,7 +101,7 @@ begin
           null,
           p_invoice_id,
           'invoice',
-          'Void / reversal — ' || coalesce(v_num, ''),
+          'Void / reversal - ' || coalesce(v_num, ''),
           auth.uid()
         );
       end loop;
@@ -135,7 +135,7 @@ begin
           null,
           p_invoice_id,
           'invoice',
-          'Void / reversal — ' || coalesce(v_num, ''),
+          'Void / reversal - ' || coalesce(v_num, ''),
           auth.uid()
         );
       end loop;

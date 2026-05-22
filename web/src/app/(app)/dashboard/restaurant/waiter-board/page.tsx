@@ -32,7 +32,7 @@ export default async function WaiterBoardPage() {
       )
       .eq("business_id", ctx.businessId)
       .maybeSingle(),
-    // new / preparing / ready — "live" orders
+    // new / preparing / ready - "live" orders
     supabase
       .from("restaurant_orders")
       .select(
@@ -42,7 +42,7 @@ export default async function WaiterBoardPage() {
       .in("status", ["new", "preparing", "ready"])
       .order("created_at", { ascending: true })
       .limit(100),
-    // served — history (include invoice payment status)
+    // served - history (include invoice payment status)
     supabase
       .from("restaurant_orders")
       .select(

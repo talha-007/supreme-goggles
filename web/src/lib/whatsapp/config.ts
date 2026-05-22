@@ -1,5 +1,5 @@
 /**
- * Meta WhatsApp Cloud API — set in env (never commit tokens).
+ * Meta WhatsApp Cloud API - set in env (never commit tokens).
  *
  * Templates must use named body variables: lowercase, underscores, digits only, e.g.
  *   {{alert_title}}  {{alert_message}}  or a single {{alert_message}}

@@ -1,4 +1,4 @@
-# POS mobile app — React Native step-by-step guideline
+# POS mobile app - React Native step-by-step guideline
 
 This document is a **phased roadmap** for a React Native POS companion to the existing **Next.js + Supabase** web app. It leans on **Expo** and “full power” RN: native modules, gestures, lists, and platform APIs.
 
@@ -37,7 +37,7 @@ Pick one pattern per feature and stay consistent.
 | Piece | Choice | Why |
 |-------|--------|-----|
 | Styling | **NativeWind** (Tailwind) *or* **Tamagui** *or* **StyleSheet + tokens** | Match design tokens from web; NativeWind is familiar if you use Tailwind. |
-| Lists | **@shopify/flash-list** | Virtualized grids/lists — critical for large product catalogs. |
+| Lists | **@shopify/flash-list** | Virtualized grids/lists - critical for large product catalogs. |
 | Gestures | **react-native-gesture-handler** + **react-native-reanimated** | Smooth sheet, swipe-to-delete line items, spring animations. |
 | Safe area | **react-native-safe-area-context** | Notches, dynamic island, Android cutouts. |
 
@@ -57,7 +57,7 @@ Pick one pattern per feature and stay consistent.
 | Barcode / QR | **expo-camera** (Barcode scanning) or **react-native-vision-camera** + MLKit | Scan SKU/barcode to add line or open product. |
 | Haptics | **expo-haptics** | Success/error on pay, increment qty. |
 | Keep awake | **expo-keep-awake** | Optional: screen on while on sale screen. |
-| Printing | **expo-print** or **react-native-thermal-receipt** (vendor-specific) | Receipt after sale — phase later. |
+| Printing | **expo-print** or **react-native-thermal-receipt** (vendor-specific) | Receipt after sale - phase later. |
 | Intents | **expo-linking** | Deep link from payment apps if you integrate locally. |
 
 ### Optional (later)
@@ -72,18 +72,18 @@ Pick one pattern per feature and stay consistent.
 
 ## 3. Repository layout (recommended)
 
-**Option A — Monorepo (best for shared types)**
+**Option A - Monorepo (best for shared types)**
 
 ```text
 supreme-goggles/
   web/            # Next.js app (unchanged)
   apps/
-    pos-mobile/   # Expo app (started — auth + POS shell)
+    pos-mobile/   # Expo app (started - auth + POS shell)
   packages/
     shared/       # optional: types, zod schemas
 ```
 
-**Option B — Separate repo**  
+**Option B - Separate repo**  
 Copy types manually or publish a small private `@org/shared` package.
 
 Use **pnpm workspaces** or **npm workspaces** + **Turborepo** if you want one `turbo build`.
@@ -96,7 +96,7 @@ Before building screens, confirm:
 
 1. **RLS policies** allow the operations the POS needs (insert/update `invoices`, `invoice_items`, stock RPCs) for `authenticated` users tied to `business_id`.
 2. **RPCs** used by the web (e.g. `generate_invoice_number`) are callable from the client with the user’s JWT.
-3. **Stock / finalize** paths match web (`saveDraftAndFinalizeCash` etc.) — either call the same Postgres functions from Supabase client or expose one **Next API route** that reuses server code.
+3. **Stock / finalize** paths match web (`saveDraftAndFinalizeCash` etc.) - either call the same Postgres functions from Supabase client or expose one **Next API route** that reuses server code.
 
 If something only exists as a Server Action today, add a **thin API** or **RPC** for mobile.
 
@@ -104,7 +104,7 @@ If something only exists as a Server Action today, add a **thin API** or **RPC**
 
 ## 5. Phased implementation (step by step)
 
-### Phase 0 — Bootstrap (days 1–2)
+### Phase 0 - Bootstrap (days 1–2)
 
 1. `npx create-expo-app@latest pos-mobile -t tabs` (or blank + install Expo Router).
 2. Enable **TypeScript**, **Expo Router**, **absolute imports**.
@@ -116,29 +116,29 @@ If something only exists as a Server Action today, add a **thin API** or **RPC**
 
 ---
 
-### Phase 1 — Auth (days 3–5)
+### Phase 1 - Auth (days 3–5)
 
 1. Initialize Supabase client (singleton) with `expo-secure-store` adapter for session persistence (see Supabase + Expo docs).
-2. Build **login** screen (email/password or magic link — match web).
-3. After login, load **`business_members`** → if none, route to **onboarding** (or block with message to finish on web — product decision).
+2. Build **login** screen (email/password or magic link - match web).
+3. After login, load **`business_members`** → if none, route to **onboarding** (or block with message to finish on web - product decision).
 4. **Sign out** clears secure storage + query cache.
 
 **Exit criteria:** User can sign in/out; session survives app restart.
 
 ---
 
-### Phase 2 — Read-only catalog (days 5–8)
+### Phase 2 - Read-only catalog (days 5–8)
 
 1. Fetch **products** (`business_id`, active, with `image_url`, `category`, `sale_price`, `current_stock`).
 2. Use **FlashList** in a **grid** (`numColumns`) for the catalog; **Image** from `expo-image` (caching).
-3. **Search** debounced — same logic as web (`ilike` or your search RPC).
-4. **Category chips** — filter client-side or server-side to mirror web POS.
+3. **Search** debounced - same logic as web (`ilike` or your search RPC).
+4. **Category chips** - filter client-side or server-side to mirror web POS.
 
 **Exit criteria:** Smooth scrolling with 500+ rows; images load from Supabase Storage public URLs.
 
 ---
 
-### Phase 3 — Cart state (days 8–10)
+### Phase 3 - Cart state (days 8–10)
 
 1. **Zustand** store: `lines[]`, `customerId`, `taxRate`, `discount`, `notes`, `dueDate`.
 2. **Add line** from product (merge qty by `product_id`).
@@ -149,7 +149,7 @@ If something only exists as a Server Action today, add a **thin API** or **RPC**
 
 ---
 
-### Phase 4 — Create / update invoice (days 10–15)
+### Phase 4 - Create / update invoice (days 10–15)
 
 1. Implement **save draft** using the same DB rules as web: insert/update `invoices` + `invoice_items`, or call existing **RPCs**.
 2. Handle **first save** → receive `invoice_id`; subsequent saves update draft only.
@@ -159,9 +159,9 @@ If something only exists as a Server Action today, add a **thin API** or **RPC**
 
 ---
 
-### Phase 5 — Checkout: cash & credit (days 15–20)
+### Phase 5 - Checkout: cash & credit (days 15–20)
 
-1. Map **finalize** flows to Supabase RPCs or API routes (payments, stock movement — whatever web uses server-side).
+1. Map **finalize** flows to Supabase RPCs or API routes (payments, stock movement - whatever web uses server-side).
 2. **Cash:** validate tender ≥ total; record payment; show change (use **BigNumber** or integer cents if you worry about floats).
 3. **Credit:** finalize as unpaid per business rules.
 4. **Haptics** on success; **reset** cart and optionally navigate to receipt screen.
@@ -170,10 +170,10 @@ If something only exists as a Server Action today, add a **thin API** or **RPC**
 
 ---
 
-### Phase 6 — Barcode & polish (days 20–25)
+### Phase 6 - Barcode & polish (days 20–25)
 
 1. **Barcode scanner** screen or modal: on scan, resolve product by `barcode` and call **add line**.
-2. **Tablet layout:** `useWindowDimensions` — two-pane POS (catalog | cart) on wide screens; single column on phone with tabs (mirror web POS pattern).
+2. **Tablet layout:** `useWindowDimensions` - two-pane POS (catalog | cart) on wide screens; single column on phone with tabs (mirror web POS pattern).
 3. **Accessibility:** `accessibilityLabel` on icon buttons; font scaling.
 4. **Performance:** memoize list rows; avoid re-rendering whole cart on each keystroke.
 
@@ -181,7 +181,7 @@ If something only exists as a Server Action today, add a **thin API** or **RPC**
 
 ---
 
-### Phase 7 — Hardening (ongoing)
+### Phase 7 - Hardening (ongoing)
 
 1. **Error boundaries** per stack (Expo Router error boundaries).
 2. **Analytics** (optional): Sentry for React Native.
@@ -190,7 +190,7 @@ If something only exists as a Server Action today, add a **thin API** or **RPC**
 
 ---
 
-## 6. Using React Native “full powers” — checklist
+## 6. Using React Native “full powers” - checklist
 
 - [ ] **FlashList** for catalog and line items (not only `FlatList`).
 - [ ] **Reanimated 3** for sheet, button press, cart total updates.
@@ -236,4 +236,4 @@ Enable **new architecture** if templates recommend it (Expo SDK 52+ defaults are
 
 ---
 
-*This is a guideline, not a guarantee of timelines — adjust per team size and backend gaps.*
+*This is a guideline, not a guarantee of timelines - adjust per team size and backend gaps.*

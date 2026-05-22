@@ -231,7 +231,7 @@ export default function DashboardScreen() {
       >
         <Text className={insightsPromoTitleClass(resolved)}>Business insights</Text>
         <Text className={insightsPromoHintClass(resolved)}>
-          Sales by day and top products — same metrics as the web dashboard charts.
+          Sales by day and top products - same metrics as the web dashboard charts.
         </Text>
       </Pressable>
 
@@ -251,7 +251,7 @@ export default function DashboardScreen() {
               Quick sale
             </Text>
             <Text className={`mt-1 text-sm leading-5 ${textSubtleClass(resolved)}`}>
-              Search products, tap to add, complete cash sale — receipt ready to share or print.
+              Search products, tap to add, complete cash sale - receipt ready to share or print.
             </Text>
           </View>
           <Text className="text-2xl text-brand-400">→</Text>

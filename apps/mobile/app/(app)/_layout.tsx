@@ -76,7 +76,7 @@ export default function AppGroupLayout() {
         tabBarAllowFontScaling: false,
         /** Shorter strings + bounded width so labels ellipsize instead of spilling past the pill. */
         tabBarLabelStyle: {
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: "600",
           width: "100%",
           textAlign: "center",
@@ -87,12 +87,15 @@ export default function AppGroupLayout() {
           borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
+          height: 62,
+          paddingTop: 6,
+          paddingBottom: Platform.OS === "ios" ? 8 : 6,
         },
         tabBarItemStyle: {
           flex: 1,
           minWidth: 0,
-          paddingHorizontal: 2,
-          paddingTop: Platform.OS === "ios" ? 4 : 2,
+          paddingHorizontal: 4,
+          paddingTop: 0,
         },
         tabBarIcon: ({ color, focused, size }) => {
           const icons = TAB_ICONS[route.name];

@@ -36,7 +36,7 @@ const MAX_SINGLE_PAGE_TIGHT_MM = 240;
 
 /**
  * Rough height estimate so the PDF page length matches the receipt (thermal
- * printers often feed paper by PDF page height — tall pages waste blank roll).
+ * printers often feed paper by PDF page height - tall pages waste blank roll).
  */
 function estimateReceiptHeightMm(
   items: InvoiceItemPrintRow[],
@@ -191,7 +191,7 @@ export function InvoicePdfDocument({
   copyLabel,
 }: Props) {
   const intlTag = intlLocaleTag(locale);
-  const dash = "—";
+  const dash = "-";
   const statusLabel =
     invoice.status === "paid"
       ? labels.statusPaid

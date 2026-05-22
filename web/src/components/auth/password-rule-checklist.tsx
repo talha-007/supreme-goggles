@@ -31,7 +31,7 @@ export function PasswordRuleChecklist({ status }: Props) {
           }
         >
           <span className="me-1.5" aria-hidden>
-            {row.ok ? "âœ“" : "â—‹"}
+            {row.ok ? "âœ“" : "â-‹"}
           </span>
           {row.label}
         </li>
