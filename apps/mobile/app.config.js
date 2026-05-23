@@ -43,6 +43,12 @@ module.exports = ({ config }) => {
           cameraPermission: "Allow Taplite to take photos for product images.",
         },
       ],
+      [
+        "expo-contacts",
+        {
+          contactsPermission: "Allow Taplite to access contacts for quick customer/supplier phone selection.",
+        },
+      ],
     ],
     extra: {
       ...config.extra,

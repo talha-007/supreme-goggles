@@ -21,7 +21,9 @@ import { PrimaryButton } from "../../src/components/PrimaryButton";
 import { SearchBar } from "../../src/components/SearchBar";
 import { useAuth } from "../../src/contexts/auth-context";
 import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
+import { pickPhoneFromContacts } from "../../src/lib/contact-picker";
 import { supabase } from "../../src/lib/supabase";
+import { normalizeWhatsAppPhone } from "../../src/lib/whatsapp-alerts";
 import {
   bottomSheetContainerClass,
   listEntityCardClass,
@@ -61,6 +63,7 @@ export default function SuppliersScreen() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [saving, setSaving] = useState(false);
+  const [pickingPhone, setPickingPhone] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const [detail, setDetail] = useState<SupplierListRow | null>(null);
@@ -125,12 +128,18 @@ export default function SuppliersScreen() {
       setSaveError("Name is required.");
       return;
     }
+    const rawPhone = phone.trim();
+    const normalizedPhone = rawPhone.length > 0 ? normalizeWhatsAppPhone(rawPhone) : null;
+    if (rawPhone.length > 0 && !normalizedPhone) {
+      setSaveError("Enter a valid phone number.");
+      return;
+    }
     setSaving(true);
     setSaveError(null);
     const { error: insErr } = await supabase.from("suppliers").insert({
       business_id: businessId,
       name: n,
-      phone: phone.trim() || null,
+      phone: normalizedPhone,
       email: email.trim() || null,
       is_active: true,
     });
@@ -234,6 +243,33 @@ export default function SuppliersScreen() {
                 placeholder="Optional"
                 keyboardType="phone-pad"
               />
+              <Pressable
+                onPress={() => {
+                  void (async () => {
+                    setPickingPhone(true);
+                    const result = await pickPhoneFromContacts();
+                    setPickingPhone(false);
+                    if (result.phone) {
+                      setPhone(result.phone);
+                      return;
+                    }
+                    if (result.error) {
+                      setSaveError(result.error);
+                    }
+                  })();
+                }}
+                disabled={saving || pickingPhone}
+                className={`mb-3 flex-row items-center justify-center rounded-xl border py-2.5 active:opacity-90 disabled:opacity-50 ${
+                  resolved === "dark" ? "border-neutral-700 bg-neutral-900" : "border-zinc-300 bg-zinc-100"
+                }`}
+                accessibilityRole="button"
+                accessibilityLabel="Pick phone from contacts"
+              >
+                <Ionicons name="person-circle-outline" size={18} color={BRAND_ACCENT_HEX} />
+                <Text className={`ml-1.5 text-sm font-medium ${textSubtleClass(resolved)}`}>
+                  {pickingPhone ? "Opening contacts..." : "Pick from contacts"}
+                </Text>
+              </Pressable>
               <FormField
                 label="Email"
                 value={email}

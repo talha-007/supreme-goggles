@@ -23,7 +23,15 @@ import {
 import { IN_APP_DATA_PROCESSING_SUMMARY } from "../../src/lib/privacy-config";
 import { openSupportWhatsApp, SUPPORT_PHONE_DISPLAY } from "../../src/lib/support-contact";
 import { supabase } from "../../src/lib/supabase";
-import { screenRootClass, insetPanelClass, insetPanelRowClass, settingsWideRowClass } from "../../src/theme/semantic";
+import {
+  screenRootClass,
+  insetPanelClass,
+  insetPanelRowClass,
+  settingsWideRowClass,
+  textMutedClass,
+  textStrongOnSurfaceClass,
+  textSubtleClass,
+} from "../../src/theme/semantic";
 
 export default function SettingsScreen() {
   const bottomPad = useTabScreenBottomPadding();
@@ -235,12 +243,12 @@ export default function SettingsScreen() {
         contentContainerClassName="px-4 pt-4"
         contentContainerStyle={{ paddingBottom: bottomPad }}
       >
-        <Text className="text-base text-neutral-400">
+        <Text className={`text-base ${textSubtleClass(resolved)}`}>
           Account, shop info, and how the app tells you when data changes.
         </Text>
 
-        <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">Appearance</Text>
-        <Text className="mt-1 text-xs text-neutral-500">
+        <Text className={`mt-8 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>Appearance</Text>
+        <Text className={`mt-1 text-xs ${textMutedClass(resolved)}`}>
           Match the shell to the system, or lock to light or dark. Tab bar and headers follow this choice.
         </Text>
         <View className="mt-3 flex-row gap-2">
@@ -276,14 +284,14 @@ export default function SettingsScreen() {
 
         {user?.email ? (
           <View className={`mt-6 ${insetPanelClass(resolved)}`}>
-            <Text className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <Text className={`text-xs font-medium uppercase tracking-wide ${textMutedClass(resolved)}`}>
               Signed in as
             </Text>
-            <Text className="mt-1 text-base text-neutral-100">{user.email}</Text>
+            <Text className={`mt-1 text-base ${textStrongOnSurfaceClass(resolved)}`}>{user.email}</Text>
           </View>
         ) : null}
 
-        <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+        <Text className={`mt-8 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
           Your shop
         </Text>
         <View className={`mt-3 ${insetPanelClass(resolved)}`}>
@@ -292,7 +300,7 @@ export default function SettingsScreen() {
           ) : (
             <>
               {!canManageShop ? (
-                <Text className="mb-3 text-xs text-amber-200/90">
+                <Text className={`mb-3 text-xs ${resolved === "dark" ? "text-amber-200/90" : "text-amber-800"}`}>
                   Only owners and managers can change the shop name or logo.
                 </Text>
               ) : null}
@@ -307,7 +315,7 @@ export default function SettingsScreen() {
                 autoCapitalize="words"
                 editable={canManageShop}
               />
-              <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">Logo</Text>
+              <Text className={`mb-2 text-xs font-medium uppercase tracking-wide ${textMutedClass(resolved)}`}>Logo</Text>
               <View className="flex-row items-center gap-4">
                 <ProductThumbnail
                   imageUrl={
@@ -321,11 +329,15 @@ export default function SettingsScreen() {
                   <Pressable
                     onPress={() => void pickShopLogo()}
                     disabled={!canManageShop}
-                    className="rounded-xl border border-brand-700/50 bg-brand-950/25 px-3 py-2.5 active:opacity-90 disabled:opacity-50"
+                    className={`rounded-xl border px-3 py-2.5 active:opacity-90 disabled:opacity-50 ${
+                      resolved === "dark"
+                        ? "border-brand-700/50 bg-brand-950/25"
+                        : "border-brand-300 bg-brand-50"
+                    }`}
                     accessibilityRole="button"
                     accessibilityLabel="Choose logo image"
                   >
-                    <Text className="text-center text-sm font-semibold text-brand-400">
+                    <Text className={`text-center text-sm font-semibold ${resolved === "dark" ? "text-brand-400" : "text-brand-800"}`}>
                       {pendingLogoUri ? "Change chosen image" : "Choose image"}
                     </Text>
                   </Pressable>
@@ -338,11 +350,13 @@ export default function SettingsScreen() {
                         setPendingLogoMime(null);
                       }}
                       disabled={!canManageShop}
-                      className="rounded-xl border border-neutral-700 px-3 py-2.5 active:opacity-90 disabled:opacity-50"
+                      className={`rounded-xl border px-3 py-2.5 active:opacity-90 disabled:opacity-50 ${
+                        resolved === "dark" ? "border-neutral-700" : "border-zinc-300 bg-zinc-100"
+                      }`}
                       accessibilityRole="button"
                       accessibilityLabel="Remove logo"
                     >
-                      <Text className="text-center text-sm font-medium text-neutral-400">Remove logo</Text>
+                      <Text className={`text-center text-sm font-medium ${textSubtleClass(resolved)}`}>Remove logo</Text>
                     </Pressable>
                   ) : removeLogo ? (
                     <Pressable
@@ -351,18 +365,22 @@ export default function SettingsScreen() {
                         setRemoveLogo(false);
                       }}
                       disabled={!canManageShop}
-                      className="rounded-xl border border-neutral-700 px-3 py-2.5 active:opacity-90 disabled:opacity-50"
+                      className={`rounded-xl border px-3 py-2.5 active:opacity-90 disabled:opacity-50 ${
+                        resolved === "dark" ? "border-neutral-700" : "border-zinc-300 bg-zinc-100"
+                      }`}
                     >
-                      <Text className="text-center text-sm font-medium text-brand-400">Undo remove</Text>
+                      <Text className={`text-center text-sm font-medium ${resolved === "dark" ? "text-brand-400" : "text-brand-800"}`}>
+                        Undo remove
+                      </Text>
                     </Pressable>
                   ) : null}
                 </View>
               </View>
-              <Text className="mt-2 text-xs text-neutral-600">
+              <Text className={`mt-2 text-xs ${textMutedClass(resolved)}`}>
                 Square crop is applied when you pick. Shown on receipts and PDFs where supported.
               </Text>
               {profileSaveError ? (
-                <Text className="mt-2 text-sm text-red-400" accessibilityRole="alert">
+                <Text className={`mt-2 text-sm ${resolved === "dark" ? "text-red-400" : "text-red-700"}`} accessibilityRole="alert">
                   {profileSaveError}
                 </Text>
               ) : null}
@@ -379,10 +397,10 @@ export default function SettingsScreen() {
           )}
         </View>
 
-        <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+        <Text className={`mt-8 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
           New bill defaults
         </Text>
-        <Text className="mt-1 text-xs text-neutral-600">
+        <Text className={`mt-1 text-xs ${textMutedClass(resolved)}`}>
           Used for Quick sale and new invoices. Invoice discount is a fixed PKR amount off each new bill; line discount
           is a default % on new lines.
         </Text>
@@ -392,7 +410,7 @@ export default function SettingsScreen() {
           ) : (
             <>
               {!canManageShop ? (
-                <Text className="mb-3 text-xs text-amber-200/90">
+                <Text className={`mb-3 text-xs ${resolved === "dark" ? "text-amber-200/90" : "text-amber-800"}`}>
                   Only owners and managers can change tax and discount defaults. Ask your shop owner if you need this
                   updated.
                 </Text>
@@ -430,7 +448,7 @@ export default function SettingsScreen() {
                 keyboardType="decimal-pad"
                 editable={canManageShop}
               />
-              <Text className="-mt-2 mb-1 text-xs text-neutral-600">
+              <Text className={`-mt-2 mb-1 text-xs ${textMutedClass(resolved)}`}>
                 Applied as the starting line discount when you add lines to a new bill (0–100).
               </Text>
               <FormField
@@ -444,7 +462,7 @@ export default function SettingsScreen() {
                 autoCapitalize="words"
                 editable={canManageShop}
               />
-              <Text className="-mt-2 mb-3 text-xs text-neutral-600">
+              <Text className={`-mt-2 mb-3 text-xs ${textMutedClass(resolved)}`}>
                 Shown on receipts and PDFs instead of a generic “Tax” label when set.
               </Text>
               {defaultsError ? <ErrorBannerWithSupport message={defaultsError} variant="compact" /> : null}
@@ -461,10 +479,10 @@ export default function SettingsScreen() {
           )}
         </View>
 
-        <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+        <Text className={`mt-8 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
           Live data and alerts
         </Text>
-        <Text className="mt-1 text-xs text-neutral-600">
+        <Text className={`mt-1 text-xs ${textMutedClass(resolved)}`}>
           When someone else saves a bill or edits stock, your phone can refresh lists and optionally buzz.
         </Text>
 
@@ -476,8 +494,8 @@ export default function SettingsScreen() {
           <View className="mt-4 gap-4">
             <View className={insetPanelRowClass(resolved)}>
               <View className="min-w-0 flex-1 pr-2">
-                <Text className="text-base font-medium text-neutral-100">Live updates</Text>
-                <Text className="mt-1 text-xs text-neutral-500">
+                <Text className={`text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>Live updates</Text>
+                <Text className={`mt-1 text-xs ${textMutedClass(resolved)}`}>
                   Listen for changes to bills and products for this shop.
                 </Text>
               </View>
@@ -491,8 +509,8 @@ export default function SettingsScreen() {
 
             <View className={insetPanelRowClass(resolved)}>
               <View className="min-w-0 flex-1 pr-2">
-                <Text className="text-base font-medium text-neutral-100">Banner message</Text>
-                <Text className="mt-1 text-xs text-neutral-500">
+                <Text className={`text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>Banner message</Text>
+                <Text className={`mt-1 text-xs ${textMutedClass(resolved)}`}>
                   Show a short notice at the top when data changes.
                 </Text>
               </View>
@@ -507,8 +525,8 @@ export default function SettingsScreen() {
 
             <View className={insetPanelRowClass(resolved)}>
               <View className="min-w-0 flex-1 pr-2">
-                <Text className="text-base font-medium text-neutral-100">Buzz on alert</Text>
-                <Text className="mt-1 text-xs text-neutral-500">
+                <Text className={`text-base font-medium ${textStrongOnSurfaceClass(resolved)}`}>Buzz on alert</Text>
+                <Text className={`mt-1 text-xs ${textMutedClass(resolved)}`}>
                   Short vibration when lists refresh after a change.
                 </Text>
               </View>
@@ -523,10 +541,10 @@ export default function SettingsScreen() {
           </View>
         )}
 
-        <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+        <Text className={`mt-8 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
           Privacy and data
         </Text>
-        <Text className="mt-2 text-sm leading-5 text-neutral-400">{IN_APP_DATA_PROCESSING_SUMMARY}</Text>
+        <Text className={`mt-2 text-sm leading-5 ${textSubtleClass(resolved)}`}>{IN_APP_DATA_PROCESSING_SUMMARY}</Text>
         <Pressable
           onPress={() => router.push("/privacy-policy")}
           accessibilityRole="button"
@@ -534,18 +552,18 @@ export default function SettingsScreen() {
           className={settingsWideRowClass(resolved)}
         >
           <View className="min-w-0 flex-1">
-            <Text className="text-base font-semibold text-sky-400">Privacy policy</Text>
-            <Text className="mt-0.5 text-xs text-neutral-500">
+            <Text className={`text-base font-semibold ${resolved === "dark" ? "text-sky-400" : "text-sky-800"}`}>Privacy policy</Text>
+            <Text className={`mt-0.5 text-xs ${textMutedClass(resolved)}`}>
               Standard POS disclosure - collection, use, sharing, retention, and your rights
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={22} color="#737373" />
+          <Ionicons name="chevron-forward" size={22} color={resolved === "dark" ? "#737373" : "#52525b"} />
         </Pressable>
 
-        <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+        <Text className={`mt-8 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
           Help and support
         </Text>
-        <Text className="mt-1 text-xs text-neutral-600">
+        <Text className={`mt-1 text-xs ${textMutedClass(resolved)}`}>
           Problems with the app, billing, or sign-in - contact your shop admin first, then message app support if you
           still need help.
         </Text>
@@ -553,26 +571,30 @@ export default function SettingsScreen() {
           onPress={() => void openSupportWhatsApp()}
           accessibilityRole="button"
           accessibilityLabel="Open WhatsApp app support"
-          className="mt-3 flex-row items-center gap-3 rounded-xl border border-brand-800/50 bg-brand-950/35 px-4 py-3.5 active:opacity-90"
+          className={`mt-3 flex-row items-center gap-3 rounded-xl border px-4 py-3.5 active:opacity-90 ${
+            resolved === "dark" ? "border-brand-800/50 bg-brand-950/35" : "border-brand-300 bg-brand-50"
+          }`}
         >
           <Ionicons name="logo-whatsapp" size={28} color={BRAND_ACCENT_HEX} />
           <View className="min-w-0 flex-1">
-            <Text className="text-base font-semibold text-brand-400">WhatsApp support</Text>
-            <Text className="mt-0.5 text-sm text-neutral-400">{SUPPORT_PHONE_DISPLAY}</Text>
+            <Text className={`text-base font-semibold ${resolved === "dark" ? "text-brand-400" : "text-brand-800"}`}>WhatsApp support</Text>
+            <Text className={`mt-0.5 text-sm ${textSubtleClass(resolved)}`}>{SUPPORT_PHONE_DISPLAY}</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#737373" />
+          <Ionicons name="chevron-forward" size={20} color={resolved === "dark" ? "#737373" : "#52525b"} />
         </Pressable>
 
-        <Text className="mt-8 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+        <Text className={`mt-8 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
           Account
         </Text>
         <Pressable
           onPress={onSignOutPress}
           accessibilityRole="button"
           accessibilityLabel="Sign out"
-          className="mt-3 rounded-xl border border-red-900/60 bg-red-950/40 px-4 py-3.5 active:opacity-90"
+          className={`mt-3 rounded-xl border px-4 py-3.5 active:opacity-90 ${
+            resolved === "dark" ? "border-red-900/60 bg-red-950/40" : "border-red-300 bg-red-50"
+          }`}
         >
-          <Text className="text-center text-base font-semibold text-red-400">Sign out</Text>
+          <Text className={`text-center text-base font-semibold ${resolved === "dark" ? "text-red-400" : "text-red-800"}`}>Sign out</Text>
         </Pressable>
       </ScrollView>
 

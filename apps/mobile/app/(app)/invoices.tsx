@@ -42,6 +42,7 @@ import {
 } from "../../src/lib/date-range-presets";
 import { formatPkr } from "../../src/lib/format-money";
 import { supabase } from "../../src/lib/supabase";
+import { buildCreditInvoiceAlert, openWhatsAppMessage } from "../../src/lib/whatsapp-alerts";
 import {
   bottomSheetContainerClass,
   chipInactiveBorder,
@@ -289,6 +290,7 @@ export default function InvoicesScreen() {
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [receiptText, setReceiptText] = useState("");
   const [receiptFetchBusy, setReceiptFetchBusy] = useState(false);
+  const [waBusy, setWaBusy] = useState(false);
   /** product_id -> image_url for invoice line display */
   const [detailLineImages, setDetailLineImages] = useState<Record<string, string | null>>({});
 
@@ -831,6 +833,23 @@ export default function InvoicesScreen() {
     }
   }, [businessId, detailId]);
 
+  const onSendCreditWhatsApp = useCallback(async () => {
+    if (!detail) return;
+    const due = Math.max(0, roundMoney(detail.total_amount - detail.paid_amount));
+    const msg = buildCreditInvoiceAlert({
+      customerName: detail.customer?.name ?? null,
+      invoiceNumber: detail.invoice_number,
+      totalAmount: detail.total_amount,
+      dueAmount: due,
+    });
+    setWaBusy(true);
+    const { error: waErr } = await openWhatsAppMessage(detail.customer?.phone ?? null, msg);
+    setWaBusy(false);
+    if (waErr) {
+      setDetailError(waErr);
+    }
+  }, [detail]);
+
   const balanceDue =
     detail != null
       ? Math.max(0, roundMoney(detail.total_amount - detail.paid_amount))
@@ -1368,6 +1387,28 @@ export default function InvoicesScreen() {
                     </Text>
                     <Text className={`mt-1 px-1 text-center text-[11px] leading-4 ${textMutedClass(resolved)}`}>
                       Opens a preview - use Share to send to WhatsApp, email, or a printer app.
+                    </Text>
+                  </Pressable>
+                ) : null}
+
+                {(detail.status === "unpaid" || detail.status === "partial") && detail.customer?.phone ? (
+                  <Pressable
+                    onPress={() => void onSendCreditWhatsApp()}
+                    disabled={waBusy}
+                    className={
+                      resolved === "dark"
+                        ? "mt-3 rounded-xl border border-emerald-700/50 bg-emerald-950/35 py-3.5 active:opacity-90 disabled:opacity-50"
+                        : "mt-3 rounded-xl border border-emerald-300 bg-emerald-50 py-3.5 active:opacity-90 disabled:opacity-50"
+                    }
+                    accessibilityRole="button"
+                    accessibilityLabel="Send WhatsApp credit alert"
+                  >
+                    <Text
+                      className={`text-center text-base font-semibold ${
+                        resolved === "dark" ? "text-emerald-300" : "text-emerald-900"
+                      }`}
+                    >
+                      {waBusy ? "Opening WhatsApp..." : "Send WhatsApp credit alert"}
                     </Text>
                   </Pressable>
                 ) : null}

@@ -33,7 +33,7 @@ export function tabBarActiveTint(resolved: ResolvedScheme): string {
 }
 
 export function tabBarInactiveTint(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "#737373" : "#71717a";
+  return resolved === "dark" ? "#737373" : "#52525b";
 }
 
 /** Primary CTA (Taplite brand violet). */
@@ -49,7 +49,7 @@ export function chipActiveBorder(resolved: ResolvedScheme): string {
 }
 
 export function chipInactiveBorder(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "border-neutral-700 bg-neutral-900" : "border-zinc-300 bg-zinc-50";
+  return resolved === "dark" ? "border-neutral-700 bg-neutral-900" : "border-zinc-400 bg-zinc-100";
 }
 
 export function chipActiveText(resolved: ResolvedScheme): string {
@@ -57,7 +57,7 @@ export function chipActiveText(resolved: ResolvedScheme): string {
 }
 
 export function chipInactiveText(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "text-neutral-300" : "text-zinc-700";
+  return resolved === "dark" ? "text-neutral-300" : "text-zinc-800";
 }
 
 export function positiveAmountClass(resolved: ResolvedScheme): string {
@@ -91,19 +91,19 @@ export function textSectionBodyClass(resolved: ResolvedScheme): string {
 }
 
 export function textBodyClass(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "text-neutral-300" : "text-zinc-700";
+  return resolved === "dark" ? "text-neutral-300" : "text-zinc-800";
 }
 
 export function textMutedClass(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "text-neutral-500" : "text-zinc-500";
+  return resolved === "dark" ? "text-neutral-500" : "text-zinc-600";
 }
 
 export function textSubtleClass(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "text-neutral-400" : "text-zinc-600";
+  return resolved === "dark" ? "text-neutral-400" : "text-zinc-700";
 }
 
 export function textFieldLabelClass(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "text-neutral-300" : "text-zinc-700";
+  return resolved === "dark" ? "text-neutral-300" : "text-zinc-800";
 }
 
 export function textStrongOnSurfaceClass(resolved: ResolvedScheme): string {
@@ -119,7 +119,7 @@ export function listEntityCardClass(resolved: ResolvedScheme): string {
 export function bottomSheetContainerClass(resolved: ResolvedScheme): string {
   return resolved === "dark"
     ? "rounded-t-2xl bg-neutral-950"
-    : "rounded-t-2xl border-t border-zinc-200 bg-zinc-50";
+    : "rounded-t-2xl border-t border-zinc-300 bg-white";
 }
 
 export function rowLinkCardClass(resolved: ResolvedScheme): string {
@@ -161,13 +161,13 @@ export function settingsWideRowClass(resolved: ResolvedScheme): string {
 export function formLineItemClass(resolved: ResolvedScheme): string {
   return resolved === "dark"
     ? "mb-4 rounded-xl border border-neutral-800 bg-neutral-900/50 p-3"
-    : "mb-4 rounded-xl border border-zinc-200 bg-zinc-50 p-3";
+    : "mb-4 rounded-xl border border-zinc-300 bg-white p-3";
 }
 
 export function stackedMutedPanelClass(resolved: ResolvedScheme): string {
   return resolved === "dark"
     ? "mt-3 rounded-xl border border-neutral-800 bg-neutral-900/60 px-3 py-3"
-    : "mt-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3";
+    : "mt-3 rounded-xl border border-zinc-300 bg-white px-3 py-3";
 }
 
 export function modalDialogSurfaceClass(resolved: ResolvedScheme): string {
@@ -179,7 +179,7 @@ export function modalDialogSurfaceClass(resolved: ResolvedScheme): string {
 export function modalSecondaryButtonClass(resolved: ResolvedScheme): string {
   return resolved === "dark"
     ? "rounded-xl bg-neutral-800 py-3.5 active:opacity-90 disabled:opacity-50"
-    : "rounded-xl bg-zinc-200 py-3.5 active:opacity-90 disabled:opacity-50";
+    : "rounded-xl bg-zinc-300 py-3.5 active:opacity-90 disabled:opacity-50";
 }
 
 export function receiptSheetSurfaceClass(resolved: ResolvedScheme): string {
@@ -191,7 +191,7 @@ export function receiptSheetSurfaceClass(resolved: ResolvedScheme): string {
 export function searchBarWrapClass(resolved: ResolvedScheme): string {
   return resolved === "dark"
     ? "flex-row items-center rounded-2xl border border-neutral-800/90 bg-neutral-900/90 px-3 shadow-sm"
-    : "flex-row items-center rounded-2xl border border-zinc-200 bg-white px-3 shadow-sm";
+    : "flex-row items-center rounded-2xl border border-zinc-300 bg-white px-3 shadow-sm";
 }
 
 export type FormInputVariant = "normal" | "error" | "warning";
@@ -204,7 +204,7 @@ export function formTextInputClass(resolved: ResolvedScheme, variant: FormInputV
         ? "border-amber-500/80"
         : resolved === "dark"
           ? "border-neutral-800"
-          : "border-zinc-200";
+          : "border-zinc-300";
   const surface =
     resolved === "dark" ? "bg-neutral-900 text-neutral-100" : "bg-white text-zinc-900";
   return `rounded-xl border text-base ${surface} ${border}`;
@@ -213,7 +213,7 @@ export function formTextInputClass(resolved: ResolvedScheme, variant: FormInputV
 export function insightsPromoCardClass(resolved: ResolvedScheme): string {
   return resolved === "dark"
     ? "mt-4 rounded-xl border border-sky-600/40 bg-sky-950/25 px-4 py-3.5 active:opacity-90"
-    : "mt-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3.5 active:opacity-90";
+    : "mt-4 rounded-xl border border-sky-300 bg-sky-100 px-4 py-3.5 active:opacity-90";
 }
 
 export function insightsPromoTitleClass(resolved: ResolvedScheme): string {
@@ -223,39 +223,39 @@ export function insightsPromoTitleClass(resolved: ResolvedScheme): string {
 }
 
 export function insightsPromoHintClass(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "mt-1 text-center text-xs text-neutral-500" : "mt-1 text-center text-xs text-zinc-600";
+  return resolved === "dark" ? "mt-1 text-center text-xs text-neutral-500" : "mt-1 text-center text-xs text-zinc-700";
 }
 
 export function quickSalePromoCardClass(resolved: ResolvedScheme): string {
   return resolved === "dark"
     ? "mt-6 rounded-2xl border border-brand-600/40 bg-brand-950/35 px-4 py-4 active:opacity-90"
-    : "mt-6 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-4 active:opacity-90";
+    : "mt-6 rounded-2xl border border-brand-300 bg-brand-100 px-4 py-4 active:opacity-90";
 }
 
 export function hairlineBorderBClass(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "border-b border-neutral-800" : "border-b border-zinc-200";
+  return resolved === "dark" ? "border-b border-neutral-800" : "border-b border-zinc-300";
 }
 
 export function hairlineBorderTClass(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "border-t border-neutral-800" : "border-t border-zinc-200";
+  return resolved === "dark" ? "border-t border-neutral-800" : "border-t border-zinc-300";
 }
 
 export function stickyFooterBarClass(resolved: ResolvedScheme): string {
   return resolved === "dark"
     ? "absolute bottom-0 left-0 right-0 border-t border-neutral-800 bg-neutral-950 px-4 pt-2"
-    : "absolute bottom-0 left-0 right-0 border-t border-zinc-200 bg-zinc-50 px-4 pt-2";
+    : "absolute bottom-0 left-0 right-0 border-t border-zinc-300 bg-white px-4 pt-2";
 }
 
 export function listRowPressableClass(resolved: ResolvedScheme): string {
   return resolved === "dark"
     ? "border-b border-neutral-800 px-4 py-3.5 active:bg-neutral-900"
-    : "border-b border-zinc-200 px-4 py-3.5 active:bg-zinc-100";
+    : "border-b border-zinc-300 px-4 py-3.5 active:bg-zinc-200";
 }
 
 export function compactPressableFieldClass(resolved: ResolvedScheme): string {
   return resolved === "dark"
     ? "rounded-xl border border-neutral-700 bg-neutral-900 px-3 py-2.5 active:opacity-90"
-    : "rounded-xl border border-zinc-200 bg-white px-3 py-2.5 active:opacity-90 shadow-sm";
+    : "rounded-xl border border-zinc-300 bg-white px-3 py-2.5 active:opacity-90 shadow-sm";
 }
 
 export function borderedSurfaceClass(resolved: ResolvedScheme): string {
@@ -283,11 +283,11 @@ export function realtimeBannerTextClass(resolved: ResolvedScheme): string {
 }
 
 export function introFooterDividerClass(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "border-t border-neutral-800" : "border-t border-zinc-200";
+  return resolved === "dark" ? "border-t border-neutral-800" : "border-t border-zinc-300";
 }
 
 export function pagerDotInactiveClass(resolved: ResolvedScheme): string {
-  return resolved === "dark" ? "bg-neutral-700" : "bg-zinc-300";
+  return resolved === "dark" ? "bg-neutral-700" : "bg-zinc-400";
 }
 
 export function themePreferenceLabel(p: ThemePreference): string {

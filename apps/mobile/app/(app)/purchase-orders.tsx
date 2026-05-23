@@ -33,6 +33,7 @@ import {
   type ProductUnit,
 } from "../../src/lib/po-workflow";
 import { supabase } from "../../src/lib/supabase";
+import { buildSupplierPurchaseAlert, openWhatsAppMessage } from "../../src/lib/whatsapp-alerts";
 import {
   borderedSurfaceClass,
   bottomSheetContainerClass,
@@ -208,6 +209,7 @@ export default function PurchaseOrdersScreen() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailActionError, setDetailActionError] = useState<string | null>(null);
   const [workflowBusy, setWorkflowBusy] = useState(false);
+  const [waBusy, setWaBusy] = useState(false);
 
   const [productPickOpen, setProductPickOpen] = useState(false);
   const [linkingItemId, setLinkingItemId] = useState<string | null>(null);
@@ -554,6 +556,21 @@ export default function PurchaseOrdersScreen() {
     setDetailActionError(null);
     setCancelPoConfirmOpen(true);
   };
+
+  const onSendSupplierWhatsApp = useCallback(async () => {
+    if (!detail) return;
+    const msg = buildSupplierPurchaseAlert({
+      supplierName: detail.supplier?.name ?? null,
+      poNumber: detail.po_number,
+      totalAmount: detail.total_amount,
+    });
+    setWaBusy(true);
+    const { error: waErr } = await openWhatsAppMessage(detail.supplier?.phone ?? null, msg);
+    setWaBusy(false);
+    if (waErr) {
+      setDetailActionError(waErr);
+    }
+  }, [detail]);
 
   const confirmCancelPo = async () => {
     if (!businessId || !detailId) return;
@@ -975,6 +992,28 @@ export default function PurchaseOrdersScreen() {
                 ))}
 
                 <View className="mt-6 gap-3">
+                  {detail.supplier?.phone && detail.status !== "draft" && detail.status !== "cancelled" ? (
+                    <Pressable
+                      onPress={() => void onSendSupplierWhatsApp()}
+                      disabled={waBusy}
+                      className={
+                        resolved === "dark"
+                          ? "rounded-xl border border-emerald-700/50 bg-emerald-950/35 py-3.5 active:opacity-90 disabled:opacity-50"
+                          : "rounded-xl border border-emerald-300 bg-emerald-50 py-3.5 active:opacity-90 disabled:opacity-50"
+                      }
+                      accessibilityRole="button"
+                      accessibilityLabel="Send supplier WhatsApp alert"
+                    >
+                      <Text
+                        className={`text-center text-base font-semibold ${
+                          resolved === "dark" ? "text-emerald-300" : "text-emerald-900"
+                        }`}
+                      >
+                        {waBusy ? "Opening WhatsApp..." : "Send WhatsApp to supplier"}
+                      </Text>
+                    </Pressable>
+                  ) : null}
+
                   {detail.status === "draft" && poLinesFullyLinked(detail.items) ? (
                     <Pressable
                       onPress={() => void onPlaceOrder()}

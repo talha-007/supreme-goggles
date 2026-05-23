@@ -31,9 +31,11 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { ErrorBannerWithSupport } from "./ErrorBannerWithSupport";
 import { FormField } from "./FormField";
 import { PrimaryButton } from "./PrimaryButton";
+import { pickPhoneFromContacts } from "../lib/contact-picker";
 import { moneyCents, normalizeCustomer, roundMoney } from "../lib/customers-normalize";
 import { formatPkr } from "../lib/format-money";
 import { supabase } from "../lib/supabase";
+import { normalizeWhatsAppPhone } from "../lib/whatsapp-alerts";
 import {
   CUSTOMER_TYPES,
   type CustomerRow,
@@ -111,6 +113,7 @@ export function CustomerEditBottomSheet({
   const [isActive, setIsActive] = useState(true);
 
   const [saving, setSaving] = useState(false);
+  const [pickingPhone, setPickingPhone] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const [invRows, setInvRows] = useState<InvoiceListRow[]>([]);
@@ -201,6 +204,12 @@ export function CustomerEditBottomSheet({
       setSaveError("Name is required.");
       return;
     }
+    const rawPhone = phone.trim();
+    const normalizedPhone = rawPhone.length > 0 ? normalizeWhatsAppPhone(rawPhone) : null;
+    if (rawPhone.length > 0 && !normalizedPhone) {
+      setSaveError("Enter a valid phone number.");
+      return;
+    }
     const creditRaw = creditLimit.trim();
     const credit = creditRaw === "" ? 0 : Number(String(creditRaw).replace(/,/g, ""));
     if (!Number.isFinite(credit) || credit < 0) {
@@ -221,7 +230,7 @@ export function CustomerEditBottomSheet({
       .from("customers")
       .update({
         name: n,
-        phone: phone.trim() || null,
+        phone: normalizedPhone,
         email: email.trim() || null,
         address: address.trim() || null,
         type,
@@ -315,6 +324,33 @@ export function CustomerEditBottomSheet({
                     placeholder="Optional"
                     keyboardType="phone-pad"
                   />
+                  <Pressable
+                    onPress={() => {
+                      void (async () => {
+                        setPickingPhone(true);
+                        const result = await pickPhoneFromContacts();
+                        setPickingPhone(false);
+                        if (result.phone) {
+                          setPhone(result.phone);
+                          return;
+                        }
+                        if (result.error) {
+                          setSaveError(result.error);
+                        }
+                      })();
+                    }}
+                    disabled={saving || pickingPhone}
+                    className={`mb-3 flex-row items-center justify-center rounded-xl border py-2.5 active:opacity-90 disabled:opacity-50 ${
+                      resolved === "dark" ? "border-neutral-700 bg-neutral-900" : "border-zinc-300 bg-zinc-100"
+                    }`}
+                    accessibilityRole="button"
+                    accessibilityLabel="Pick phone from contacts"
+                  >
+                    <Ionicons name="person-circle-outline" size={18} color={BRAND_ACCENT_HEX} />
+                    <Text className={`ml-1.5 text-sm font-medium ${textSubtleClass(resolved)}`}>
+                      {pickingPhone ? "Opening contacts..." : "Pick from contacts"}
+                    </Text>
+                  </Pressable>
                   <FormField
                     label="Email"
                     value={email}
