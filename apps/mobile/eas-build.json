@@ -1,0 +1,48 @@
+﻿{
+  "id": "bbfaa252-fafb-48d6-90ee-a9e8c4b7c16f",
+  "status": "ERRORED",
+  "platform": "ANDROID",
+  "error": {
+    "errorCode": "EAS_BUILD_UNKNOWN_GRADLE_ERROR",
+    "message": "Gradle build failed with unknown error. See logs for the \"Run gradlew\" phase for more information."
+  },
+  "artifacts": {},
+  "fingerprint": {
+    "id": "019e5b62-c944-7f84-a8ff-3c67c7c80d17",
+    "hash": "dad68b6d177a17b2dec6302d113abe61ab3c7566"
+  },
+  "initiatingActor": {
+    "id": "387078bd-cbed-41c8-8115-87e19ec20681",
+    "displayName": "kakarot_7"
+  },
+  "logFiles": [
+    "https://storage.googleapis.com/eas-workflows-production/logs/3a8e0b3a-cbfa-4ab6-9957-865d3ffa0736/bbfaa252-fafb-48d6-90ee-a9e8c4b7c16f/2026-05-24T19%3A07%3A42Z-79783538-c6d2-4af1-a906-957d61b5b265.txt?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=www-production%40exponentjs.iam.gserviceaccount.com%2F20260524%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20260524T191428Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=c0d5132b11f93d2c817f790c48145c634348c88d076be862ce34da3528293ada55233de5f3cb9bc37b5410f953c5c0479e96eb076332a25d23af2fbd5bcd91ec4f65cb4f1286155c3904084e1e5137406d71cbbcc1f9b952cd9107e351ab25cb481759f412140b92164b761e7d07d9005fa5ccd2488296ba211dde2b0bc3898190cb9d9f283908668f2fc376b53b6a9526f39e970d76e91c3ea6de6d1aab07bd599dd8caad44f0d88f2593cc08205f6285b45428a981eab1cfb98e28361b285dc3a8fe1c3d47d82c961aaabc48ba0d476e809592d809e98faf9c6551807cefc2e8d5433027d6ca469a5f168e539bce479291067b001afeb17ebd1485513511e9"
+  ],
+  "project": {
+    "id": "3a8e0b3a-cbfa-4ab6-9957-865d3ffa0736",
+    "name": "pos-mobile",
+    "slug": "pos-mobile",
+    "ownerAccount": {
+      "id": "48856baf-f84f-463d-9015-3e52788c76b3",
+      "name": "kakarot_7"
+    }
+  },
+  "distribution": "STORE",
+  "buildProfile": "production-apk",
+  "sdkVersion": "54.0.0",
+  "appVersion": "1.0.0",
+  "appBuildVersion": "1",
+  "gitCommitHash": "144532f4ad040fb597008fd821d3e0eab4d5680a",
+  "gitCommitMessage": "Enhance mobile app functionality and UI with contact integration and theme updates\n\n- Added support for accessing contacts in the mobile app, allowing users to quickly select customer and supplier phone numbers.\n- Updated app configuration to include permissions for contacts access.\n- Refactored various screens to incorporate phone number normalization and selection from contacts.\n- Enhanced UI components with updated theme styles for better visual consistency across light and dark modes.\n- Improved error handling and user feedback for phone number input and WhatsApp messaging functionality.",
+  "priority": "NORMAL",
+  "createdAt": "2026-05-24T19:07:41.220Z",
+  "updatedAt": "2026-05-24T19:10:14.724Z",
+  "completedAt": "2026-05-24T19:10:14.525Z",
+  "expirationDate": "2026-06-23T19:07:41.246Z",
+  "isForIosSimulator": false,
+  "metrics": {
+    "buildWaitTime": 876,
+    "buildQueueTime": 4676,
+    "buildDuration": 147753
+  }
+}

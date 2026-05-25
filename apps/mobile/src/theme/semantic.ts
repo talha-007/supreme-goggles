@@ -130,8 +130,8 @@ export function rowLinkCardClass(resolved: ResolvedScheme): string {
 
 export function metricCardClass(resolved: ResolvedScheme): string {
   return resolved === "dark"
-    ? "min-w-[46%] flex-1 rounded-xl border border-neutral-800 bg-neutral-900/80 p-4"
-    : "min-w-[46%] flex-1 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm";
+    ? "w-[48%] rounded-xl border border-neutral-800 bg-neutral-900/80 p-4"
+    : "w-[48%] rounded-xl border border-zinc-200 bg-white p-4 shadow-sm";
 }
 
 export function metricCardCompactClass(resolved: ResolvedScheme): string {

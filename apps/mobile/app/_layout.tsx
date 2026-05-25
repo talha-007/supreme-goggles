@@ -1,3 +1,6 @@
+import "react-native-gesture-handler";
+import "react-native-reanimated";
+
 import "../global.css";
 
 import { Stack } from "expo-router";
@@ -5,6 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AppErrorBoundary } from "../src/components/AppErrorBoundary";
+import { ConfigGate } from "../src/components/ConfigGate";
 import { AuthProvider } from "../src/contexts/auth-context";
 import { ThemeProvider, useTheme } from "../src/contexts/theme-context";
 
@@ -28,14 +32,16 @@ function ThemedStack() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <SafeAreaProvider>
-          <AppErrorBoundary>
-            <ThemedStack />
-          </AppErrorBoundary>
-        </SafeAreaProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <AppErrorBoundary>
+      <ThemeProvider>
+        <ConfigGate>
+          <AuthProvider>
+            <SafeAreaProvider>
+              <ThemedStack />
+            </SafeAreaProvider>
+          </AuthProvider>
+        </ConfigGate>
+      </ThemeProvider>
+    </AppErrorBoundary>
   );
 }

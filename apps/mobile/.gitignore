@@ -27,3 +27,4 @@ android/local.properties
 .env
 .env.local
 .env.*.local
+src/config/embedded-env.generated.ts

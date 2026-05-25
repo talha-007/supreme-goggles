@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Redirect, Tabs } from "expo-router";
+import { router, Tabs } from "expo-router";
 import type { ComponentProps } from "react";
-import { ActivityIndicator, Platform, View } from "react-native";
+import { useEffect } from "react";
+import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
 
 import { FloatingTabBar } from "../../src/components/FloatingTabBar";
@@ -31,29 +32,24 @@ export default function AppGroupLayout() {
   const { session, loading, hasBusiness, subscriptionAccess } = useAuth();
   const { resolved } = useTheme();
 
-  if (loading) {
-    return (
-      <View className={`${screenRootClass(resolved)} items-center justify-center`}>
-        <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
-      </View>
-    );
-  }
-
-  if (!session) {
-    return <Redirect href="/login" />;
-  }
-
-  if (!hasBusiness) {
-    return <Redirect href="/onboarding" />;
-  }
-
-  if (!subscriptionAccess) {
-    return <Redirect href="/subscription-expired" />;
-  }
+  useEffect(() => {
+    if (loading) return;
+    if (!session) {
+      router.replace("/login");
+      return;
+    }
+    if (!hasBusiness) {
+      router.replace("/onboarding");
+      return;
+    }
+    if (!subscriptionAccess) {
+      router.replace("/subscription-expired");
+    }
+  }, [loading, session, hasBusiness, subscriptionAccess]);
 
   return (
     <RealtimeNotificationsProvider>
-      <View className={screenRootClass(resolved)}>
+      <View className={`${screenRootClass(resolved)} flex-1`}>
         <RealtimeUpdateBanner />
         <Tabs
       initialRouteName="dashboard"
@@ -107,7 +103,7 @@ export default function AppGroupLayout() {
         },
       })}
     >
-      <Tabs.Screen name="dashboard" options={{ title: "Home", tabBarLabel: "Home" }} />
+      <Tabs.Screen name="dashboard" options={{ title: "Home", tabBarLabel: "Home", headerBackVisible: false, gestureEnabled: false }} />
       <Tabs.Screen name="invoices" options={{ title: "Bill", tabBarLabel: "Bill" }} />
       <Tabs.Screen name="products" options={{ title: "Products", tabBarLabel: "Stock" }} />
       <Tabs.Screen name="customers" options={{ title: "Customers", tabBarLabel: "People" }} />
@@ -118,7 +114,19 @@ export default function AppGroupLayout() {
       <Tabs.Screen name="suppliers" options={{ href: null, title: "Suppliers" }} />
       <Tabs.Screen name="purchase-orders" options={{ href: null, title: "Purchase orders" }} />
         </Tabs>
+        {loading ? (
+          <View style={styles.authOverlay} className={`${screenRootClass(resolved)} items-center justify-center`}>
+            <ActivityIndicator size="large" color={BRAND_ACCENT_HEX} />
+          </View>
+        ) : null}
       </View>
     </RealtimeNotificationsProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  authOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 50,
+  },
+});

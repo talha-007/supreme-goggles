@@ -95,7 +95,16 @@ android {
         versionCode 1
         versionName "1.0.0"
 
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a"
+        }
+
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
+    }
+    splits {
+        abi {
+            enable false
+        }
     }
     signingConfigs {
         debug {
@@ -103,6 +112,8 @@ android {
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
+            v1SigningEnabled true
+            v2SigningEnabled true
         }
     }
     buildTypes {

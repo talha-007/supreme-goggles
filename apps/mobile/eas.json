@@ -34,15 +34,17 @@
     },
     "production-apk": {
       "extends": "production",
+      "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "NEXT_PUBLIC_SITE_URL": "https://www.taplite.store",
+        "NEXT_PUBLIC_SUPABASE_URL": "https://qqplffyjlpdhqwegbtea.supabase.co"
       }
     },
     "production-installable": {
-      "extends": "production-apk",
-      "android": {
-        "gradleCommand": ":app:assembleRelease -PreactNativeArchitectures=arm64-v8a"
-      }
+      "extends": "production-apk"
     }
   },
   "submit": {

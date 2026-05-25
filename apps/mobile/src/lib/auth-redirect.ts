@@ -1,5 +1,6 @@
 import { createURL } from "expo-linking";
-import Constants from "expo-constants";
+
+import { runtimeConfig } from "../config/runtime-config";
 
 /**
  * `emailRedirectTo` for mobile sign-up:
@@ -18,12 +19,7 @@ export function getEmailRedirectUrl(): string {
     typeof process.env.EXPO_PUBLIC_EMAIL_REDIRECT_USE_SITE_URL === "string" &&
     process.env.EXPO_PUBLIC_EMAIL_REDIRECT_USE_SITE_URL === "1";
 
-  const extra = Constants.expoConfig?.extra as { siteUrl?: string } | undefined;
-  const raw =
-    typeof extra?.siteUrl === "string" && extra.siteUrl.length > 0
-      ? extra.siteUrl
-      : "http://localhost:3000";
-  const siteUrl = raw.replace(/\/$/, "");
+  const siteUrl = runtimeConfig.siteUrl.replace(/\/$/, "");
   const httpsCallback = `${siteUrl}/auth/callback`;
 
   if (useSite || __DEV__) {
@@ -35,12 +31,7 @@ export function getEmailRedirectUrl(): string {
 
 /** Password reset email link: browser opens web `/auth/callback` then `/auth/update-password`. */
 export function getPasswordResetRedirectUrl(): string {
-  const extra = Constants.expoConfig?.extra as { siteUrl?: string } | undefined;
-  const raw =
-    typeof extra?.siteUrl === "string" && extra.siteUrl.length > 0
-      ? extra.siteUrl
-      : "http://localhost:3000";
-  const siteUrl = raw.replace(/\/$/, "");
+  const siteUrl = runtimeConfig.siteUrl.replace(/\/$/, "");
   const next = encodeURIComponent("/auth/update-password");
   return `${siteUrl}/auth/callback?next=${next}`;
 }

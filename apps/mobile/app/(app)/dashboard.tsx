@@ -1,7 +1,7 @@
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
-import { router, useNavigation } from "expo-router";
+import { router } from "expo-router";
 import { BRAND_ACCENT_HEX } from "../../src/theme/brand";
 
 import { useAuth } from "../../src/contexts/auth-context";
@@ -13,6 +13,7 @@ import {
   STATS_PERIOD_OPTIONS,
   type StatsDatePreset,
 } from "../../src/lib/date-range-presets";
+import { resolveInventoryCost } from "../../src/lib/inventory-cost";
 import { supabase } from "../../src/lib/supabase";
 import {
   chipActiveBorder,
@@ -46,7 +47,6 @@ const MORE_LINKS = [
 ] as const;
 
 export default function DashboardScreen() {
-  const navigation = useNavigation();
   const bottomPad = useTabScreenBottomPadding();
   const { businessId, user } = useAuth();
   const { refreshGeneration } = useRealtimeNotifications();
@@ -58,7 +58,11 @@ export default function DashboardScreen() {
     customers: number;
     drafts: number;
     periodSales: number;
+    periodInvoiceCount: number;
     outstanding: number;
+    inventoryCost: number;
+    lowStock: number;
+    openPos: number;
   } | null>(null);
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -78,6 +82,9 @@ export default function DashboardScreen() {
       draftsRes,
       receivableRes,
       periodRes,
+      inventoryCostRes,
+      reorderCandidatesRes,
+      openPoCountRes,
     ] = await Promise.all([
       supabase
         .from("products")
@@ -106,6 +113,19 @@ export default function DashboardScreen() {
         .gte("created_at", rangeStart.toISOString())
         .order("created_at", { ascending: false })
         .limit(3000),
+      supabase.rpc("business_inventory_cost", { p_business_id: businessId }),
+      supabase
+        .from("products")
+        .select("current_stock, reorder_level")
+        .eq("business_id", businessId)
+        .eq("is_active", true)
+        .gt("reorder_level", 0)
+        .limit(500),
+      supabase
+        .from("purchase_orders")
+        .select("id", { count: "exact", head: true })
+        .eq("business_id", businessId)
+        .in("status", ["draft", "ordered", "partial"]),
     ]);
 
     const sumMoney = (
@@ -137,6 +157,17 @@ export default function DashboardScreen() {
       paid_amount: unknown;
       status?: string;
     }[];
+    const periodInvoiceCount = periodRows.filter(
+      (inv) => inv.status !== "draft" && inv.status !== "cancelled",
+    ).length;
+    const reorderCandidates = (reorderCandidatesRes.data ?? []) as {
+      current_stock: unknown;
+      reorder_level: unknown;
+    }[];
+    const lowStockCount = reorderCandidates.filter(
+      (p) => Number(p.current_stock ?? 0) <= Number(p.reorder_level ?? 0),
+    ).length;
+    const inventoryCost = await resolveInventoryCost(supabase, businessId, inventoryCostRes);
 
     setStats({
       products: productsRes.count ?? 0,
@@ -146,20 +177,16 @@ export default function DashboardScreen() {
         periodRows,
         (inv) => inv.status !== "draft" && inv.status !== "cancelled",
       ),
+      periodInvoiceCount,
       outstanding: outstandingPk(receivableRows),
+      inventoryCost,
+      lowStock: lowStockCount,
+      openPos: openPoCountRes.count ?? 0,
     });
     setLoading(false);
   }, [businessId, user, statsPeriod]);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: "Home",
-      headerBackVisible: false,
-      gestureEnabled: false,
-    });
-  }, [navigation]);
-
-  useLayoutEffect(() => {
+  useEffect(() => {
     setStats(null);
   }, [businessId]);
 
@@ -260,13 +287,34 @@ export default function DashboardScreen() {
 
       <View className="mt-6 flex-row flex-wrap gap-3">
         <StatCard
+          resolved={resolved}
           label={`Sales (${STATS_PERIOD_OPTIONS.find((x) => x.key === statsPeriod)?.label ?? "Period"})`}
           value={pkr.format(stats.periodSales)}
+          hint={`${stats.periodInvoiceCount} invoices · excludes drafts & cancelled`}
         />
-        <StatCard label="Outstanding (open bills)" value={pkr.format(stats.outstanding)} />
-        <StatCard label="Draft invoices" value={String(stats.drafts)} />
-        <StatCard label="Products" value={String(stats.products)} />
-        <StatCard label="Customers" value={String(stats.customers)} />
+        <StatCard
+          resolved={resolved}
+          label="Outstanding (open bills)"
+          value={pkr.format(stats.outstanding)}
+          hint="Unpaid + partial balance"
+        />
+        <StatCard resolved={resolved} label="Draft invoices" value={String(stats.drafts)} hint="Not yet finalized" />
+        <StatCard
+          resolved={resolved}
+          label="Inventory (cost)"
+          value={pkr.format(stats.inventoryCost)}
+          hint="On-hand qty × purchase price"
+        />
+      </View>
+
+      <Text className={`mt-8 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
+        Stock & counts
+      </Text>
+      <View className="mt-3 flex-row flex-wrap gap-3">
+        <StatCard resolved={resolved} label="Products" value={String(stats.products)} hint="Active SKUs" />
+        <StatCard resolved={resolved} label="Customers" value={String(stats.customers)} hint="Active customers" />
+        <StatCard resolved={resolved} label="Low stock" value={String(stats.lowStock)} hint="At or below reorder level" />
+        <StatCard resolved={resolved} label="Open POs" value={String(stats.openPos)} hint="Draft, ordered, or partial" />
       </View>
 
       <Text className={`mt-8 text-sm font-semibold uppercase tracking-wide ${textMutedClass(resolved)}`}>
@@ -287,12 +335,22 @@ export default function DashboardScreen() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
-  const { resolved } = useTheme();
+function StatCard({
+  resolved,
+  label,
+  value,
+  hint,
+}: {
+  resolved: "light" | "dark";
+  label: string;
+  value: string;
+  hint?: string;
+}) {
   return (
     <View className={metricCardClass(resolved)}>
       <Text className={`text-xs ${textMutedClass(resolved)}`}>{label}</Text>
       <Text className={`mt-1 text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>{value}</Text>
+      {hint ? <Text className={`mt-1 text-[11px] leading-4 ${textMutedClass(resolved)}`}>{hint}</Text> : null}
     </View>
   );
 }
