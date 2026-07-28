@@ -61,6 +61,9 @@ export type POFormValues = {
 export type ReceiveLineInput = {
   po_item_id: string;
   qty_received: number;
+  /** Required when batch expiry mode is on. */
+  batch_no?: string | null;
+  expiry_date?: string | null;
 };
 
 export type ReceiveItemsFormValues = {

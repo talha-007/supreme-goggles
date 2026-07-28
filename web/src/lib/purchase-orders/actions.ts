@@ -390,6 +390,13 @@ export async function receiveStock(poId: string, values: ReceiveItemsFormValues)
 
   const items = (po.items ?? []) as PurchaseOrderItemRow[];
 
+  const { data: settingsRow } = await supabase
+    .from("business_settings")
+    .select("enable_batch_expiry")
+    .eq("business_id", ctx.businessId)
+    .maybeSingle();
+  const batchMode = settingsRow?.enable_batch_expiry === true;
+
   for (const it of items) {
     if (Number(it.qty_ordered) > 0 && !it.product_id) {
       return {
@@ -401,61 +408,102 @@ export async function receiveStock(poId: string, values: ReceiveItemsFormValues)
 
   const byId = new Map(items.map((i) => [i.id, { ...i }]));
 
-  const mergedQty = new Map<string, number>();
+  const qtyByPoItem = new Map<string, number>();
   for (const recv of values.items) {
     if (recv.qty_received <= 0) continue;
-    mergedQty.set(
-      recv.po_item_id,
-      (mergedQty.get(recv.po_item_id) ?? 0) + recv.qty_received,
-    );
+    qtyByPoItem.set(recv.po_item_id, (qtyByPoItem.get(recv.po_item_id) ?? 0) + recv.qty_received);
   }
 
-  for (const [poItemId, qtyAdd] of mergedQty) {
-    if (qtyAdd <= 0) continue;
-    const recv = { po_item_id: poItemId, qty_received: qtyAdd };
-    const row = byId.get(recv.po_item_id);
+  for (const [poItemId, qtyAdd] of qtyByPoItem) {
+    const row = byId.get(poItemId);
     if (!row) continue;
-
-    const nextReceived = roundMoney(row.qty_received + recv.qty_received);
+    const nextReceived = roundMoney(row.qty_received + qtyAdd);
     if (nextReceived > row.qty_ordered + 0.0001) {
       return {
         error: `Receive quantity exceeds ordered for "${row.product_name}".`,
       };
     }
+  }
 
-    const { error: itemErr } = await supabase
-      .from("purchase_order_items")
-      .update({ qty_received: nextReceived })
-      .eq("id", recv.po_item_id)
-      .eq("purchase_order_id", poId);
-
-    if (itemErr) return { error: itemErr.message };
-
-    row.qty_received = nextReceived;
+  for (const recv of values.items) {
+    if (recv.qty_received <= 0) continue;
+    const row = byId.get(recv.po_item_id);
+    if (!row) continue;
 
     const productId = row.product_id;
     if (!productId) {
       return { error: "Line is missing a catalog link. Cannot receive stock." };
     }
 
-    const { error: stockErr } = await supabase.rpc("increment_stock", {
-      p_product_id: productId,
-      p_qty: recv.qty_received,
-    });
-    if (stockErr) return { error: stockErr.message };
+    if (batchMode) {
+      const batchNo = String(recv.batch_no ?? "").trim();
+      if (!batchNo) {
+        return { error: `Batch number is required for "${row.product_name}".` };
+      }
+      const expiryRaw = String(recv.expiry_date ?? "").trim();
+      const expiryDate = /^\d{4}-\d{2}-\d{2}$/.test(expiryRaw) ? expiryRaw : null;
 
-    const { error: movErr } = await supabase.from("stock_movements").insert({
-      business_id: ctx.businessId,
-      product_id: productId,
-      type: "in",
-      quantity: recv.qty_received,
-      unit_cost: row.unit_cost,
-      reference_id: poId,
-      reference_type: "purchase_order",
-      note: `Received against ${po.po_number as string}`,
-      created_by: ctx.userId,
-    });
-    if (movErr) return { error: movErr.message };
+      const { data: batchId, error: batchErr } = await supabase.rpc("upsert_product_batch_stock", {
+        p_business_id: ctx.businessId,
+        p_product_id: productId,
+        p_batch_no: batchNo,
+        p_expiry_date: expiryDate,
+        p_qty: recv.qty_received,
+        p_unit_cost: row.unit_cost,
+        p_purchase_order_id: poId,
+        p_purchase_order_item_id: recv.po_item_id,
+        p_note: `Received against ${String(po.po_number)}`,
+      });
+      if (batchErr) return { error: batchErr.message };
+
+      const { error: movErr } = await supabase.from("stock_movements").insert({
+        business_id: ctx.businessId,
+        product_id: productId,
+        product_batch_id: batchId,
+        type: "in",
+        quantity: recv.qty_received,
+        unit_cost: row.unit_cost,
+        reference_id: poId,
+        reference_type: "purchase_order",
+        note: `Received batch ${batchNo} against ${String(po.po_number)}`,
+        created_by: ctx.userId,
+      });
+      if (movErr) return { error: movErr.message };
+    } else {
+      const { error: stockErr } = await supabase.rpc("increment_stock", {
+        p_product_id: productId,
+        p_qty: recv.qty_received,
+      });
+      if (stockErr) return { error: stockErr.message };
+
+      const { error: movErr } = await supabase.from("stock_movements").insert({
+        business_id: ctx.businessId,
+        product_id: productId,
+        type: "in",
+        quantity: recv.qty_received,
+        unit_cost: row.unit_cost,
+        reference_id: poId,
+        reference_type: "purchase_order",
+        note: `Received against ${String(po.po_number)}`,
+        created_by: ctx.userId,
+      });
+      if (movErr) return { error: movErr.message };
+    }
+  }
+
+  for (const [poItemId, qtyAdd] of qtyByPoItem) {
+    const row = byId.get(poItemId);
+    if (!row) continue;
+    const nextReceived = roundMoney(row.qty_received + qtyAdd);
+
+    const { error: itemErr } = await supabase
+      .from("purchase_order_items")
+      .update({ qty_received: nextReceived })
+      .eq("id", poItemId)
+      .eq("purchase_order_id", poId);
+
+    if (itemErr) return { error: itemErr.message };
+    row.qty_received = nextReceived;
   }
 
   const { data: updatedItems } = await supabase

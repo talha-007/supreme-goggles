@@ -27,6 +27,12 @@ import { useRealtimeNotifications } from "../../src/contexts/realtime-notificati
 import { useTabScreenBottomPadding } from "../../src/hooks/useTabScreenBottomPadding";
 import { formatPkr } from "../../src/lib/format-money";
 import { deleteProductImageByUrl, uploadProductImageFromUri } from "../../src/lib/product-images";
+import {
+  addProductBatch,
+  formatBatchExpiry,
+  listProductBatches,
+  type ProductBatchRow,
+} from "../../src/lib/product-batches";
 import { supabase } from "../../src/lib/supabase";
 import {
   bottomSheetContainerClass,
@@ -45,6 +51,20 @@ import { PRODUCT_UNITS, type ProductRow, type ProductUnit } from "../../src/type
 
 function roundMoney(n: number): number {
   return Math.round(n * 100) / 100;
+}
+
+function formatExpiryDate(iso: string | null | undefined): string {
+  if (!iso?.trim()) return "-";
+  const d = new Date(`${iso.trim()}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-PK", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function parseExpiryDateInput(raw: string): string | null {
+  const s = raw.trim();
+  if (!s) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  return s;
 }
 
 function normalizeProduct(row: Record<string, unknown>): ProductRow {
@@ -67,6 +87,10 @@ function normalizeProduct(row: Record<string, unknown>): ProductRow {
     sale_price: Number(row.sale_price),
     current_stock: Number(row.current_stock),
     reorder_level: Number(row.reorder_level),
+    generic_name: row.generic_name != null ? String(row.generic_name) : null,
+    expiry_date: row.expiry_date != null ? String(row.expiry_date) : null,
+    requires_prescription: row.requires_prescription === true,
+    mrp: row.mrp != null ? Number(row.mrp) : null,
     is_active: Boolean(row.is_active),
     image_url: row.image_url != null ? String(row.image_url) : null,
     created_at: String(row.created_at),
@@ -120,6 +144,20 @@ export default function ProductsScreen() {
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [showPharmacyFields, setShowPharmacyFields] = useState(false);
+  const [batchExpiryMode, setBatchExpiryMode] = useState(false);
+  const [genericName, setGenericName] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [mrp, setMrp] = useState("");
+  const [requiresPrescription, setRequiresPrescription] = useState(false);
+  const [batches, setBatches] = useState<ProductBatchRow[]>([]);
+  const [batchesLoading, setBatchesLoading] = useState(false);
+  const [batchFormOpen, setBatchFormOpen] = useState(false);
+  const [batchNo, setBatchNo] = useState("");
+  const [batchExpiry, setBatchExpiry] = useState("");
+  const [batchQty, setBatchQty] = useState("");
+  const [batchSaving, setBatchSaving] = useState(false);
+  const [batchError, setBatchError] = useState<string | null>(null);
 
   const [detail, setDetail] = useState<ProductRow | null>(null);
 
@@ -127,6 +165,25 @@ export default function ProductsScreen() {
     const t = setTimeout(() => setDebouncedQuery(query.trim()), 300);
     return () => clearTimeout(t);
   }, [query]);
+
+  useEffect(() => {
+    if (!businessId) return;
+    void (async () => {
+      const [{ data: businessRow }, { data: settingsRow }] = await Promise.all([
+        supabase.from("businesses").select("type").eq("id", businessId).maybeSingle(),
+        supabase
+          .from("business_settings")
+          .select("enable_batch_expiry, enable_prescription_flow")
+          .eq("business_id", businessId)
+          .maybeSingle(),
+      ]);
+      const batchExpiry = settingsRow?.enable_batch_expiry === true;
+      const prescriptionFlow = settingsRow?.enable_prescription_flow === true;
+      const isPharmacy = businessRow?.type === "pharmacy";
+      setBatchExpiryMode(batchExpiry);
+      setShowPharmacyFields(isPharmacy || batchExpiry || prescriptionFlow);
+    })();
+  }, [businessId]);
 
   const load = useCallback(async () => {
     if (!businessId || !user) {
@@ -181,6 +238,10 @@ export default function ProductsScreen() {
               setCurrentStock("0");
               setReorderLevel("0");
               setIsActive(true);
+              setGenericName("");
+              setExpiryDate("");
+              setMrp("");
+              setRequiresPrescription(false);
               setPendingImageUri(null);
               setPendingMimeType(null);
               setRemoveImage(false);
@@ -204,6 +265,54 @@ export default function ProductsScreen() {
     void load();
   };
 
+  const openDetail = async (p: ProductRow) => {
+    setDetail(p);
+    if (!batchExpiryMode || !businessId) {
+      setBatches([]);
+      return;
+    }
+    setBatchesLoading(true);
+    const { batches: list, error: batchErr } = await listProductBatches(supabase, businessId, p.id);
+    setBatches(list);
+    if (batchErr) setError(batchErr);
+    setBatchesLoading(false);
+  };
+
+  const onSaveBatch = async () => {
+    if (!businessId || !detail) return;
+    const qty = Number(String(batchQty).replace(/,/g, ""));
+    if (!batchNo.trim()) {
+      setBatchError("Batch number is required.");
+      return;
+    }
+    if (!Number.isFinite(qty) || qty <= 0) {
+      setBatchError("Enter a valid quantity.");
+      return;
+    }
+    setBatchSaving(true);
+    setBatchError(null);
+    const expiry = batchExpiry.trim();
+    const res = await addProductBatch(supabase, businessId, detail.id, {
+      batch_no: batchNo.trim(),
+      expiry_date: /^\d{4}-\d{2}-\d{2}$/.test(expiry) ? expiry : null,
+      qty,
+    });
+    setBatchSaving(false);
+    if (res.error) {
+      setBatchError(res.error);
+      return;
+    }
+    setBatchFormOpen(false);
+    setBatchNo("");
+    setBatchExpiry("");
+    setBatchQty("");
+    void load();
+    const { batches: list } = await listProductBatches(supabase, businessId, detail.id);
+    setBatches(list);
+    const updated = rows.find((r) => r.id === detail.id);
+    if (updated) setDetail(updated);
+  };
+
   const openFormForEdit = (p: ProductRow) => {
     setSaveError(null);
     setDetail(null);
@@ -218,6 +327,10 @@ export default function ProductsScreen() {
     setCurrentStock(String(p.current_stock));
     setReorderLevel(String(p.reorder_level));
     setIsActive(p.is_active);
+    setGenericName(p.generic_name ?? "");
+    setExpiryDate(p.expiry_date ?? "");
+    setMrp(p.mrp != null ? String(p.mrp) : "");
+    setRequiresPrescription(p.requires_prescription === true);
     setPendingImageUri(null);
     setPendingMimeType(null);
     setRemoveImage(false);
@@ -263,12 +376,21 @@ export default function ProductsScreen() {
       setSaveError("Enter a valid purchase price.");
       return;
     }
-    if (!Number.isFinite(stock) || stock < 0) {
+    if (!batchExpiryMode && (!Number.isFinite(stock) || stock < 0)) {
       setSaveError("Enter a valid current stock.");
       return;
     }
     if (!Number.isFinite(reorder) || reorder < 0) {
       setSaveError("Enter a valid reorder level.");
+      return;
+    }
+    if (showPharmacyFields && !batchExpiryMode && expiryDate.trim() && !parseExpiryDateInput(expiryDate)) {
+      setSaveError("Expiry date must be YYYY-MM-DD (e.g. 2026-12-31).");
+      return;
+    }
+    const mrpNum = mrp.trim() ? Number(String(mrp).replace(/,/g, "")) : null;
+    if (showPharmacyFields && mrp.trim() && (!Number.isFinite(mrpNum) || (mrpNum ?? 0) < 0)) {
+      setSaveError("Enter a valid MRP.");
       return;
     }
 
@@ -278,7 +400,7 @@ export default function ProductsScreen() {
       data: { session },
     } = await supabase.auth.getSession();
 
-    const baseRow = {
+    const baseRow: Record<string, unknown> = {
       name: n,
       sku: sku.trim() || null,
       barcode: null,
@@ -288,10 +410,18 @@ export default function ProductsScreen() {
       unit,
       purchase_price: roundMoney(purchase),
       sale_price: roundMoney(sale),
-      current_stock: stock,
+      current_stock: batchExpiryMode && !editingId ? 0 : stock,
       reorder_level: reorder,
       is_active: isActive,
     };
+    if (showPharmacyFields) {
+      baseRow.generic_name = genericName.trim() || null;
+      if (!batchExpiryMode) {
+        baseRow.expiry_date = parseExpiryDateInput(expiryDate);
+      }
+      baseRow.mrp = mrpNum != null ? roundMoney(mrpNum) : null;
+      baseRow.requires_prescription = requiresPrescription;
+    }
 
     if (editingId) {
       const { error: updErr } = await supabase
@@ -414,7 +544,7 @@ export default function ProductsScreen() {
             <SearchBar
               value={query}
               onChangeText={setQuery}
-              placeholder="Search name, SKU, or barcode"
+              placeholder="Search name, SKU, generic, or barcode"
               accessibilityLabel="Search products"
             />
             <ScrollView
@@ -476,7 +606,7 @@ export default function ProductsScreen() {
           const low = isLowStock(item);
           return (
             <Pressable
-              onPress={() => setDetail(item)}
+              onPress={() => void openDetail(item)}
               className={listEntityCardClass(resolved)}
             >
               <View className="flex-row items-start justify-between gap-3">
@@ -485,6 +615,11 @@ export default function ProductsScreen() {
                   <Text className={`text-base font-semibold ${textStrongOnSurfaceClass(resolved)}`} numberOfLines={2}>
                     {item.name}
                   </Text>
+                  {showPharmacyFields && item.generic_name ? (
+                    <Text className="mt-0.5 text-xs text-neutral-500" numberOfLines={1}>
+                      {item.generic_name}
+                    </Text>
+                  ) : null}
                   {item.sku ? (
                     <Text className="mt-1 font-mono text-xs text-neutral-500">{item.sku}</Text>
                   ) : null}
@@ -591,6 +726,43 @@ export default function ProductsScreen() {
                 placeholder="e.g. Nestlé"
                 autoCapitalize="words"
               />
+              {showPharmacyFields ? (
+                <>
+                  <FormField
+                    label="Generic name (optional)"
+                    value={genericName}
+                    onChangeText={setGenericName}
+                    placeholder="e.g. Paracetamol"
+                    autoCapitalize="words"
+                  />
+                  {!batchExpiryMode ? (
+                    <FormField
+                      label="Expiry date (optional)"
+                      value={expiryDate}
+                      onChangeText={setExpiryDate}
+                      placeholder="YYYY-MM-DD"
+                      autoCapitalize="none"
+                    />
+                  ) : null}
+                  <FormField
+                    label="MRP (optional)"
+                    value={mrp}
+                    onChangeText={setMrp}
+                    placeholder="0"
+                    keyboardType="decimal-pad"
+                  />
+                  <View className="mb-4 flex-row items-center justify-between rounded-xl border border-neutral-800 px-3 py-3">
+                    <Text className={`text-sm font-medium ${textFieldLabelClass(resolved)}`}>
+                      Requires prescription
+                    </Text>
+                    <Switch
+                      value={requiresPrescription}
+                      onValueChange={setRequiresPrescription}
+                      trackColor={{ false: "#404040", true: BRAND_ACCENT_HEX }}
+                    />
+                  </View>
+                </>
+              ) : null}
               <Text className={`mb-2 text-sm font-medium ${textFieldLabelClass(resolved)}`}>Unit</Text>
               <ScrollView
                 horizontal
@@ -635,6 +807,7 @@ export default function ProductsScreen() {
                   />
                 </View>
               </View>
+              {!batchExpiryMode ? (
               <View className="flex-row gap-3">
                 <View className="flex-1">
                   <FormField
@@ -655,6 +828,15 @@ export default function ProductsScreen() {
                   />
                 </View>
               </View>
+              ) : (
+                <FormField
+                  label="Reorder at"
+                  value={reorderLevel}
+                  onChangeText={setReorderLevel}
+                  placeholder="0"
+                  keyboardType="decimal-pad"
+                />
+              )}
               {saveError ? <ErrorBannerWithSupport message={saveError} variant="compact" /> : null}
               <PrimaryButton
                 label={editingId ? "Save changes" : "Save product"}
@@ -717,6 +899,70 @@ export default function ProductsScreen() {
                   <DetailRow label="Barcode" value={detail.barcode ?? "-"} />
                   <DetailRow label="Category" value={detail.category ?? "-"} />
                   <DetailRow label="Brand" value={detail.brand ?? "-"} />
+                  {showPharmacyFields ? (
+                    <>
+                      <DetailRow label="Generic name" value={detail.generic_name ?? "-"} />
+                      {!batchExpiryMode ? (
+                        <DetailRow label="Expiry" value={formatExpiryDate(detail.expiry_date)} />
+                      ) : null}
+                      <DetailRow
+                        label="MRP"
+                        value={detail.mrp != null ? formatPkr(detail.mrp) : "-"}
+                      />
+                      <DetailRow
+                        label="Prescription"
+                        value={detail.requires_prescription ? "Required" : "Not required"}
+                      />
+                    </>
+                  ) : null}
+                  {batchExpiryMode ? (
+                    <View className="mt-4">
+                      <Text className={`text-sm font-semibold ${textStrongOnSurfaceClass(resolved)}`}>
+                        Stock batches
+                      </Text>
+                      <Text className="mt-1 text-xs text-neutral-500">
+                        Sales use oldest expiry first (FEFO).
+                      </Text>
+                      {batchesLoading ? (
+                        <ActivityIndicator className="mt-3" size="small" color={BRAND_ACCENT_HEX} />
+                      ) : batches.length === 0 ? (
+                        <Text className="mt-2 text-sm text-neutral-500">No batches yet.</Text>
+                      ) : (
+                        <View className="mt-2 gap-2">
+                          {batches.map((b) => (
+                            <View
+                              key={b.id}
+                              className="flex-row items-center justify-between rounded-lg border border-neutral-800 px-3 py-2"
+                            >
+                              <View>
+                                <Text className={`font-mono text-xs ${textStrongOnSurfaceClass(resolved)}`}>
+                                  {b.batch_no}
+                                </Text>
+                                <Text className="text-xs text-neutral-500">
+                                  Exp: {formatBatchExpiry(b.expiry_date)}
+                                </Text>
+                              </View>
+                              <Text className="text-sm font-semibold tabular-nums text-brand-400/95">
+                                {b.qty_on_hand}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                      <Pressable
+                        onPress={() => {
+                          setBatchError(null);
+                          setBatchNo("");
+                          setBatchExpiry("");
+                          setBatchQty("");
+                          setBatchFormOpen(true);
+                        }}
+                        className="mt-3 rounded-xl border border-brand-500/40 py-2.5"
+                      >
+                        <Text className="text-center text-sm font-medium text-brand-400">Add batch</Text>
+                      </Pressable>
+                    </View>
+                  ) : null}
                   <DetailRow label="Sale price" value={formatPkr(detail.sale_price)} />
                   <DetailRow label="Purchase price" value={formatPkr(detail.purchase_price)} />
                 </View>
@@ -732,6 +978,34 @@ export default function ProductsScreen() {
                 </Pressable>
               </ScrollView>
             ) : null}
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={batchFormOpen} animationType="slide" transparent onRequestClose={() => setBatchFormOpen(false)}>
+        <View className="flex-1 justify-end bg-black/60">
+          <View className={`px-4 pb-10 pt-4 ${bottomSheetContainerClass(resolved)}`}>
+            <Text className={`text-lg font-semibold ${textStrongOnSurfaceClass(resolved)}`}>Add batch</Text>
+            <FormField label="Batch number" value={batchNo} onChangeText={setBatchNo} placeholder="e.g. B2401" />
+            <FormField
+              label="Expiry (YYYY-MM-DD)"
+              value={batchExpiry}
+              onChangeText={setBatchExpiry}
+              placeholder="2026-12-31"
+              autoCapitalize="none"
+            />
+            <FormField
+              label="Quantity"
+              value={batchQty}
+              onChangeText={setBatchQty}
+              placeholder="0"
+              keyboardType="decimal-pad"
+            />
+            {batchError ? <ErrorBannerWithSupport message={batchError} variant="compact" /> : null}
+            <PrimaryButton label="Save batch" onPress={() => void onSaveBatch()} loading={batchSaving} />
+            <Pressable onPress={() => setBatchFormOpen(false)} className="mt-3 py-3">
+              <Text className={`text-center text-base ${textSubtleClass(resolved)}`}>Cancel</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>

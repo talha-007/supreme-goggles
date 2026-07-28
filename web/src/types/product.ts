@@ -40,6 +40,10 @@ export type ProductRow = {
   requires_prescription: boolean;
   /** Pharmacy flow: optional MRP (maximum retail price). */
   mrp: number | null;
+  /** Pharmacy flow: generic / INN name (e.g. Paracetamol). */
+  generic_name: string | null;
+  /** Pharmacy flow: optional expiry date (YYYY-MM-DD). */
+  expiry_date: string | null;
   /** Restaurant flow: true when this product is sold as a menu item. */
   is_menu_item: boolean;
   is_active: boolean;

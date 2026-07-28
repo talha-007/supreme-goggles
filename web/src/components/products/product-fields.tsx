@@ -19,6 +19,8 @@ type Props = {
   categorySuggestions?: readonly string[];
   brandSuggestions?: readonly string[];
   showPharmacyFields?: boolean;
+  /** When true, expiry is tracked per batch — hide product-level expiry field. */
+  batchExpiryMode?: boolean;
   showRestaurantFields?: boolean;
   /** Spare parts / auto parts catalog fields (OEM, interchange, application). */
   showSparePartsFields?: boolean;
@@ -33,6 +35,7 @@ export function ProductFields({
   categorySuggestions = [],
   brandSuggestions = [],
   showPharmacyFields = false,
+  batchExpiryMode = false,
   showRestaurantFields = false,
   showSparePartsFields = false,
   menuMode = false,
@@ -280,6 +283,35 @@ export function ProductFields({
       {showPharmacyFields ? (
         <>
           <div className="flex flex-col gap-1">
+            <label htmlFor="generic_name" className="text-sm font-medium text-zinc-700">
+              {t("genericName")}
+            </label>
+            <input
+              id="generic_name"
+              name="generic_name"
+              type="text"
+              defaultValue={d.generic_name ?? ""}
+              placeholder={t("genericNameHint")}
+              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
+            />
+          </div>
+          {batchExpiryMode ? (
+            <p className="sm:col-span-2 text-sm text-zinc-600">{t("batchExpiryHint")}</p>
+          ) : (
+            <div className="flex flex-col gap-1">
+              <label htmlFor="expiry_date" className="text-sm font-medium text-zinc-700">
+                {t("expiryDate")}
+              </label>
+              <input
+                id="expiry_date"
+                name="expiry_date"
+                type="date"
+                defaultValue={d.expiry_date ?? ""}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
+              />
+            </div>
+          )}
+          <div className="flex flex-col gap-1">
             <label htmlFor="mrp" className="text-sm font-medium text-zinc-700">
               {t("mrp")}
             </label>
@@ -327,20 +359,33 @@ export function ProductFields({
       ) : null}
       {!menuMode ? (
         <>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="current_stock" className="text-sm font-medium text-zinc-700">
-              {t("currentStock")}
-            </label>
-            <input
-              id="current_stock"
-              name="current_stock"
-              type="number"
-              min={0}
-              step="0.001"
-              defaultValue={d.current_stock ?? 0}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
-            />
-          </div>
+          {batchExpiryMode ? (
+            <>
+              <input type="hidden" name="current_stock" value={String(d.current_stock ?? 0)} />
+              <div className="flex flex-col gap-1">
+                <span className="text-sm font-medium text-zinc-700">{t("currentStock")}</span>
+                <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm tabular-nums text-zinc-800">
+                  {d.current_stock ?? 0}{" "}
+                  <span className="text-zinc-500">({t("batchStockHint")})</span>
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col gap-1">
+              <label htmlFor="current_stock" className="text-sm font-medium text-zinc-700">
+                {t("currentStock")}
+              </label>
+              <input
+                id="current_stock"
+                name="current_stock"
+                type="number"
+                min={0}
+                step="0.001"
+                defaultValue={d.current_stock ?? 0}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none ring-zinc-400 focus:ring-2"
+              />
+            </div>
+          )}
           <div className="flex flex-col gap-1">
             <label htmlFor="reorder_level" className="text-sm font-medium text-zinc-700">
               {t("reorderLevel")}

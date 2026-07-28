@@ -4,6 +4,7 @@ import { PoLineQuickAdd } from "@/components/purchase-orders/po-line-quick-add";
 import { ReceivePoForm } from "@/components/purchase-orders/receive-po-form";
 import { getPurchaseOrder } from "@/lib/purchase-orders/actions";
 import { requireBusinessContext, canManageProducts, guardOwnerPage } from "@/lib/auth/business-context";
+import { createClient } from "@/lib/supabase/server";
 import { intlLocaleTag } from "@/lib/i18n/intl-locale";
 import type { PurchaseOrderItemRow, PurchaseOrderStatus } from "@/types/purchase-order";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -53,7 +54,16 @@ export default async function PurchaseOrderDetailPage({
   });
 
   const { id } = await params;
-  const { po, error } = await getPurchaseOrder(id);
+  const supabase = await createClient();
+  const [{ po, error }, { data: settingsRow }] = await Promise.all([
+    getPurchaseOrder(id),
+    supabase
+      .from("business_settings")
+      .select("enable_batch_expiry")
+      .eq("business_id", ctx.businessId)
+      .maybeSingle(),
+  ]);
+  const batchExpiryMode = settingsRow?.enable_batch_expiry === true;
 
   if (error) {
     throw new Error(`Failed to load purchase order: ${error}`);
@@ -234,7 +244,9 @@ export default async function PurchaseOrderDetailPage({
           </div>
         ) : null}
 
-        {showReceive ? <ReceivePoForm poId={id} items={items} /> : null}
+        {showReceive ? (
+          <ReceivePoForm poId={id} items={items} batchExpiryMode={batchExpiryMode} />
+        ) : null}
       </div>
     </div>
   );

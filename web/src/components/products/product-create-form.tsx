@@ -14,6 +14,7 @@ type CreateProps = {
   scanMode?: boolean;
   taxonomy: ProductTaxonomy;
   showPharmacyFields?: boolean;
+  batchExpiryMode?: boolean;
   showRestaurantFields?: boolean;
   showSparePartsFields?: boolean;
   menuMode?: boolean;
@@ -24,6 +25,7 @@ export function ProductCreateForm({
   scanMode,
   taxonomy,
   showPharmacyFields = false,
+  batchExpiryMode = false,
   showRestaurantFields = false,
   showSparePartsFields = false,
   menuMode = false,
@@ -61,6 +63,7 @@ export function ProductCreateForm({
         categorySuggestions={taxonomy.categories}
         brandSuggestions={taxonomy.brands}
         showPharmacyFields={showPharmacyFields}
+        batchExpiryMode={batchExpiryMode}
         showRestaurantFields={showRestaurantFields}
         showSparePartsFields={showSparePartsFields}
         menuMode={menuMode}

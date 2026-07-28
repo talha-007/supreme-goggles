@@ -225,6 +225,13 @@ export async function receiveRemainingStock(
 
   const items = (po.items ?? []) as PoItemRow[];
 
+  const { data: settingsRow } = await supabase
+    .from("business_settings")
+    .select("enable_batch_expiry")
+    .eq("business_id", businessId)
+    .maybeSingle();
+  const batchMode = settingsRow?.enable_batch_expiry === true;
+
   for (const it of items) {
     if (Number(it.qty_ordered) > 0 && !it.product_id) {
       return {
@@ -284,24 +291,54 @@ export async function receiveRemainingStock(
       return { error: "Line is missing a catalog link. Cannot receive stock." };
     }
 
-    const { error: stockErr } = await supabase.rpc("increment_stock", {
-      p_product_id: productId,
-      p_qty: qtyAdd,
-    });
-    if (stockErr) return { error: stockErr.message };
+    if (batchMode) {
+      const batchNo = `${String(po.po_number)}-${poItemId.slice(0, 8)}`;
+      const { data: batchId, error: batchErr } = await supabase.rpc("upsert_product_batch_stock", {
+        p_business_id: businessId,
+        p_product_id: productId,
+        p_batch_no: batchNo,
+        p_expiry_date: null,
+        p_qty: qtyAdd,
+        p_unit_cost: row.unit_cost,
+        p_purchase_order_id: poId,
+        p_purchase_order_item_id: poItemId,
+        p_note: `Received against ${String(po.po_number)}`,
+      });
+      if (batchErr) return { error: batchErr.message };
 
-    const { error: movErr } = await supabase.from("stock_movements").insert({
-      business_id: businessId,
-      product_id: productId,
-      type: "in",
-      quantity: qtyAdd,
-      unit_cost: row.unit_cost,
-      reference_id: poId,
-      reference_type: "purchase_order",
-      note: `Received against ${String(po.po_number)}`,
-      created_by: userId,
-    });
-    if (movErr) return { error: movErr.message };
+      const { error: movErr } = await supabase.from("stock_movements").insert({
+        business_id: businessId,
+        product_id: productId,
+        product_batch_id: batchId,
+        type: "in",
+        quantity: qtyAdd,
+        unit_cost: row.unit_cost,
+        reference_id: poId,
+        reference_type: "purchase_order",
+        note: `Received batch ${batchNo} against ${String(po.po_number)}`,
+        created_by: userId,
+      });
+      if (movErr) return { error: movErr.message };
+    } else {
+      const { error: stockErr } = await supabase.rpc("increment_stock", {
+        p_product_id: productId,
+        p_qty: qtyAdd,
+      });
+      if (stockErr) return { error: stockErr.message };
+
+      const { error: movErr } = await supabase.from("stock_movements").insert({
+        business_id: businessId,
+        product_id: productId,
+        type: "in",
+        quantity: qtyAdd,
+        unit_cost: row.unit_cost,
+        reference_id: poId,
+        reference_type: "purchase_order",
+        note: `Received against ${String(po.po_number)}`,
+        created_by: userId,
+      });
+      if (movErr) return { error: movErr.message };
+    }
   }
 
   const { data: updatedItems } = await supabase

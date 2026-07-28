@@ -31,6 +31,11 @@ export type ProductRow = {
   sale_price: number;
   current_stock: number;
   reorder_level: number;
+  /** Pharmacy flow (optional; from DB when column exists). */
+  generic_name?: string | null;
+  expiry_date?: string | null;
+  requires_prescription?: boolean;
+  mrp?: number | null;
   is_active: boolean;
   image_url: string | null;
   created_at: string;

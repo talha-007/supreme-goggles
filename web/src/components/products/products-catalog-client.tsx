@@ -41,6 +41,8 @@ type Props = {
   canEdit: boolean;
   /** Extra OEM column for spare parts businesses. */
   showSparePartsColumns?: boolean;
+  /** Generic name + expiry columns for pharmacy / medical stores. */
+  showPharmacyColumns?: boolean;
 };
 
 async function fetchProductSearch(
@@ -68,6 +70,7 @@ export function ProductsCatalogClient({
   initialScanMode,
   canEdit,
   showSparePartsColumns = false,
+  showPharmacyColumns = false,
 }: Props) {
   const tp = useTranslations("products");
   const tc = useTranslations("common");
@@ -150,7 +153,8 @@ export function ProductsCatalogClient({
 
   const safeQ = sanitizeProductSearchQuery(q);
 
-  const tableColSpan = 10 + (showSparePartsColumns ? 1 : 0) + (canEdit ? 1 : 0);
+  const tableColSpan =
+    10 + (showSparePartsColumns ? 1 : 0) + (showPharmacyColumns ? 2 : 0) + (canEdit ? 1 : 0);
 
   const unknownBarcode =
     !loading &&
@@ -374,6 +378,12 @@ export function ProductsCatalogClient({
               <th className="px-4 py-3">{tp("colCategory")}</th>
               <th className="px-4 py-3">{tp("colBrand")}</th>
               {showSparePartsColumns ? <th className="px-4 py-3">{tp("colOem")}</th> : null}
+              {showPharmacyColumns ? (
+                <>
+                  <th className="px-4 py-3">{tp("colGenericName")}</th>
+                  <th className="px-4 py-3">{tp("colExpiry")}</th>
+                </>
+              ) : null}
               <th className="px-4 py-3">{tc("sku")}</th>
               <th className="px-4 py-3">{tc("barcode")}</th>
               <th className="px-4 py-3">{tc("unit")}</th>
@@ -439,6 +449,16 @@ export function ProductsCatalogClient({
                       <td className="max-w-[7rem] truncate px-4 py-3 font-mono text-xs text-zinc-600">
                         {p.oem_part_number?.trim() ? p.oem_part_number : tc("dash")}
                       </td>
+                    ) : null}
+                    {showPharmacyColumns ? (
+                      <>
+                        <td className="max-w-[8rem] truncate px-4 py-3 text-zinc-600">
+                          {p.generic_name?.trim() ? p.generic_name : tc("dash")}
+                        </td>
+                        <td className="px-4 py-3 tabular-nums text-zinc-600">
+                          {p.expiry_date?.trim() ? p.expiry_date : tc("dash")}
+                        </td>
+                      </>
                     ) : null}
                     <td className="px-4 py-3 text-zinc-600">{p.sku ?? tc("dash")}</td>
                     <td className="px-4 py-3 font-mono text-xs text-zinc-600">

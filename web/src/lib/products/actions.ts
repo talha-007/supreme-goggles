@@ -30,6 +30,13 @@ function parseNullableMoney(value: FormDataEntryValue | null): number | null {
   return Math.round(n * 100) / 100;
 }
 
+function parseNullableDate(value: FormDataEntryValue | null): string | null {
+  const s = String(value ?? "").trim();
+  if (!s) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  return s;
+}
+
 export type ProductActionState = { error?: string };
 
 export async function createProduct(
@@ -74,6 +81,8 @@ export async function createProduct(
       reorder_level: parseQty(formData.get("reorder_level")),
       requires_prescription: formData.get("requires_prescription") === "on",
       mrp: parseNullableMoney(formData.get("mrp")),
+      generic_name: String(formData.get("generic_name") ?? "").trim() || null,
+      expiry_date: parseNullableDate(formData.get("expiry_date")),
       is_menu_item: formData.get("is_menu_item") === "on",
       is_active: formData.get("is_active") === "on",
       created_by: ctx.userId,
@@ -177,6 +186,8 @@ export async function updateProduct(
     reorder_level: parseQty(formData.get("reorder_level")),
     requires_prescription: formData.get("requires_prescription") === "on",
     mrp: parseNullableMoney(formData.get("mrp")),
+    generic_name: String(formData.get("generic_name") ?? "").trim() || null,
+    expiry_date: parseNullableDate(formData.get("expiry_date")),
     is_menu_item: formData.get("is_menu_item") === "on",
     is_active: formData.get("is_active") === "on",
   };

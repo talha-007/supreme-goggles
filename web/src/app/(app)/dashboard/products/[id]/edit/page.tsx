@@ -1,7 +1,9 @@
 import { ProductEditForm } from "@/components/products/product-edit-form";
+import { ProductBatchesPanel } from "@/components/products/product-batches-panel";
 import { requireBusinessContext, canManageProducts, guardOwnerPage } from "@/lib/auth/business-context";
 import { resolveBusinessCapabilities, type BusinessType } from "@/lib/business/capabilities";
 import { isSparePartsBusinessType } from "@/lib/business/business-type-helpers";
+import { listProductBatches } from "@/lib/product-batches/actions";
 import { getProductTaxonomy } from "@/lib/products/taxonomy";
 import { createClient } from "@/lib/supabase/server";
 import type { ProductRow } from "@/types/product";
@@ -55,6 +57,7 @@ export default async function EditProductPage({
     settingsRow,
   );
   const taxonomy = await getProductTaxonomy();
+  const { batches } = caps.batchExpiry ? await listProductBatches(id) : { batches: [] };
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -75,9 +78,15 @@ export default async function EditProductPage({
           product={product}
           taxonomy={taxonomy}
           showPharmacyFields={caps.batchExpiry || caps.prescriptionFlow}
+          batchExpiryMode={caps.batchExpiry}
           showRestaurantFields={caps.tableService || caps.kotPrinting || caps.type === "restaurant"}
           showSparePartsFields={isSparePartsBusinessType(caps.type)}
           menuMode={menuMode}
+        />
+        <ProductBatchesPanel
+          productId={product.id}
+          initialBatches={batches}
+          batchExpiryMode={caps.batchExpiry}
         />
       </div>
     </div>

@@ -72,6 +72,7 @@ export default async function NewProductPage({
           scanMode={scanMode}
           taxonomy={taxonomy}
           showPharmacyFields={caps.batchExpiry || caps.prescriptionFlow}
+          batchExpiryMode={caps.batchExpiry}
           showRestaurantFields={caps.tableService || caps.kotPrinting || caps.type === "restaurant"}
           showSparePartsFields={isSparePartsBusinessType(caps.type)}
           menuMode={menuMode}
